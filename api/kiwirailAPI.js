@@ -6,8 +6,8 @@ moment().tz('Pacific/Auckland').format();
 
 
 module.exports = {
-    geVisVehicles: function(){
-        return new Promise (function(resolve, reject) {
+    geVisVehicles: function() {
+        return new Promise(function(resolve, reject) {
             let options = {
                 hostname: 'gis.kiwirail.co.nz',
                 port: app.get('port'),
@@ -16,7 +16,7 @@ module.exports = {
                 json: true,
             };
             https.get(options, function(response) {
-                //console.log("Got response: " + response.statusCode);
+                // console.log("Got response: " + response.statusCode);
             let body = '';
             response.on('data', function(chunk) {
                 body += chunk;
@@ -29,14 +29,14 @@ module.exports = {
                     if (body == {'metadata': {'outputSpatialReference': 0}, 'features': []}) {
                     console.log('GeVis Vehicles responded empty @' + moment().format('HH:mm:ss'));
                     };
-                    resolve(geVisVehicles)
+                    resolve(geVisVehicles);
                 };
                 });
             }).on('error', function(error) {
                 console.log('Got error: ' + error.message);
             });
-        })
+        });
     },
-    //other functions
-}
+    // other functions
+};
 

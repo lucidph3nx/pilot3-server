@@ -7,12 +7,10 @@ module.exports = {
         moment().tz('Pacific/Auckland').format();
 
         return new Promise((resolve, reject) => {
-            let timetableQueryString = 'SELECT * FROM [Compass].[dbo].[todaysTimetable] ORDER BY [blockId], [serviceDeparts], [serviceId], [stationSequence]';
-            let sequelize = new Sequelize('Compass', 'TDW-Compass', 'wx38tt2018', {
-            logging: false,
-            host: 'APNZWPCPSQL01',
-            dialect: 'mssql',
-            });
+            let timetableQueryString = 'SELECT * FROM [Compass].[dbo].[todaysTimetable]';
+            timetableQueryString += 'ORDER BY [blockId], [serviceDeparts], [serviceId], [stationSequence]';
+            let sequelize = new Sequelize('Compass', 'TDW-Compass', 'wx38tt2018',
+                        {logging: false, host: 'APNZWPCPSQL01', dialect: 'mssql'});
 
             let currentTimetable = [];
             let timingPoint = {};
