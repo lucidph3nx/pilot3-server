@@ -41,10 +41,10 @@ module.exports = function Service(CurrentMoment,
   this.speed = speed;
   this.compass = compass;
   this.moving = (speed >= 1);
-  this.location_age = locationAge;
-  this.location_age_seconds =
-    parseInt(this.location_age.toString().split(':')[0]*60) +
-    parseInt(this.location_age.toString().split(':')[1]);
+  this.locationAge = locationAge;
+  this.locationAgeSeconds =
+    parseInt(this.locationAge.toString().split(':')[0]*60) +
+    parseInt(this.locationAge.toString().split(':')[1]);
   this.varianceKiwirail = gevisvariancefix(varianceKiwirail);
   this.timetableDetails = getTimetableDetails(this.serviceId, this.serviceDescription, this.kiwirail);
   this.departs = this.timetableDetails.departs;
@@ -60,8 +60,8 @@ module.exports = function Service(CurrentMoment,
   let lastStationDetails = getlaststation(this.lat, this.lon,
                                           this.meterage,
                                           this.KRline, this.direction);
-  this.laststation = lastStationDetails[0];
-  this.laststationcurrent = lastStationDetails[1];
+  this.lastStation = lastStationDetails[0];
+  this.lastStationCurrent = lastStationDetails[1];
   // variables needed to calculate own delay
   let previousStationDetails = getSequenceStnDetails(this.meterage, this.direction, this.serviceId, 'prev');
   let nextStationDetails = getSequenceStnDetails(this.meterage, this.direction, this.serviceId, 'next');
@@ -77,20 +77,25 @@ module.exports = function Service(CurrentMoment,
                                               this.nextstntime,
                                               this.prevstnmeterage,
                                               this.nextstnmeterage,
-                                              this.location_age_seconds);
-  this.schedule_variance = scheduleVariance[1];
-  this.schedule_variance_min = scheduleVariance[0];
-  if (this.schedule_variance_min == '') {
+                                              this.locationAgeSeconds);
+  this.scheduleVariance = scheduleVariance[1];
+  this.scheduleVarianceMin = scheduleVariance[0];
+  if (this.scheduleVarianceMin == '') {
     this.varianceFriendly = this.varianceKiwirail;
   } else {
-    this.varianceFriendly = (this.schedule_variance_min).toFixed(0);
+    this.varianceFriendly = (this.scheduleVarianceMin).toFixed(0);
     if (this.varianceFriendly == -0) {
       this.varianceFriendly = 0;
     };
   }
   this.crewDetails = getCrewDetails(this.serviceId, currentRosterDuties);
-  this.LastService = getSequenceUnit(this.serviceId, this.blockId, 'prev');
-  this.NextService = getSequenceUnit(this.serviceId, this.blockId, 'next');
+  this.lastService = getSequenceUnit(this.serviceId, this.blockId, 'prev');
+  this.nextService = getSequenceUnit(this.serviceId, this.blockId, 'next');
+  if (this.nextService == '') {
+    this.hasNextService = false;
+  } else {
+    this.hasNextService = true;
+  }
   this.NextTime = getTimetableDetails(this.NextService, '', false).departs;
   if (this.NextTime == '') {
     this.NextTimeString = '';
@@ -137,7 +142,7 @@ module.exports = function Service(CurrentMoment,
         stopProcessing = true;
       };
       // filter already arrived trains
-      if (this.laststation == this.destination) {
+      if (this.lastStation == this.destination) {
         TempStatus = 'Arriving';
         if (StatusMessage == '' && stopProcessing == false) {
           StatusMessage = TempStatus;
@@ -197,7 +202,7 @@ module.exports = function Service(CurrentMoment,
         stopProcessing = true;
       };
       // look at linking issues
-      if (this.location_age_seconds >=180 && this.kiwirail == false) {
+      if (this.locationAgeSeconds >=180 && this.kiwirail == false) {
         TempStatus = '';
         let tunnelExceptionsList = [
           {tunnelName: 'Rimutaka', line: 'WRL', statusMessage: 'In Rimutaka Tunnel',
@@ -215,8 +220,8 @@ module.exports = function Service(CurrentMoment,
         // identify tunnel tracking issues
         if (this.direction == 'UP') {
           for (tunnel of tunnelExceptionsList) {
-            if (tunnel.southStation == this.laststation
-                && tunnel.secondsTheshold > this.location_age_seconds
+            if (tunnel.southStation == this.lastStation
+                && tunnel.secondsTheshold > this.locationAgeSeconds
                 && tunnel.line == this.line) {
               TempStatus = tunnel.statusMessage;
               StatusArray[1] = TempStatus;
@@ -224,8 +229,8 @@ module.exports = function Service(CurrentMoment,
           };
         } else if (this.direction == 'DOWN') {
           for (tunnel of tunnelExceptionsList) {
-            if (tunnel.northStation == this.laststation
-                && tunnel.secondsTheshold > this.location_age_seconds
+            if (tunnel.northStation == this.lastStation
+                && tunnel.secondsTheshold > this.locationAgeSeconds
                 && tunnel.line == this.line) {
               TempStatus = tunnel.statusMessage;
               StatusArray[1] = TempStatus;
@@ -260,13 +265,13 @@ module.exports = function Service(CurrentMoment,
     StatusMessage = TempStatus;
     stopProcessing = true;
   };
-  if (this.speed == 0 && this.laststationcurrent == false) {
-    if (this.laststation == 'POMA' && this.origin == 'TAIT') {
-      this.laststation = 'TAIT';
+  if (this.speed == 0 && this.lastStationCurrent == false) {
+    if (this.lastStation == 'POMA' && this.origin == 'TAIT') {
+      this.lastStation = 'TAIT';
       TempStatus = 'In Storage Road';
       StatusArray[2] = TempStatus;
-    } else if (this.laststation == 'TEHO' && this.origin == 'WAIK') {
-      this.laststation = 'WAIK';
+    } else if (this.lastStation == 'TEHO' && this.origin == 'WAIK') {
+      this.lastStation = 'WAIK';
       TempStatus = 'In Turn Back Road';
       StatusArray[2] = TempStatus;
     } else {
@@ -294,20 +299,21 @@ module.exports = function Service(CurrentMoment,
       linked_unit: this.linkedUnit,
       cars: this.cars,
       speed: this.speed,
-      location_age: this.location_age,
-      location_age_seconds: this.location_age_seconds,
+      locationAge: this.locationAge,
+      locationAgeSeconds: this.locationAgeSeconds,
       varianceFriendly: this.varianceFriendly,
-      schedule_variance: this.schedule_variance,
+      scheduleVariance: this.scheduleVariance,
       varianceKiwirail: this.varianceKiwirail,
       departs: this.departsString,
       origin: this.origin,
       arrives: this.arrivesString,
       destination: this.destination,
-      laststation: this.laststation,
-      laststationcurrent: this.laststationcurrent,
+      laststation: this.lastStation,
+      lastStationCurrent: this.lastStationCurrent,
       LastService: this.LastService,
-      NextService: this.NextService,
-      NextTime: this.NextTimeString,
+      hasNextService: this.hasNextService,
+      nextService: this.nextService,
+      nextTime: this.NextTimeString,
       LE: this.crewDetails.LE.staffName,
       LEExists: this.crewDetails.LEExists,
       LEShift: this.crewDetails.LE.shiftId,
@@ -577,7 +583,7 @@ module.exports = function Service(CurrentMoment,
    * @return {string} the service number requested, either next or previous
    */
   function getSequenceUnit(serviceId, blockId, nextOrPrev) {
-    if (serviceId == undefined || blockId == undefined) {
+    if (serviceId == undefined || blockId == undefined || blockId == '') {
       return '';
     };
     let seqServiceId;
@@ -677,7 +683,7 @@ module.exports = function Service(CurrentMoment,
           } else if (passengerLineAssociations.WRL.includes(tempServiceSubstring)) {
             line = ['WRL', false];
           } else if (passengerLineAssociations.HVL.includes(tempServiceSubstring)) {
-            line = ['WRL', false];
+            line = ['HVL', false];
           } else if (passengerLineAssociations.MEL.includes(tempServiceSubstring)) {
             line = ['MEL', false];
           } else if (passengerLineAssociations.KPL.includes(tempServiceSubstring)) {

@@ -37,6 +37,14 @@ module.exports = function(app, current) {
         response.write(JSON.stringify(apiResponse));
         response.end();
     });
+    // get roster Day Status
+    app.get('/api/rosterDayStatus', (request, response) => {
+        currentRosterDayStatus = current.rosterDayStatus;
+        let apiResponse = {'Time': moment(), currentRosterDayStatus};
+        response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+        response.write(JSON.stringify(apiResponse));
+        response.end();
+    });
     // get all roster duties for a particular shift today
     app.get('/api/dayRoster', (request, response) => {
         let requestedShift = request.query.shiftId;

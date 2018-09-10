@@ -19,6 +19,7 @@ let current = {
   tripSheet: [],
   busReplacementList: [],
   rosterDuties: [],
+  rosterDayStatus: [],
 };
 // =======API=======
 require('./api/pilotAPI')(app, current);
@@ -29,7 +30,8 @@ let compassAPI = require('./api/compassAPI');
 // =======time logs=======
 let timetableLastUpdated;
 let busReplacementsLastUpdated;
-let RosterDutiesLastUpdated;
+let rosterDutiesLastUpdated;
+let rosterStatusLastUpdated;
 
 // =======users system=======
 // let cors = require('cors');
@@ -60,15 +62,25 @@ function refreshData() {
     console.log(error);
   });
   // roster duties list, updates every 10 minutes
-  if (RosterDutiesLastUpdated == undefined | RosterDutiesLastUpdated < moment().subtract(10, 'minutes')) {
+  if (rosterDutiesLastUpdated == undefined | rosterDutiesLastUpdated < moment().subtract(10, 'minutes')) {
   vdsRosterAPI.rosterDuties().then((result) => {
     current.rosterDuties = result;
-    RosterDutiesLastUpdated = moment();
+    rosterDutiesLastUpdated = moment();
     pilotLog('VDS Roster Duties loaded ok');
   }).catch((error) => {
     console.log(error);
   });
 }
+  // roster day status, updates every 5 minutes
+  if (rosterStatusLastUpdated == undefined | rosterStatusLastUpdated < moment().subtract(5, 'minutes')) {
+    vdsRosterAPI.dayRosterStatus().then((result) => {
+      current.rosterDayStatus = result;
+      rosterStatusLastUpdated = moment();
+      pilotLog('VDS Roster Day Status loaded ok');
+    }).catch((error) => {
+      console.log(error);
+    });
+  }
   // bus replacement list, updates every 5 minutes
   if (busReplacementsLastUpdated == undefined | busReplacementsLastUpdated < moment().subtract(5, 'minutes')) {
     compassAPI.busReplacements().then((result) => {

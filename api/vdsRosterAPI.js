@@ -16,7 +16,7 @@ module.exports = {
             ORDER BY [date], [staffId], [minutesFrom]
         `;
 
-        let sequelize = new Sequelize('VDS_TDW', 'WEBSN', 'Welcome1', {
+        let sequelize = new Sequelize('VDS_TDW', 'BEN_SHERMAN_RO', 'Ben2018S', {
             logging: false,
             host: 'APAUPVDSSQL01',
             dialect: 'mssql',
@@ -32,7 +32,8 @@ module.exports = {
             .then(function(response) {
             for (trp = 0; trp < response[0].length; trp++) {
                 serviceRoster = {};
-                if (response[0][trp].dutyName !== null && response[0][trp].dutyType !== null && response[0][trp].dutyType !== 'REC') {
+                if (response[0][trp].dutyName !== null && response[0][trp].dutyType
+                    !== null && response[0][trp].dutyType !== 'REC') {
                     serviceRoster = {
                         shiftId: response[0][trp].shiftName.trim(),
                         shiftType: response[0][trp].shiftType.trim(),
@@ -57,7 +58,7 @@ module.exports = {
         /**
          * Takes a time in min past midnight
          * Converts it into a moment object
-         * @param {string} minutesPastMidnight 
+         * @param {string} minutesPastMidnight
          * @return {object} - Moment object
          */
         function mpm2m(minutesPastMidnight) {
@@ -70,5 +71,46 @@ module.exports = {
             return thisMoment;
         };
     },
-    //other exports here
+    // returns current counters fo each location and position - days roster status
+    dayRosterStatus: function dayStatus() {
+        const Sequelize = require('sequelize');
+        let moment = require('moment-timezone');
+        moment().tz('Pacific/Auckland').format();
+
+        return new Promise((resolve, reject) => {
+        let today = moment().format('YYYY-MM-DD');
+        let rosterQueryString = `
+            SELECT * FROM [VDS_TDW].[WEBSN].[dayStatus] WHERE [date] = '`+today+`'
+        `;
+
+        let sequelize = new Sequelize('VDS_TDW', 'BEN_SHERMAN_RO', 'Ben2018S', {
+            logging: false,
+            host: 'APAUPVDSSQL01',
+            dialect: 'mssql',
+            dialectOptions: {
+            instanceName: 'TDW',
+            },
+        });
+
+        let dayStatus = [];
+        let rosterStatus = {};
+
+        sequelize.query(rosterQueryString)
+            .then(function(response) {
+            for (st = 0; st < response[0].length; st++) {
+                rosterStatus = {};
+                rosterStatus = {
+                    staffType: response[0][st].staffType.trim(),
+                    location: response[0][st].location.trim(),
+                    counterType: response[0][st].counterType.trim(),
+                    count: response[0][st].count,
+                };
+                dayStatus.push(rosterStatus);
+            };
+            resolve(dayStatus);
+            }
+        );
+        });
+        },
+    // other exports here
     };
