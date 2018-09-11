@@ -5,6 +5,32 @@ let getDayRosterFromShift = require('./../functions/dayRosterFromShift');
 let getRunningSheetForStation = require('./../functions/runningSheetForStation');
 
 module.exports = function(app, current) {
+    app.use(function(req, res, next) {
+        let oneof = false;
+        if (req.headers.origin) {
+            res.header('Access-Control-Allow-Origin', req.headers.origin);
+            oneof = true;
+        }
+        if (req.headers['access-control-request-method']) {
+            res.header('Access-Control-Allow-Methods', req.headers['access-control-request-method']);
+            oneof = true;
+        }
+        if (req.headers['access-control-request-headers']) {
+            res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers']);
+            oneof = true;
+        }
+        if (oneof) {
+            res.header('Access-Control-Max-Age', 60 * 60 * 24 * 365);
+        }
+        // intercept OPTIONS method
+        if (oneof && req.method == 'OPTIONS') {
+            res.send(200);
+        }
+        else {
+            next();
+        }
+    });
+
     app.get('/api/currentStatus', (request, response) => {
         let currentMoment = moment();
         let currentStatus = '';
@@ -14,7 +40,7 @@ module.exports = function(app, current) {
         response.end();
       });
     // get list of all train servics that are active now
-    app.get('/api/currentServices', (request, response) => {
+    app.get('/api/currentServices', (request, response, next) => {
         let currentServices = current.services;
         let apiResponse = {'Time': moment(), currentServices};
         response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
