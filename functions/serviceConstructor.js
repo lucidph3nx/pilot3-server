@@ -96,7 +96,7 @@ module.exports = function Service(CurrentMoment,
   } else {
     this.hasNextService = true;
   }
-  this.NextTime = getTimetableDetails(this.NextService, '', false).departs;
+  this.NextTime = getTimetableDetails(this.nextService, '', false).departs;
   if (this.NextTime == '') {
     this.NextTimeString = '';
   } else {
