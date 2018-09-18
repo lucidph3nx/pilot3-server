@@ -7,12 +7,15 @@ let getCurrentServices = require('./functions/currentServices');
 let getCurrentUnitList = require('./functions/currentUnitList');
 let getCurrentTimetable = require('./functions/currentTimetable');
 let getCurrentTripSheet = require('./functions/currentTripSheet');
+// ======dummy data=======
+let dummyCurrentServices = require('./data/dummyCurrentServices');
 
 // =======express=======
 let express = require('express');
 let app = express();
 // =======global variable=======
 let current = {
+  debug: false,
   services: [],
   unitList: [],
   timetable: [],
@@ -52,8 +55,11 @@ function refreshData() {
   let geVisVehicles;
   kiwirailAPI.geVisVehicles().then((result) => {
     geVisVehicles = result;
-    if (current.rosterDuties !== [] && current.timetable !== [] && current.tripSheet !== []) {
+    if (!current.debug && current.rosterDuties !== [] && current.timetable !== [] && current.tripSheet !== []) {
       current.services = getCurrentServices(geVisVehicles, current);
+    }
+    if (current.debug) {
+      current.services = dummyCurrentServices;
     }
     current.unitList = getCurrentUnitList(geVisVehicles);
 
