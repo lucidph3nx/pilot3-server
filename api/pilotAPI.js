@@ -25,8 +25,7 @@ module.exports = function(app, current) {
         // intercept OPTIONS method
         if (oneof && req.method == 'OPTIONS') {
             res.send(200);
-        }
-        else {
+        } else {
             next();
         }
     });
@@ -97,6 +96,6 @@ module.exports = function(app, current) {
         });
 
     let port = 4000;
-    app.listen(port);
+    app.listen(port, '0.0.0.0');
     console.log('Pilot API listening on ' + port);
 };
