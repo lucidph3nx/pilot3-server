@@ -3,6 +3,7 @@ moment().tz('Pacific/Auckland').format();
 let asRequiredStaff = require('./../functions/asRequiredStaff');
 let getDayRosterFromShift = require('./../functions/dayRosterFromShift');
 let getRunningSheetForStation = require('./../functions/runningSheetForStation');
+let vdsRosterAPI = require('./vdsRosterAPI');
 
 module.exports = function(app, current) {
     app.use(function(req, res, next) {
@@ -65,10 +66,25 @@ module.exports = function(app, current) {
     // get roster Day Status
     app.get('/api/rosterDayStatus', (request, response) => {
         currentRosterDayStatus = current.rosterDayStatus;
-        let apiResponse = {'Time': moment(), currentRosterDayStatus};
-        response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
-        response.write(JSON.stringify(apiResponse));
-        response.end();
+        let requestedDay = moment(request.query.date);
+        let apiResponse;
+        // if today provide prefetched data, else fetch fresh from the vds kitchen
+        if (requestedDay.isSame(moment(), 'day')) {
+            apiResponse = {'Time': moment(), currentRosterDayStatus};
+            response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+            response.write(JSON.stringify(apiResponse));
+            response.end();
+        } else {
+            vdsRosterAPI.dayRosterStatus(requestedDay).then((result) => {
+                currentRosterDayStatus = result;
+                apiResponse = {'Time': moment(), currentRosterDayStatus};
+                response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+                response.write(JSON.stringify(apiResponse));
+                response.end();
+              }).catch((error) => {
+                console.log(error);
+              });
+        }
     });
     // get all roster duties for a particular shift today
     app.get('/api/dayRoster', (request, response) => {

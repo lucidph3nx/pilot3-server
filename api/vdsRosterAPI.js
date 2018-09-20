@@ -71,16 +71,16 @@ module.exports = {
             return thisMoment;
         };
     },
-    // returns current counters fo each location and position - days roster status
-    dayRosterStatus: function dayStatus() {
+    // returns current counters for each location and position - days roster status
+    dayRosterStatus: function dayStatus(date) {
         const Sequelize = require('sequelize');
         let moment = require('moment-timezone');
         moment().tz('Pacific/Auckland').format();
 
         return new Promise((resolve, reject) => {
-        let today = moment().format('YYYY-MM-DD');
+        let searchdate = moment(date).format('YYYY-MM-DD');
         let rosterQueryString = `
-            SELECT * FROM [VDS_TDW].[WEBSN].[dayStatus] WHERE [date] = '`+today+`'
+            SELECT * FROM [VDS_TDW].[WEBSN].[dayStatus] WHERE [date] = '`+searchdate+`'
         `;
 
         let sequelize = new Sequelize('VDS_TDW', 'BEN_SHERMAN_RO', 'Ben2018S', {
