@@ -112,5 +112,45 @@ module.exports = {
         );
         });
         },
+    // returns uncovered shifts for day
+    uncoveredShifts: function uncoveredShifts(date) {
+        const Sequelize = require('sequelize');
+        let moment = require('moment-timezone');
+        moment().tz('Pacific/Auckland').format();
+
+        return new Promise((resolve, reject) => {
+        let searchdate = moment(date).format('YYYY-MM-DD');
+        let rosterQueryString = `
+            SELECT * FROM [VDS_TDW].[WEBSN].[uncoveredShifts] WHERE [date] = '`+searchdate+`'
+        `;
+
+        let sequelize = new Sequelize('VDS_TDW', 'BEN_SHERMAN_RO', 'Ben2018S', {
+            logging: false,
+            host: 'APAUPVDSSQL01',
+            dialect: 'mssql',
+            dialectOptions: {
+            instanceName: 'TDW',
+            },
+        });
+
+        let uncoveredShifts = [];
+        let shift = {};
+
+        sequelize.query(rosterQueryString)
+            .then(function(response) {
+            for (st = 0; st < response[0].length; st++) {
+                shift = {};
+                shift = {
+                    shiftName: response[0][st].shiftName.trim(),
+                    staffType: response[0][st].staffType.trim(),
+                    location: response[0][st].location.trim(),
+                };
+                uncoveredShifts.push(shift);
+            };
+            resolve(uncoveredShifts);
+            }
+        );
+        });
+        },
     // other exports here
     };

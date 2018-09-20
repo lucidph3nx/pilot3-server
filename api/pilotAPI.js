@@ -86,6 +86,21 @@ module.exports = function(app, current) {
               });
         }
     });
+    // get uncovered shifts
+    app.get('/api/uncoveredShifts', (request, response) => {
+        currentRosterDayStatus = current.rosterDayStatus;
+        let requestedDay = moment(request.query.date);
+        let apiResponse;
+        vdsRosterAPI.uncoveredShifts(requestedDay).then((result) => {
+            uncoveredShifts = result;
+            apiResponse = {'Time': moment(), uncoveredShifts};
+            response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+            response.write(JSON.stringify(apiResponse));
+            response.end();
+            }).catch((error) => {
+            console.log(error);
+            });
+    });
     // get all roster duties for a particular shift today
     app.get('/api/dayRoster', (request, response) => {
         let requestedShift = request.query.shiftId;
