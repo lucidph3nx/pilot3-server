@@ -32,20 +32,32 @@ module.exports = {
             .then(function(response) {
             for (trp = 0; trp < response[0].length; trp++) {
                 serviceRoster = {};
+                let staffId;
+                let staffName;
+                let shiftCovered;
+                if (response[0][trp].uncovered !== 1) {
+                    staffId = response[0][trp].staffId.trim()
+                    staffName = response[0][trp].firstName.trim() + ' ' + response[0][trp].lastName.trim();
+                    shiftCovered = true;
+                } else {
+                    staffId = '';
+                    staffName = '';
+                    shiftCovered = false;
+                }
                 if (response[0][trp].dutyName !== null && response[0][trp].dutyType
                     !== null && response[0][trp].dutyType !== 'REC') {
                     serviceRoster = {
                         shiftId: response[0][trp].shiftName.trim(),
                         shiftType: response[0][trp].shiftType.trim(),
-                        staffId: response[0][trp].staffId.trim(),
-                        staffName: response[0][trp].firstName.trim() +
-                        ' ' + response[0][trp].lastName.trim(),
+                        staffId: staffId,
+                        staffName: staffName,
                         dutyName: response[0][trp].dutyName.trim(),
                         dutyType: response[0][trp].dutyType.trim(),
                         dutyStartTime: mpm2m(response[0][trp].minutesFrom),
                         dutyStartTimeString: mpm2m(response[0][trp].minutesFrom).format('HH:mm'),
                         dutyEndTime: mpm2m(response[0][trp].minutesTo),
                         dutyEndTimeString: mpm2m(response[0][trp].minutesTo).format('HH:mm'),
+                        shiftCovered: shiftCovered,
                     };
                     currentRoster.push(serviceRoster);
                     };

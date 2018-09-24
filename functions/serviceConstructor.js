@@ -660,8 +660,8 @@ module.exports = function Service(CurrentMoment,
         JVL: ['92', '93', '99', 'JV'],
       };
       let freightLineAssociations = {
-        WRL: ['F'],
-        KPL: ['2', '3', '5', '6', 'B', 'E'],
+        WRL: ['6', 'F'],
+        KPL: ['2', '3', '5', 'B', 'E'],
       };
         // looks for service id's with a random letter on the end
         // treat as a 3 digit
