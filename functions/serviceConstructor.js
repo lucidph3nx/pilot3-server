@@ -387,7 +387,7 @@ module.exports = function Service(CurrentMoment,
       arrivesString = servicePoints[servicePoints.length-1].arrives.format('HH:mm');
       destination = servicePoints[servicePoints.length-1].station;
     } else if (kiwirailBoolean) {
-      let KiwiRailDetails = guessKiwiRailTimetableDetails()[0];
+      let KiwiRailDetails = guessKiwiRailTimetableDetails();
       origin = KiwiRailDetails[0];
       destination = KiwiRailDetails[1];
     }
@@ -407,8 +407,8 @@ module.exports = function Service(CurrentMoment,
   function guessKiwiRailTimetableDetails() {
       description = description.toUpperCase();
       description = description.split('-');
-      description[0].trim();
-      description[1].trim();
+      description[0] = description[0].trim();
+      description[1] = description[1].trim();
       origin = '';
       destination = '';
       if (description[0].substring(0, 8) == 'AUCKLAND') {
