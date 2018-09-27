@@ -2,10 +2,16 @@ let moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 let asRequiredStaff = require('./../functions/asRequiredStaff');
 let getDayRosterFromShift = require('./../functions/dayRosterFromShift');
+let getStaffPhotoFromId = require('./../functions/staffImage');
 let getRunningSheetForStation = require('./../functions/runningSheetForStation');
 let vdsRosterAPI = require('./vdsRosterAPI');
+const path = require('path');
+const fs = require('fs');
+let express = require('express');
 
 module.exports = function(app, current) {
+    app.use('/staff', express.static(path.resolve('./data/img/staff')));
+    // cross origin requests
     app.use(function(req, res, next) {
         let oneof = false;
         if (req.headers.origin) {
@@ -108,6 +114,18 @@ module.exports = function(app, current) {
         response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
         response.write(JSON.stringify(apiResponse));
         response.end();
+    });
+    // get staff image from staffId
+    app.get('/api/staffImage', (request, response) => {
+        let requestedStaffId = request.query.staffId;
+        let responsePath;
+        if (getStaffPhotoFromId(requestedStaffId) !== '') {
+            responsePath = path.resolve(getStaffPhotoFromId(requestedStaffId));
+            response.sendFile(responsePath);
+        } else {
+            response.writeHead(404);
+            response.end();
+        }
     });
     // get list of staff who are "as Required" now
     app.get('/api/asRequiredStaff', (request, response) => {

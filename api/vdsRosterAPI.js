@@ -36,7 +36,7 @@ module.exports = {
                 let staffName;
                 let shiftCovered;
                 if (response[0][trp].uncovered !== 1) {
-                    staffId = response[0][trp].staffId.trim()
+                    staffId = response[0][trp].staffId.trim();
                     staffName = response[0][trp].firstName.trim() + ' ' + response[0][trp].lastName.trim();
                     shiftCovered = true;
                 } else {

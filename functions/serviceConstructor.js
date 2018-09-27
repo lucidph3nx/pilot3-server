@@ -663,6 +663,7 @@ module.exports = function Service(CurrentMoment,
         WRL: ['6', 'F'],
         KPL: ['2', '3', '5', 'B', 'E'],
       };
+      let networkServicesAssociations = ['WT'];
         // looks for service id's with a random letter on the end
         // treat as a 3 digit
         for (p = 0; p < serviceId.length; p++) {
@@ -690,6 +691,8 @@ module.exports = function Service(CurrentMoment,
             line = ['KPL', false];
           } else if (passengerLineAssociations.JVL.includes(tempServiceSubstring)) {
             line = ['JVL', false];
+          } else if (networkServicesAssociations.includes(tempServiceSubstring)) {
+            line = ['', true];
           } else {
             line = '';
           };
