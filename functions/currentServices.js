@@ -6,7 +6,6 @@ module.exports = function(geVisVehicles, current) {
   let currentTimetable = current.timetable;
   let currentTripSheet = current.tripSheet;
   let currentBusReplacementList = current.busReplacementList;
-
   let trains = geVisVehicles.features;
   let currentServices = [];
   let currentMoment = moment();
@@ -71,10 +70,14 @@ module.exports = function(geVisVehicles, current) {
   for (st = 0; st < servicesToday.length; st++) {
     let timetabledService = servicesToday[st];
     alreadyTracking = false;
+    console.log(st)
+    console.log(servicesToday[st])
     let serviceTimePoints = currentTimetable.filter(
-        (currentTimetable) => currentTimetable.serviceId == timetabledService.serviceId);
+        (currentServiceTimetable) => currentServiceTimetable.serviceId == timetabledService.serviceId);
+    console.log(serviceTimePoints[0].serviceId)
     let serviceDeparts = serviceTimePoints[0].departs;
     let serviceArrives = serviceTimePoints[serviceTimePoints.length-1].arrives;
+    console.log(serviceDeparts.format('HH:mm') + ' ' + serviceArrives.format('HH:mm'))
     // find if fits within specified timeband
     if (serviceDeparts < moment(currentMoment).subtract(1, 'minutes') &&
         serviceArrives > moment(currentMoment).add(5, 'minutes')) {
@@ -106,8 +109,8 @@ module.exports = function(geVisVehicles, current) {
             currentServices.push(service.web());
           }
       };
-      return currentServices;
   };
+  return currentServices;
   /**
    * decides if train meets selection criteria
    * @param {object} train
