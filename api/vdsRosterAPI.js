@@ -164,5 +164,45 @@ module.exports = {
         );
         });
         },
-    // other exports here
+    visboardHeadcount: function visboardHeadcount() {
+        const Sequelize = require('sequelize');
+        let moment = require('moment-timezone');
+        moment().tz('Pacific/Auckland').format();
+
+        return new Promise((resolve, reject) => {
+        let rosterQueryString = 'SELECT * FROM [VDS_TDW].[WEBSN].[visBoardHeadcount] ORDER BY 3,5,6';
+
+        let sequelize = new Sequelize('VDS_TDW', 'BEN_SHERMAN_RO', 'Ben2018S', {
+            logging: false,
+            host: 'APAUPVDSSQL01',
+            dialect: 'mssql',
+            dialectOptions: {
+            instanceName: 'TDW',
+            },
+        });
+
+        let headcounts = [];
+        let entry = {};
+
+        sequelize.query(rosterQueryString)
+            .then(function(response) {
+            for (st = 0; st < response[0].length; st++) {
+                entry = {};
+                entry = {
+                    year: response[0][st].year,
+                    fortnight: response[0][st].fortnight,
+                    begining: response[0][st].begining,
+                    count: response[0][st].count,
+                    position: response[0][st].position,
+                    location: response[0][st].location,
+                };
+                headcounts.push(entry);
+            };
+            resolve(headcounts);
+            }
+        );
+        });
+        },
+
+        // other exports here
     };

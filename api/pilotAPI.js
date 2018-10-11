@@ -92,6 +92,18 @@ module.exports = function(app, current) {
               });
         }
     });
+    // get headcount data for vis board
+    app.get('/api/visboardHeadcount', (request, response) => {
+        vdsRosterAPI.visboardHeadcount().then((result) => {
+            headcountData = result;
+            apiResponse = {'Time': moment(), headcountData};
+            response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+            response.write(JSON.stringify(apiResponse));
+            response.end();
+          }).catch((error) => {
+            console.log(error);
+          });
+    });
     // get uncovered shifts
     app.get('/api/uncoveredShifts', (request, response) => {
         currentRosterDayStatus = current.rosterDayStatus;
