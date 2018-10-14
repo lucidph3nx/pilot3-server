@@ -6,7 +6,7 @@ let getStaffPhotoFromId = require('./../functions/staffImage');
 let getRunningSheetForStation = require('./../functions/runningSheetForStation');
 let vdsRosterAPI = require('./vdsRosterAPI');
 const path = require('path');
-const fs = require('fs');
+// const fs = require('fs');
 let express = require('express');
 
 module.exports = function(app, current) {
