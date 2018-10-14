@@ -202,8 +202,8 @@ module.exports = function Service(CurrentMoment,
         stopProcessing = true;
       };
       // look at linking issues
-      if (this.locationAgeSeconds >=240 && this.kiwirail == false) {
-        TempStatus = '';
+      if (this.locationAgeSeconds >=180 && this.kiwirail == false) {
+        // TempStatus = '';
         let tunnelExceptionsList = [
           {tunnelName: 'Rimutaka', line: 'WRL', statusMessage: 'In Rimutaka Tunnel',
                   southStation: 'MAYM', northStation: 'FEAT', secondsTheshold: 900},
