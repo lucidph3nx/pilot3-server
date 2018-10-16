@@ -20,10 +20,25 @@ module.exports = {
         function sqlLogThisService(currentService) {
             let now = moment();
             return new Promise((resolve, reject) => {
+                let timeStamp = now.format('YYYY-MM-DD HH:mm:ss');
+                let serviceId = currentService.serviceId;
+                let blockId = currentService.blockId;
                 let kiwirail;
                 let lastStationCurrent;
-                if (currentService.kiwirail) {kiwirail=1;} else {kiwirail=0;}
-                if (currentService.lastStationCurrent) {lastStationCurrent=1;} else {lastStationCurrent=0;}
+                if (currentService.kiwirail) {
+                    kiwirail=1;
+                } else {
+                    kiwirail=0;
+                }
+                if (currentService.lastStationCurrent) {
+                    lastStationCurrent=1;
+                } else {
+                    lastStationCurrent=0;
+                }
+                let thisLE = currentService.LE;
+                let thisTM = currentService.TM;
+                thisLE= thisLE.replace(/'/g, '\'\'');
+                thisTM = thisTM.replace(/'/g, '\'\'');
                 let rosterQueryString = `
                 INSERT INTO [dbo].[pilotLog]
                         ([timeStamp]
@@ -57,9 +72,9 @@ module.exports = {
                         ,[long]
                         ,[meterage])
                     VALUES (
-                        '`+now.format('YYYY-MM-DD HH:mm:ss')+`'
-                        ,'`+currentService.serviceId+`'
-                        ,'`+currentService.blockId+`'
+                        '`+timeStamp+`'
+                        ,'`+serviceId+`'
+                        ,'`+blockId+`'
                         ,'`+currentService.line+`'
                         ,`+kiwirail+`
                         ,'`+currentService.direction+`'
@@ -76,9 +91,9 @@ module.exports = {
                         ,'`+currentService.destination+`'
                         ,'`+currentService.lastStation+`'
                         ,`+lastStationCurrent+`
-                        ,'`+currentService.LE+`'
+                        ,'`+thisLE+`'
                         ,'`+currentService.LEShift+`'
-                        ,'`+currentService.TM+`'
+                        ,'`+thisTM+`'
                         ,'`+currentService.TMShift+`'
                         ,'`+currentService.statusMessage+`'
                         ,'`+currentService.statusArray[0]+`'
@@ -100,7 +115,7 @@ module.exports = {
                                 encrypt: false,
                             },
                         });
-                        //console.log(rosterQueryString);
+                        // console.log(rosterQueryString);
                         sequelize.query(rosterQueryString)
                             .then(function(response) {
                             }

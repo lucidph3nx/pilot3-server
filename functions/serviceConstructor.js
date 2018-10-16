@@ -57,6 +57,9 @@ module.exports = function Service(CurrentMoment,
   this.lat = lat;
   this.lon = lon;
   this.meterage = getmeterage(this.lat, this.lon, this.KRline);
+  if (this.meterage == '') {
+    this.meterage = 0;
+  }
   let lastStationDetails = getlaststation(this.lat, this.lon,
                                           this.meterage,
                                           this.KRline, this.direction);
