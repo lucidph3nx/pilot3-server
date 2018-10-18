@@ -1,7 +1,7 @@
 let lineshapes = require('../Data/lineshapes');
 
 /**
- * Takes GPS coodinates and which line the train belongs to
+ * Takes GPS coodinates and which line the train/point belongs to
  * works out what the current meterage should be (closest intesect)
  * @param {number} lat
  * @param {number} long
