@@ -20,6 +20,9 @@ module.exports = {
             logging: false,
             host: 'APAUPVDSSQL01',
             dialect: 'mssql',
+            options: {
+                encrypt: false,
+            },
             dialectOptions: {
             instanceName: 'TDW',
             },
@@ -99,6 +102,9 @@ module.exports = {
             logging: false,
             host: 'APAUPVDSSQL01',
             dialect: 'mssql',
+            options: {
+                encrypt: false,
+            },
             dialectOptions: {
             instanceName: 'TDW',
             },
@@ -140,8 +146,11 @@ module.exports = {
             logging: false,
             host: 'APAUPVDSSQL01',
             dialect: 'mssql',
+            options: {
+                encrypt: false,
+            },
             dialectOptions: {
-            instanceName: 'TDW',
+                instanceName: 'TDW',
             },
         });
 
@@ -176,6 +185,9 @@ module.exports = {
             logging: false,
             host: 'APAUPVDSSQL01',
             dialect: 'mssql',
+            options: {
+                encrypt: false,
+            },
             dialectOptions: {
             instanceName: 'TDW',
             },

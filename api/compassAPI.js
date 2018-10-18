@@ -10,7 +10,14 @@ module.exports = {
             let timetableQueryString = 'SELECT * FROM [Compass].[dbo].[todaysTimetable]';
             timetableQueryString += 'ORDER BY [blockId], [serviceDeparts], [serviceId], [stationSequence]';
             let sequelize = new Sequelize('Compass', 'TDW-Compass', 'wx38tt2018',
-                        {logging: false, host: 'APNZWPCPSQL01', dialect: 'mssql'});
+                        {
+                            logging: false,
+                            host: 'APNZWPCPSQL01',
+                            dialect: 'mssql',
+                            options: {
+                                encrypt: false,
+                            },
+                        });
 
             let currentTimetable = [];
             let timingPoint = {};
@@ -75,6 +82,9 @@ module.exports = {
               logging: false,
               host: 'APNZWPCPSQL01',
               dialect: 'mssql',
+              options: {
+                encrypt: false,
+              },
             });
 
             let currentBusReplacedList = [];

@@ -3,7 +3,8 @@ moment().tz('Pacific/Auckland').format();
 // supporting data files
 let StationGeoboundaries = require('../Data/StationGeoboundaries');
 let StationMeterage = require('../Data/StationMeterage');
-let lineshapes = require('../Data/lineshapes');
+// let lineshapes = require('../Data/lineshapes');
+let meterageCalculation = require('./meterageCalculation');
 
 // service constructor Object, represents a single rail service
 module.exports = function Service(CurrentMoment,
@@ -56,7 +57,7 @@ module.exports = function Service(CurrentMoment,
   this.destination = this.timetableDetails.destination;
   this.lat = lat;
   this.lon = lon;
-  this.meterage = getmeterage(this.lat, this.lon, this.KRline);
+  this.meterage = meterageCalculation.getmeterage(this.lat, this.lon, this.KRline);
   if (this.meterage == '') {
     this.meterage = 0;
   }
@@ -811,116 +812,6 @@ module.exports = function Service(CurrentMoment,
     return fixedvariance;
   };
   // mathematical functions
-  /**
-   * Takes GPS coodinates and which line the train belongs to
-   * works out what the current meterage should be (closest intesect)
-   * @param {number} lat
-   * @param {number} long
-   * @param {string} KRline
-   * @return {number} Meterage of train service
-   */
-  function getmeterage(lat, long, KRline) {
-    // if rail line is undefined, give up
-    if (typeof KRline == 'undefined' || KRline == '') {
-      return '';
-    }
-    let position = {'coords': {'latitude': lat, 'longitude': long}};
-    let locations = lineshapes.filter((lineshapes) => lineshapes.lineId == KRline);
-    let point1 = locations[0];
-    let point2 = locations[1];
-    let closest;
-    let nextclosest;
-    let point1Distance = distance(point1, position.coords);
-    for (i = 1; i < locations.length; i++) {
-        // cycle component
-        if (distance(locations[i], position.coords) < point1Distance) {
-              point2 = point1;
-              point2Distance = point1Distance;
-              point1 = locations[i];
-              point1Distance = distance(locations[i], position.coords);
-        // stopping component
-        } else if (inbetween(point2, position.coords, point1)) {
-          // stop
-        } else {
-          // keep on cycling
-          point2 = point1;
-          point2Distance = point1Distance;
-          point1 = locations[i];
-          point1Distance = distance(locations[i], position.coords);
-        };
-      };
-      if (distance(point1, position.coords) < distance(point2, position.coords)) {
-        closest = point1;
-        nextclosest = point2;
-      } else {
-        closest = point2;
-        nextclosest = point1;
-      };
-    // checks the order (direction) of the points selected
-    if (closest.order < nextclosest.order) {
-      // beyond closest meterage
-      let XX = nextclosest.latitude - closest.latitude;
-      let YY = nextclosest.longitude - closest.longitude;
-      let ShortestLength = ((XX * (position.coords.latitude - closest.latitude))
-                          + (YY * (position.coords.longitude - closest.longitude))) / ((XX * XX) + (YY * YY));
-      let Vlocation = {
-        'latitude': (closest.latitude + XX * ShortestLength),
-        'longitude': (closest.longitude + YY * ShortestLength),
-      };
-      meterage = closest.meterage + distance(Vlocation, closest);
-    } else {
-      // behind closest meterage
-      let XX = closest.latitude - nextclosest.latitude;
-      let YY = closest.longitude - nextclosest.longitude;
-      let ShortestLength = ((XX * (position.coords.latitude - nextclosest.latitude))
-                          + (YY * (position.coords.longitude - nextclosest.longitude))) / ((XX * XX) + (YY * YY));
-      let Vlocation = {
-        'latitude': (nextclosest.latitude + XX * ShortestLength),
-        'longitude': (nextclosest.longitude + YY * ShortestLength),
-      };
-      meterage = closest.meterage - distance(Vlocation, closest);
-    };
-    return Math.floor(meterage);
-        /**
-     * Works out if position 2 is inbetween positions 1 & 3
-     * @param {object} position1 lat long pair
-     * @param {object} position2 lat long pair
-     * @param {object} position3 lat long pair
-     * @return {boolean} if inbetween then true
-     */
-    function inbetween(position1, position2, position3) {
-      // function determines if position 2 is inbetween 1 & 3
-      let AB = bearing(position2, position1);
-      let BC = bearing(position2, position3);
-      let BCZero = BC - AB;
-      if (BCZero > -90 && BCZero < 90) {
-        return false;
-      } else {
-        return true;
-      }
-      /**
-       * Finds bearing (degrees) of position2 from position 1
-       * @param {object} position1 lat long pair
-       * @param {object} position2 lat long pair
-       * @return {number} bearing
-       */
-      function bearing(position1, position2) {
-        let lat1=position1.latitude;
-        let lat2=position2.latitude;
-        let lon1=position1.longitude;
-        let lon2=position2.longitude;
-        let φ1 = lat1 * Math.PI / 180;
-        let φ2 = lat2 * Math.PI / 180;
-        let λ1 = lon1 * Math.PI / 180;
-        let λ2 = lon2 * Math.PI / 180;
-        let y = Math.sin(λ2-λ1) * Math.cos(φ2);
-        let x = Math.cos(φ1)*Math.sin(φ2) -
-                Math.sin(φ1)*Math.cos(φ2)*Math.cos(λ2-λ1);
-        let bearing = Math.atan2(y, x) * 180 / Math.PI;
-        return bearing;
-      };
-    };
-  };
   /**
   * gets distance in meters between 2 points
   * @param {object} position1 lat long pair
