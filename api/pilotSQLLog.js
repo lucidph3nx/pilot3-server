@@ -37,8 +37,24 @@ module.exports = {
                 }
                 let thisLE = currentService.LE;
                 let thisTM = currentService.TM;
+                let cars = currentService.cars;
+                if (cars == '') {
+                    cars = '\'\'';
+                };
+                let speed = currentService.speed;
+                if (speed == '') {
+                    speed = '\'\'';
+                };
                 thisLE= thisLE.replace(/'/g, '\'\'');
                 thisTM = thisTM.replace(/'/g, '\'\'');
+                let lat = currentService.lat;
+                if (lat == '') {
+                    lat = '\'\'';
+                };
+                let long = currentService.long;
+                if (long == '') {
+                    long = '\'\'';
+                };
                 let rosterQueryString = `
                 INSERT INTO [dbo].[pilotLog]
                         ([timeStamp]
@@ -80,7 +96,7 @@ module.exports = {
                         ,'`+currentService.direction+`'
                         ,'`+currentService.linkedUnit+`'
                         ,'`+currentService.cars+`'
-                        ,`+currentService.speed+`
+                        ,`+speed+`
                         ,`+currentService.locationAgeSeconds+`
                         ,'`+currentService.scheduleVariance+`'
                         ,`+currentService.varianceFriendly+`
@@ -99,8 +115,8 @@ module.exports = {
                         ,'`+currentService.statusArray[0]+`'
                         ,'`+currentService.statusArray[1]+`'
                         ,'`+currentService.statusArray[2]+`'
-                        ,`+currentService.lat+`
-                        ,`+currentService.long+`
+                        ,`+lat+`
+                        ,`+long+`
                         ,`+currentService.meterage+`)
                 `;
                         let sequelize = new Sequelize({

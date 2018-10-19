@@ -12,7 +12,7 @@ module.exports = {
     getmeterage: function getmeterage(lat, long, KRline) {
     // if rail line is undefined, give up
     if (typeof KRline == 'undefined' || KRline == '') {
-        return 0;
+        return '';
     }
     // position we are solving for
     let position = {'coords': {'latitude': lat, 'longitude': long}};
