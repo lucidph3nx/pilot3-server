@@ -7,7 +7,7 @@ module.exports = {
         moment().tz('Pacific/Auckland').format();
         let currentServices = current.services;
         if (currentServices.length !== 0) {
-            console.log('SQL logging: ' + currentServices.length + ' services');
+            // console.log('SQL logging: ' + currentServices.length + ' services');
             for (let s = 0; s < currentServices.length; s++) {
                 sqlLogThisService(currentServices[s]);
             }

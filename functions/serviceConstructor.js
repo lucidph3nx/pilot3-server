@@ -59,7 +59,7 @@ module.exports = function Service(CurrentMoment,
   this.lon = lon;
   this.meterage = meterageCalculation.getmeterage(this.lat, this.lon, this.KRline);
   if (this.meterage == '') {
-    this.meterage = 0;
+    this.meterage = -1;
   }
   let lastStationDetails = getlaststation(this.lat, this.lon,
                                           this.meterage,
@@ -854,6 +854,10 @@ module.exports = function Service(CurrentMoment,
     let thisEast;
     let lastStation = ['', false];
 
+    if (meterage === -1) {
+      return lastStation;
+    }
+
     // checks lat long for current stations first
     for (j = 0; j < StationGeoboundaries.length; j++) {
       thisId = StationGeoboundaries[j].station_id;
@@ -960,7 +964,8 @@ module.exports = function Service(CurrentMoment,
     if (kiwirailBoolean == false
       && prevStationTime !== undefined
       && nextStationTime !== undefined
-      && prevStationMeterage !== undefined) {
+      && prevStationMeterage !== undefined
+      && meterage !== -1) {
       // the time you would expect the service to be in its current position
       let ExpectedTime = moment(prevStationTime + (nextStationTime-prevStationTime) * ((meterage - prevStationMeterage)
                               / (nextStationMeterage - prevStationMeterage)));
