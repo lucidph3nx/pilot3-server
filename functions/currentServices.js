@@ -62,26 +62,30 @@ module.exports = function(geVisVehicles, current) {
         currentServices.push(service.web());
     };
   }
-  //  get all timetabled services that are not active
+  //  get all timetabled services
   let alreadyTracking = false;
   let serviceDate = moment().format('YYYYMMDD');
   //  cycle through services
   let servicesToday = currentTripSheet;
-  for (st = 0; st < servicesToday.length; st++) {
+  for (let st = 0; st < servicesToday.length; st++) {
     let timetabledService = servicesToday[st];
     alreadyTracking = false;
     let serviceTimePoints = currentTimetable.filter(
         (currentServiceTimetable) => currentServiceTimetable.serviceId == timetabledService.serviceId);
     let serviceDeparts = serviceTimePoints[0].departs;
     let serviceArrives = serviceTimePoints[serviceTimePoints.length-1].arrives;
+    // if (timetabledService.serviceId == '3616') {
+    //   console.log('this')
+    // }
+
     // find if fits within specified timeband
     if (serviceDeparts < moment(currentMoment).subtract(1, 'minutes') &&
         serviceArrives > moment(currentMoment).add(5, 'minutes')) {
-          for (cs = 0; cs < currentServices.length; cs++) {
-            if (currentServices[cs].serviceId == timetabledService.serviceId) {
+          // console.log(timetabledService.serviceId);
+          for (let cs = 0; cs < currentServices.length; cs++) {
+            if (!alreadyTracking && currentServices[cs].serviceId == timetabledService.serviceId) {
               alreadyTracking = true;
             }
-            if (alreadyTracking) break;
           };
           if (alreadyTracking == false) {
             let service = new Service(currentMoment,
@@ -98,7 +102,8 @@ module.exports = function(geVisVehicles, current) {
               currentBusReplacementList);
             // look for previous service and mark if still running
             for (csa = 0; csa < currentServices.length; csa++) {
-              if (currentServices[csa].serviceId == service.LastService) {
+              if (service.statusMessage !== 'Previous Service Delayed'
+                  && currentServices[csa].serviceId == service.lastService) {
                 service.statusMessage = 'Previous Service Delayed';
               }
             };

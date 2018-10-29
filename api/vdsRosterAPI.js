@@ -164,6 +164,8 @@ module.exports = {
                 shift = {
                     shiftName: response[0][st].shiftName.trim(),
                     staffType: response[0][st].staffType.trim(),
+                    startTime: mpm2m(response[0][st].minutesStart).format('HH:mm'),
+                    endTime: mpm2m(response[0][st].minutesEnd).format('HH:mm'),
                     location: response[0][st].location.trim(),
                 };
                 uncoveredShifts.push(shift);
@@ -172,6 +174,21 @@ module.exports = {
             }
         );
         });
+                /**
+         * Takes a time in min past midnight
+         * Converts it into a moment object
+         * @param {string} minutesPastMidnight
+         * @return {object} - Moment object
+         */
+        function mpm2m(minutesPastMidnight) {
+            let thisMoment = moment();
+            thisMoment.set('hour', 0);
+            thisMoment.set('minute', 0);
+            thisMoment.set('seconds', 0);
+            thisMoment.set('miliseconds', 0);
+            thisMoment.add(minutesPastMidnight, 'minutes');
+            return thisMoment;
+        };
         },
     visboardHeadcount: function visboardHeadcount() {
         const Sequelize = require('sequelize');

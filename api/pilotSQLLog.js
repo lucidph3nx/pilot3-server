@@ -131,9 +131,10 @@ module.exports = {
                                 encrypt: false,
                             },
                         });
-                        // console.log(rosterQueryString);
                         sequelize.query(rosterQueryString)
                             .then(function(response) {
+                                // console.log(response);
+                                resolve('done');
                             }
                         );
                         });

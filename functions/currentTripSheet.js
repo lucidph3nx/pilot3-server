@@ -5,7 +5,6 @@ module.exports = function(timetable) {
         let tripLine = {};
         for (tp = 0; tp < currentTimetable.length; tp++) {
             if (currentTimetable[tp].serviceId !== tripLine.serviceId) {
-
                 tripLine = {
                     serviceId: currentTimetable[tp].serviceId,
                     line: currentTimetable[tp].line,
