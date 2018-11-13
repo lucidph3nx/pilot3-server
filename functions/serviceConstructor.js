@@ -9,27 +9,26 @@ let meterageCalculation = require('./meterageCalculation');
 // service constructor Object, represents a single rail service
 module.exports = function Service(CurrentMoment,
                                   serviceId,
-                                  serviceDate,
                                   serviceDescription,
                                   linkedUnit,
                                   secondUnit,
                                   secondUnitLat, secondUnitLon,
                                   speed, compass,
                                   locationAge,
+                                  locationAgeSeconds,
                                   varianceKiwirail,
                                   lat, lon,
                                   currentRosterDuties,
                                   currentTimetable,
                                   currentBusReplacementList) {
   this.currenttime = moment(CurrentMoment);
-  this.serviceId = serviceId.trim();
-  this.serviceDescription = serviceDescription.trim();
-  this.serviceDate = moment(serviceDate.trim(), 'YYYYMMDD');
+  this.serviceId = serviceId;
+  this.serviceDescription = serviceDescription;
   this.line = getlinefromserviceid(this.serviceId)[0];
   this.kiwirail = getlinefromserviceid(this.serviceId, serviceDescription)[1];
   this.direction = getdirectionfromserviceid(this.serviceId);
   this.KRline = lineToKiwiRailLine(this.line);
-  this.linkedUnit = linkedUnit.trim();
+  this.linkedUnit = linkedUnit;
   // if linked unit is track machine, this.kiwirail is true
   if (this.linkedUnit.substring(0, 3) == 'ETM') {
     this.kiwirail = true;
@@ -43,9 +42,9 @@ module.exports = function Service(CurrentMoment,
   this.compass = compass;
   this.moving = (speed >= 1);
   this.locationAge = locationAge;
-  this.locationAgeSeconds =
-    parseInt(this.locationAge.toString().split(':')[0]*60) +
-    parseInt(this.locationAge.toString().split(':')[1]);
+  this.locationAgeSeconds = locationAgeSeconds;
+    // parseInt(this.locationAge.toString().split(':')[0]*60) +
+    // parseInt(this.locationAge.toString().split(':')[1]);
   this.varianceKiwirail = gevisvariancefix(varianceKiwirail);
   this.timetableDetails = getTimetableDetails(this.serviceId, this.serviceDescription, this.kiwirail);
   this.departs = this.timetableDetails.departs;
@@ -650,7 +649,7 @@ module.exports = function Service(CurrentMoment,
         let numcharId = '';
         let line = [];
         let freightdetect;
-        if (typeof serviceDescription !== 'undefined') {
+        if (serviceDescription !== null && serviceDescription !== undefined) {
           if (serviceDescription.includes('FREIGHT')) {
             freightdetect = true;
           };
@@ -909,7 +908,7 @@ module.exports = function Service(CurrentMoment,
       if ((direction == 'UP' && nextOrPrev == 'next')
       || (direction == 'DOWN' && nextOrPrev == 'prev')) {
           if (currentTimetable[st].serviceId == serviceId
-            && getMeterageOfStation(currentTimetable[st].station) > meterage) {
+            && getMeterageOfStation(currentTimetable[st].station) > trainMeterage) {
               station = currentTimetable[st].station;
               time = currentTimetable[st].departs;
               stationMeterage = getMeterageOfStation(currentTimetable[st].station);
@@ -918,7 +917,7 @@ module.exports = function Service(CurrentMoment,
       } else if ((direction == 'DOWN' && nextOrPrev == 'next')
       || (direction == 'UP' && nextOrPrev == 'prev')) {
           if (currentTimetable[st].serviceId == serviceId
-            && getMeterageOfStation(currentTimetable[st].station) < meterage) {
+            && getMeterageOfStation(currentTimetable[st].station) < trainMeterage) {
               station = currentTimetable[st].station;
               time = currentTimetable[st].departs;
               stationMeterage = getMeterageOfStation(currentTimetable[st].station);

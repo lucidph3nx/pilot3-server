@@ -58,7 +58,7 @@ function refreshData() {
     geVisVehicles = result;
     if (!current.debug && current.rosterDuties !== [] && current.timetable !== [] && current.tripSheet !== []) {
       current.services = getCurrentServices(geVisVehicles, current);
-      PilotSQLLog.pilotSQLLog(current);
+      //PilotSQLLog.pilotSQLLog(current);
     }
     if (current.debug) {
       current.services = dummyCurrentServices;

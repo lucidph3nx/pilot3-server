@@ -18,10 +18,8 @@ module.exports = {
                                 encrypt: false,
                             },
                         });
-
             let currentTimetable = [];
             let timingPoint = {};
-
             sequelize.query(timetableQueryString)
             .then(function(response) {
             for (tp = 0; tp < response[0].length; tp++) {

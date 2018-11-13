@@ -13,38 +13,40 @@ module.exports = function(geVisVehicles, current) {
   for (gj = 0; gj < trains.length; gj++) {
     let train = trains[gj].attributes;
   if (meetsTrainSelectionCriteria(train)) {
-        let serviceId = train.TrainID;
-        let serviceDate = train.TrainDate;
-        let serviceDescription = train.TrainDesc;
-        let linkedUnit = train.VehicleID;
+        let serviceId = train.TRNID;
+        let serviceDescription = train.TRNDESCRP;
+        let linkedUnit = train.VEHID;
         let secondUnit = '';
         let secondUnitLat = '';
         let secondUnitLong = '';
         //  work out what the second half of the train unit is
-        if (train.EquipDesc.trim() == 'Matangi Power Car') {
+        if (train.EQUIPDESC.trim() == 'Matangi Power Car') {
             secondUnit = 'FT' + linkedUnit.substring(2, 6);
-        } else if (train.EquipDesc.trim() == 'Matangi Trailer Car') {
+        } else if (train.EQUIPDESC.trim() == 'Matangi Trailer Car') {
             secondUnit = 'FP' + linkedUnit.substring(2, 6);
         }
         if (secondUnit !== '') {
           for (su = 0; su < trains.length; su++) {
-            if (trains[su].attributes.VehicleID == secondUnit) {
-              secondUnitLat = trains[su].attributes.Latitude;
-              secondUnitLong = trains[su].attributes.Longitude;
+            if (trains[su].attributes.VEHID == secondUnit) {
+              secondUnitLat = trains[su].attributes.LAT;
+              secondUnitLong = trains[su].attributes.LON;
               break;
             }
           }
         }
-        let speed = train.VehicleSpeed;
-        let compass = train.DirectionCompass;
-        let locationAge = train.PositionAge;
-        let varianceKiwirail = train.DelayTime;
-        let lat = train.Latitude;
-        let long = train.Longitude;
+        let speed = train.VEHSPD;
+        let compass = train.VEHDIR;
+        let loadTime = moment(train.TIMESTMPGIS);
+        let positionTime = moment(train.TIMESTMPNZ);
+        let locationAgeRAW = loadTime.diff(positionTime);
+        let locationAge = moment.utc(locationAgeRAW).format('mm:ss'); // locationAgeRAW.format('mmm:ss');
+        let locationAgeSeconds = Number(moment.utc(locationAgeRAW).format('s'));
+        let varianceKiwirail = train.DELAYTIME;
+        let lat = train.LAT;
+        let long = train.LON;
         //  new service object
         let service = new Service(currentMoment,
                                   serviceId,
-                                  serviceDate,
                                   serviceDescription,
                                   linkedUnit,
                                   secondUnit,
@@ -53,6 +55,7 @@ module.exports = function(geVisVehicles, current) {
                                   speed,
                                   compass,
                                   locationAge,
+                                  locationAgeSeconds,
                                   varianceKiwirail,
                                   lat,
                                   long,
@@ -64,7 +67,6 @@ module.exports = function(geVisVehicles, current) {
   }
   //  get all timetabled services
   let alreadyTracking = false;
-  let serviceDate = moment().format('YYYYMMDD');
   //  cycle through services
   let servicesToday = currentTripSheet;
   for (let st = 0; st < servicesToday.length; st++) {
@@ -90,11 +92,11 @@ module.exports = function(geVisVehicles, current) {
           if (alreadyTracking == false) {
             let service = new Service(currentMoment,
               timetabledService.serviceId,
-              serviceDate,
               'FROM TIMETABLE',
               '', '', '', '',
               '', '',
               '00:00',
+              0,
               0,
               '', '',
               currentRosterDuties,
@@ -121,10 +123,12 @@ module.exports = function(geVisVehicles, current) {
   function meetsTrainSelectionCriteria(train) {
       const northernBoundary = -40.625887; // Levin
       const westernBoundary = 174.5; // cook strait
-      if (train.TrainID !== '' &&
-      train.Longitude > westernBoundary &&
-      train.Latitude < northernBoundary &&
-      train.EquipmentDesc.trim() !== 'Rail Ferry' ) {
+      if (train.TRNID !== null &&
+      train.LON > westernBoundary &&
+      train.LAT < northernBoundary &&
+      train.EQUIPDESC !== 'KAIARAHI' &&
+      train.EQUIPDESC !== 'ARATERE' &&
+      train.EQUIPDESC !== 'KAITAKI') {
           return true;
       } else {
       return false;

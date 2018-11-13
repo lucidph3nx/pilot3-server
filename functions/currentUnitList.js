@@ -1,3 +1,6 @@
+let moment = require('moment-timezone');
+moment().tz('Pacific/Auckland').format();
+
 module.exports = function(geVisVehicles) {
   let trains = geVisVehicles.features;
   let currentUnitList = [];
@@ -5,15 +8,19 @@ module.exports = function(geVisVehicles) {
   // itterate through all items in GeVisJSON and use all relevant ones
   for (gj = 0; gj < trains.length; gj++) {
   let train = trains[gj].attributes;
-  if (train.EquipDesc.trim() == 'Matangi Power Car' || train.EquipDesc.trim() == 'Matangi Trailer Car') {
+  if (train.EQUIPDESC.trim() == 'Matangi Power Car' || train.EQUIPDESC.trim() == 'Matangi Trailer Car') {
+    let loadTime = moment(train.TIMESTMPGIS);
+    let positionTime = moment(train.TIMESTMPNZ);
+    let locationAgeRAW = loadTime.diff(positionTime);
+    let locationAge = moment.utc(locationAgeRAW).format('mmm:ss'); // locationAgeRAW.format('mmm:ss');
       unit = {
-        UnitId: train.VehicleID,
-        location: train.Latitude + ' ' + train.Longitude,
-        positionAge: train.PositionAge,
-        positionAgeSeconds: parseInt(train.PositionAge.toString().split(':')[0]*60)
-                          + parseInt(train.PositionAge.toString().split(':')[1]),
-        vehicleSpeed: train.VehicleSpeed,
-        serviceId: train.TrainID,
+        UnitId: train.VEHID,
+        location: train.LAT + ' ' + train.LON,
+        positionAge: locationAge,
+        positionAgeSeconds: parseInt(locationAge.toString().split(':')[0]*60)
+                          + parseInt(locationAge.toString().split(':')[1]),
+        vehicleSpeed: train.VEHSPD,
+        serviceId: train.TRNID,
       };
       currentUnitList.push(unit);
     };

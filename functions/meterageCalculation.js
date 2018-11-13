@@ -11,7 +11,7 @@ let lineshapes = require('../Data/lineshapes');
 module.exports = {
     getmeterage: function getmeterage(lat, long, KRline) {
         // if rail line is undefined, give up
-        if (typeof KRline == 'undefined' || KRline == '') {
+        if (typeof KRline == 'undefined' || KRline == '' || lat == '' || long == '') {
             return '';
         }
         // position we are solving for
