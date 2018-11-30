@@ -1,6 +1,7 @@
 /* eslint-env node */
 let moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
+const puppeteer = require('puppeteer');
 
 // ======supporting functions=======
 let getCurrentServices = require('./functions/currentServices');
@@ -24,12 +25,16 @@ let current = {
   rosterDuties: [],
   rosterDayStatus: [],
 };
+let geVisToken = [undefined, moment('1970-01-01')];
 // =======API=======
 require('./api/pilotAPI')(app, current);
 let kiwirailAPI = require('./api/kiwirailAPI');
 let vdsRosterAPI = require('./api/vdsRosterAPI');
 let compassAPI = require('./api/compassAPI');
 // let PilotSQLLog = require('./api/pilotSQLLog');
+// =======Puppeteer=======
+// let getGeVisToken = require('./api/puppeteer/getGeVisToken');
+
 // =======time logs=======
 let timetableLastUpdated;
 let busReplacementsLastUpdated;
@@ -45,29 +50,86 @@ let rosterStatusLastUpdated;
 // app.use(bodyParser.urlencoded({ extended: false }));
 // app.use(bodyParser.json());
 
+/**
+ * uses pupperteer to log into mobile GeVis and retrieve an authentication token
+ */
+async function getGeVisToken() {
+  (async () => {
+    let token;
+    // let t0 = Date.now();
+    const args = ['--enable-features=NetworkService'];
+    const options = {
+      args,
+      headless: false,
+      ignoreHTTPSErrors: false,
+    };
+    const browser = await puppeteer.launch(options);
+    const page = await browser.newPage();
+    // await page.waitFor(5000)
+    await page.setCacheEnabled(false);
+    await page.goto('https://gis.kiwirail.co.nz/maps/?viewer=gevis', {waitUntil: 'networkidle0'});
+    await page.click('[value="External Identity"]'),
+    await page.waitForSelector('#UserName');
+    await page.type('#UserName', 'transdevnz'),
+    await page.type('#Password', 't26R!9x4fZ'),
+    await page.click('[value="Sign In"]'),
+    await page.waitForNavigation();
+    await page.setRequestInterception(true);
+    // await page.waitFor(20000);
+    page.on('request', (interceptedRequest) => {
+      if (interceptedRequest.url().startsWith('https://gis.kiwirail.co.nz/arcgis/rest/services/External/gevisOpData/MapServer/export')) {
+        let url = interceptedRequest.url();
+        let stringarray = url.split('&');
+        token = stringarray[0].split('=')[1];
+        // let t1 = Date.now();
+        // console.log(token);
+        // console.log('Call to doSomething took ' + (t1 - t0) + ' milliseconds.');
+        browser.close();
+        geVisToken = [token, moment()];
+        pilotLog('GeVis Auth Token Retrieved Ok');
+      } else {
+        interceptedRequest.continue();
+      }
+    });
+  })();
+};
+
+// getGeVisToken.getGeVisToken()
+// .then((result) => {
+//   geVisToken = result;
+// })
+// .catch(console.error);
 
 // begin server
 refreshData();
+getGeVisToken();
 /**
  * Function to maintain current data for all dependancies
  */
 function refreshData() {
-  let geVisVehicles;
-  kiwirailAPI.geVisVehicles().then((result) => {
-    geVisVehicles = result;
-    if (!current.debug && current.rosterDuties !== [] && current.timetable !== [] && current.tripSheet !== []) {
-      current.services = getCurrentServices(geVisVehicles, current);
-      // PilotSQLLog.pilotSQLLog(current);
+  // console.log(geVisToken[0]);
+  // console.log(geVisToken[1]);
+  if (geVisToken !== undefined && geVisToken[0] !== undefined) {
+    if (geVisToken[1] < moment().subtract(60, 'minutes')) {
+      getGeVisToken();
     }
-    if (current.debug) {
-      current.services = dummyCurrentServices;
-    }
-    current.unitList = getCurrentUnitList(geVisVehicles);
+    let geVisVehicles;
+    kiwirailAPI.geVisVehicles(geVisToken[0]).then((result) => {
+      geVisVehicles = result;
+      if (!current.debug && current.rosterDuties !== [] && current.timetable !== [] && current.tripSheet !== []) {
+        current.services = getCurrentServices(geVisVehicles, current);
+        // PilotSQLLog.pilotSQLLog(current);
+      }
+      if (current.debug) {
+        current.services = dummyCurrentServices;
+      }
+      current.unitList = getCurrentUnitList(geVisVehicles);
 
-    pilotLog('GeVis Vehicles loaded ok');
-  }).catch((error) => {
-    console.log(error);
-  });
+      pilotLog('GeVis Vehicles loaded ok');
+    }).catch((error) => {
+      console.log(error);
+    });
+  };
   // roster duties list, updates every 10 minutes
   if (rosterDutiesLastUpdated == undefined | rosterDutiesLastUpdated < moment().subtract(10, 'minutes')) {
   vdsRosterAPI.rosterDuties().then((result) => {
@@ -113,7 +175,7 @@ function refreshData() {
   setTimeout(refreshData, 10 * 1000);
 }
 /**
- * a simple function to steamline console log code for this program
+ * a simple function to streamline console log code for this program
  * @param {string} status - the thing to report
  */
 function pilotLog(status) {

@@ -38,12 +38,12 @@ module.exports = {
     //     });
     // },
     // taking a crack at the new API
-    geVisVehicles: function() {
+    geVisVehicles: function(token) {
         return new Promise(function(resolve, reject) {
             let options = {
                 hostname: 'gis.kiwirail.co.nz',
                 port: app.get('port'),
-                path: 'https://gis.kiwirail.co.nz/arcgis/rest/services/Tracking/vehicleGevis/MapServer/4/query?token=mu7KOveMEh2InlTIhvvU_K0ioXP_Py6Cov-gjnGQQlo.&f=json&returnGeometry=false&spatialRel=esriSpatialRelIntersects&geometry=%7B%22xmin%22%3A0.0%2C%22ymin%22%3A0.0%2C%22xmax%22%3A9999999.9%2C%22ymax%22%3A9999999.9%2C%22spatialReference%22%3A%7B%22wkid%22%3A2193%7D%7D&geometryType=esriGeometryEnvelope&outFields=TRNID,VEHID,EQUIPDESC,LAT,LON,VEHSPD,VEHDIR,TIMESTMPNZ,TIMESTMPGIS,DELAYTIME,TRNDESCRP',
+                path: 'https://gis.kiwirail.co.nz/arcgis/rest/services/Tracking/vehicleGevis/MapServer/4/query?token=' + token + '&f=json&returnGeometry=false&spatialRel=esriSpatialRelIntersects&geometry=%7B%22xmin%22%3A0.0%2C%22ymin%22%3A0.0%2C%22xmax%22%3A9999999.9%2C%22ymax%22%3A9999999.9%2C%22spatialReference%22%3A%7B%22wkid%22%3A2193%7D%7D&geometryType=esriGeometryEnvelope&outFields=TRNID,VEHID,EQUIPDESC,LAT,LON,VEHSPD,VEHDIR,TIMESTMPNZ,TIMESTMPGIS,DELAYTIME,TRNDESCRP',
                 method: 'GET',
                 json: true,
             };
