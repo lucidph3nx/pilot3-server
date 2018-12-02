@@ -84,13 +84,15 @@ async function getGeVisToken() {
         // let t1 = Date.now();
         // console.log(token);
         // console.log('Call to doSomething took ' + (t1 - t0) + ' milliseconds.');
-        browser.close();
+        
         geVisToken = [token, moment()];
         pilotLog('GeVis Auth Token Retrieved Ok');
       } else {
         interceptedRequest.continue();
       }
     });
+    await page.waitFor(60000);
+    await browser.close();
   })();
 };
 
