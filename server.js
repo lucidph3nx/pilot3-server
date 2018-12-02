@@ -3,6 +3,9 @@ let moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 const puppeteer = require('puppeteer');
 
+// ======Authentication credentials=======
+let credentials = require('./credentials');
+
 // ======supporting functions=======
 let getCurrentServices = require('./functions/currentServices');
 let getCurrentUnitList = require('./functions/currentUnitList');
@@ -70,8 +73,8 @@ async function getGeVisToken() {
     await page.goto('https://gis.kiwirail.co.nz/maps/?viewer=gevis', {waitUntil: 'networkidle0'});
     await page.click('[value="External Identity"]'),
     await page.waitForSelector('#UserName');
-    await page.type('#UserName', 'transdevnz'),
-    await page.type('#Password', 't26R!9x4fZ'),
+    await page.type('#UserName', credentials.GeVis.username),
+    await page.type('#Password', credentials.GeVis.password),
     await page.click('[value="Sign In"]'),
     await page.waitForNavigation();
     await page.setRequestInterception(true);

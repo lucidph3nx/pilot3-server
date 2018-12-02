@@ -1,3 +1,5 @@
+// ======Authentication credentials=======
+let credentials = require('../credentials');
 
 module.exports = {
     // returns current datetime and object with todays VDS roster per trip
@@ -15,16 +17,17 @@ module.exports = {
             WHERE [date] = @ThisDate
             ORDER BY [date], [staffId], [minutesFrom]
         `;
-
-        let sequelize = new Sequelize('VDS_TDW', 'BEN_SHERMAN_RO', 'Ben2018S', {
+        let sequelize = new Sequelize(credentials.VDSSQL.database,
+                                      credentials.VDSSQL.username,
+                                      credentials.VDSSQL.password, {
             logging: false,
-            host: 'APAUPVDSSQL01',
+            host: credentials.VDSSQL.host,
             dialect: 'mssql',
             options: {
                 encrypt: false,
             },
             dialectOptions: {
-            instanceName: 'TDW',
+            instanceName: credentials.VDSSQL.instanceName,
             },
         });
 
@@ -142,15 +145,17 @@ module.exports = {
             SELECT * FROM [VDS_TDW].[WEBSN].[uncoveredShifts] WHERE [date] = '`+searchdate+`'
         `;
 
-        let sequelize = new Sequelize('VDS_TDW', 'BEN_SHERMAN_RO', 'Ben2018S', {
+        let sequelize = new Sequelize(credentials.VDSSQL.database,
+                                      credentials.VDSSQL.username,
+                                      credentials.VDSSQL.password, {
             logging: false,
-            host: 'APAUPVDSSQL01',
+            host: credentials.VDSSQL.host,
             dialect: 'mssql',
             options: {
-                encrypt: false,
+            encrypt: false,
             },
             dialectOptions: {
-                instanceName: 'TDW',
+            instanceName: credentials.VDSSQL.instanceName,
             },
         });
 
@@ -198,15 +203,17 @@ module.exports = {
         return new Promise((resolve, reject) => {
         let rosterQueryString = 'SELECT * FROM [VDS_TDW].[WEBSN].[visBoardHeadcount] ORDER BY 3,5,6';
 
-        let sequelize = new Sequelize('VDS_TDW', 'BEN_SHERMAN_RO', 'Ben2018S', {
+        let sequelize = new Sequelize(credentials.VDSSQL.database,
+                                      credentials.VDSSQL.username,
+                                      credentials.VDSSQL.password, {
             logging: false,
-            host: 'APAUPVDSSQL01',
+            host: credentials.VDSSQL.host,
             dialect: 'mssql',
             options: {
-                encrypt: false,
+            encrypt: false,
             },
             dialectOptions: {
-            instanceName: 'TDW',
+            instanceName: credentials.VDSSQL.instanceName,
             },
         });
 

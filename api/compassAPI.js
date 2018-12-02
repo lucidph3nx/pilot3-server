@@ -1,18 +1,22 @@
+// ======Authentication credentials=======
+let credentials = require('../credentials');
 
-// returns current timetable stop times from Compass DB
 module.exports = {
+    // returns current timetable stop times from Compass DB
     currentTimetable: function() {
         const Sequelize = require('sequelize');
         let moment = require('moment-timezone');
         moment().tz('Pacific/Auckland').format();
-
         return new Promise((resolve, reject) => {
             let timetableQueryString = 'SELECT * FROM [Compass].[dbo].[todaysTimetable]';
             timetableQueryString += 'ORDER BY [blockId], [serviceDeparts], [serviceId], [stationSequence]';
-            let sequelize = new Sequelize('Compass', 'TDW-Compass', 'wx38tt2018',
+            let sequelize = new Sequelize(
+                credentials.CompassSQL.database,
+                credentials.CompassSQL.username,
+                credentials.CompassSQL.password,
                         {
                             logging: false,
-                            host: 'APNZWPCPSQL01',
+                            host: credentials.CompassSQL.host,
                             dialect: 'mssql',
                             options: {
                                 encrypt: false,
@@ -65,25 +69,19 @@ module.exports = {
         moment().tz('Pacific/Auckland').format();
 
         return new Promise((resolve, reject) => {
-            // let today = moment().format('YYYY-MM-DD');
             let busReplacementQueryString = 'SELECT * FROM dbo.[todaysBusReplacements]';
-            // let busReplacementQueryString = `
-            // DECLARE @todaydate datetime;
-            // SET @todaydate = '`+today+`'
-            // SELECT [TT_TDN] As 'serviceId'
-            //       ,[BusReplacement] AS 'busReplaced'
-            // FROM [Compass].[COMPASS].[TDW_Daily_Services]
-            // WHERE [BusReplacement] != 0
-            // AND [OPERATING_DATE] = @todaydate
-            // `;
-            let sequelize = new Sequelize('Compass', 'TDW-Compass', 'wx38tt2018', {
-              logging: false,
-              host: 'APNZWPCPSQL01',
-              dialect: 'mssql',
-              options: {
-                encrypt: false,
-              },
-            });
+            let sequelize = new Sequelize(
+                credentials.CompassSQL.database,
+                credentials.CompassSQL.username,
+                credentials.CompassSQL.password,
+                {
+                    logging: false,
+                    host: credentials.CompassSQL.host,
+                    dialect: 'mssql',
+                    options: {
+                        encrypt: false,
+                    },
+                });
 
             let currentBusReplacedList = [];
             let replacementOccurance = {};
