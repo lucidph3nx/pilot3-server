@@ -39,8 +39,11 @@ module.exports = function(geVisVehicles, current) {
         let loadTime = moment(train.TIMESTMPGIS);
         let positionTime = moment(train.TIMESTMPNZ);
         let locationAgeRAW = loadTime.diff(positionTime);
+        // console.log(locationAgeRAW);
+        // console.log(Number(moment.utc(locationAgeRAW).format('s')));
+        // console.log(Number(moment.utc(locationAgeRAW).valueOf()/1000));
         let locationAge = moment.utc(locationAgeRAW).format('mm:ss'); // locationAgeRAW.format('mmm:ss');
-        let locationAgeSeconds = Number(moment.utc(locationAgeRAW).format('s'));
+        let locationAgeSeconds = Number(moment.utc(locationAgeRAW).valueOf()/1000);
         let varianceKiwirail = train.DELAYTIME;
         let lat = train.LAT;
         let long = train.LON;

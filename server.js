@@ -5,7 +5,6 @@ const puppeteer = require('puppeteer');
 
 // ======Authentication credentials=======
 let credentials = require('./credentials');
-
 // ======supporting functions=======
 let getCurrentServices = require('./functions/currentServices');
 let getCurrentUnitList = require('./functions/currentUnitList');
@@ -28,7 +27,8 @@ let current = {
   rosterDuties: [],
   rosterDayStatus: [],
 };
-let geVisToken = [undefined, moment('1970-01-01')];
+// let geVisToken = [undefined, moment('1970-01-01')];
+let geVisToken = ['cqgUpRByNpb7odIUSX1MbSEjAP68te0O6tWX89pWi7c.', moment('2018-12-03 13:39:00')];
 // =======API=======
 require('./api/pilotAPI')(app, current);
 let kiwirailAPI = require('./api/kiwirailAPI');

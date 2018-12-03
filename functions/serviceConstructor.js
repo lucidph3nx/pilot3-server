@@ -239,19 +239,23 @@ module.exports = function Service(CurrentMoment,
               StatusArray[1] = TempStatus;
             };
           };
-    } else if (this.departed == false && TempStatus == '') {
-      TempStatus = 'Awaiting Departure';
-      StatusArray[0] = TempStatus;
-      StatusArray[1] = TempStatus;
-    } else if (secondUnit !== '') {
-      let first = {latitude: this.lat,
-                  longitude: this.lon};
-      let sec = {latitude: this.secondUnitLat,
-                  longitude: this.secondUnitLon};
-      if (distance(first, sec)>2000) {
-        console.log('distance between units exceeds 2km');
-        TempStatus = 'GPS Fault';
+      if (this.departed == false && TempStatus == '') {
+        TempStatus = 'Awaiting Departure';
+        StatusArray[0] = TempStatus;
         StatusArray[1] = TempStatus;
+      } else if (this.secondUnit !== '' && TempStatus == '') {
+        let first = {latitude: this.lat,
+                    longitude: this.lon};
+        let sec = {latitude: this.secondUnitLat,
+                    longitude: this.secondUnitLon};
+        if (distance(first, sec)>2000) {
+          console.log('distance between units exceeds 2km');
+          TempStatus = 'GPS Fault';
+          StatusArray[1] = TempStatus;
+        } else {
+          TempStatus = 'Check OMS Linking';
+          StatusArray[1] = TempStatus;
+        };
       } else {
         TempStatus = 'Check OMS Linking';
         StatusArray[1] = TempStatus;
