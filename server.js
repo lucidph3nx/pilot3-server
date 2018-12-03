@@ -27,16 +27,16 @@ let current = {
   rosterDuties: [],
   rosterDayStatus: [],
 };
-// let geVisToken = [undefined, moment('1970-01-01')];
-let geVisToken = ['cqgUpRByNpb7odIUSX1MbSEjAP68te0O6tWX89pWi7c.', moment('2018-12-03 13:39:00')];
+let geVisToken = [undefined, moment('1970-01-01')];
+//  for live debugging, put the key here and update time to less than an hour
+// let geVisToken = ['cqgUpRByNpb7odIUSX1MbSEjAP68te0O6tWX89pWi7c.', moment('2018-12-03 13:39:00')];
+
 // =======API=======
 require('./api/pilotAPI')(app, current);
 let kiwirailAPI = require('./api/kiwirailAPI');
 let vdsRosterAPI = require('./api/vdsRosterAPI');
 let compassAPI = require('./api/compassAPI');
 // let PilotSQLLog = require('./api/pilotSQLLog');
-// =======Puppeteer=======
-// let getGeVisToken = require('./api/puppeteer/getGeVisToken');
 
 // =======time logs=======
 let timetableLastUpdated;
@@ -121,7 +121,7 @@ function refreshData() {
     let geVisVehicles;
     kiwirailAPI.geVisVehicles(geVisToken[0]).then((result) => {
       geVisVehicles = result;
-      if (!current.debug && current.rosterDuties !== [] && current.timetable !== [] && current.tripSheet !== []) {
+      if (!current.debug && current.rosterDuties !== [] && current.timetable !== [] && current.tripSheet !== [] && geVisVehicles.features !== undefined) {
         current.services = getCurrentServices(geVisVehicles, current);
         // PilotSQLLog.pilotSQLLog(current);
       }

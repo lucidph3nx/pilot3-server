@@ -61,6 +61,9 @@ module.exports = {
                     if (body == {'metadata': {'outputSpatialReference': 0}, 'features': []}) {
                     console.log('NEW GeVis Vehicles responded empty @' + moment().format('HH:mm:ss'));
                     };
+                    if (body == {'error': {'code': 498, 'message': 'Invalid Token', 'details': []}}) {
+                        console.log(moment().format('HH:mm:ss') + 'GEVIS TOKEN INVALID');
+                    };
                     resolve(geVisVehicles);
                 };
                 });
