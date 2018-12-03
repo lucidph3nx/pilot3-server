@@ -80,6 +80,7 @@ async function getGeVisToken() {
     await page.setRequestInterception(true);
     // await page.waitFor(20000);
     page.on('request', (interceptedRequest) => {
+      // eslint-disable-next-line max-len
       if (interceptedRequest.url().startsWith('https://gis.kiwirail.co.nz/arcgis/rest/services/External/gevisOpData/MapServer/export')) {
         let url = interceptedRequest.url();
         let stringarray = url.split('&');
@@ -87,7 +88,6 @@ async function getGeVisToken() {
         // let t1 = Date.now();
         // console.log(token);
         // console.log('Call to doSomething took ' + (t1 - t0) + ' milliseconds.');
-        
         geVisToken = [token, moment()];
         pilotLog('GeVis Auth Token Retrieved Ok');
       } else {
@@ -121,7 +121,8 @@ function refreshData() {
     let geVisVehicles;
     kiwirailAPI.geVisVehicles(geVisToken[0]).then((result) => {
       geVisVehicles = result;
-      if (!current.debug && current.rosterDuties !== [] && current.timetable !== [] && current.tripSheet !== [] && geVisVehicles.features !== undefined) {
+      if (!current.debug && current.rosterDuties !== [] && current.timetable !== []
+           && current.tripSheet !== [] && geVisVehicles.features !== undefined) {
         current.services = getCurrentServices(geVisVehicles, current);
         // PilotSQLLog.pilotSQLLog(current);
       }
