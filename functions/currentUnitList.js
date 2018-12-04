@@ -12,7 +12,7 @@ module.exports = function(geVisVehicles) {
     let loadTime = moment(train.TIMESTMPGIS);
     let positionTime = moment(train.TIMESTMPNZ);
     let locationAgeRAW = loadTime.diff(positionTime);
-    let locationAge = moment.utc(locationAgeRAW).format('mmm:ss'); // locationAgeRAW.format('mmm:ss');
+    let locationAge = moment.utc(locationAgeRAW).format('mm:ss'); // locationAgeRAW.format('mmm:ss');
       unit = {
         UnitId: train.VEHID,
         location: train.LAT + ' ' + train.LON,

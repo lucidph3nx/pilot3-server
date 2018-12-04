@@ -27,9 +27,9 @@ let current = {
   rosterDuties: [],
   rosterDayStatus: [],
 };
-let geVisToken = [undefined, moment('1970-01-01')];
+// let geVisToken = [undefined, moment('1970-01-01')];
 //  for live debugging, put the key here and update time to less than an hour
-// let geVisToken = ['cqgUpRByNpb7odIUSX1MbSEjAP68te0O6tWX89pWi7c.', moment('2018-12-03 13:39:00')];
+let geVisToken = ['0E30GIt_8B1Q2K8a8HTaqhqCSED0IyUkUc75BccpjUU.', moment('2018-12-04 14:14:00')];
 
 // =======API=======
 require('./api/pilotAPI')(app, current);
