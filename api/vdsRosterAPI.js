@@ -294,7 +294,126 @@ module.exports = {
             }
         );
         });
-        },
-
+    },
+    visboardAnnualLeave: function visboardAnnualLeave() {
+        const Sequelize = require('sequelize');
+        let moment = require('moment-timezone');
+        moment().tz('Pacific/Auckland').format();
+        return new Promise((resolve, reject) => {
+        let rosterQueryString = 'SELECT * FROM [VDS_TDW].[WEBSN].[visBoardAnnualLeave] ORDER BY 3,5,6';
+        let sequelize = new Sequelize(credentials.VDSSQL.database,
+                                        credentials.VDSSQL.username,
+                                        credentials.VDSSQL.password, {
+            logging: false,
+            host: credentials.VDSSQL.host,
+            dialect: 'mssql',
+            options: {
+            encrypt: false,
+            },
+            dialectOptions: {
+            instanceName: credentials.VDSSQL.instanceName,
+            },
+        });
+        let annualLeave = [];
+        let entry = {};
+        sequelize.query(rosterQueryString)
+            .then(function(response) {
+            for (st = 0; st < response[0].length; st++) {
+                entry = {};
+                entry = {
+                    year: response[0][st].year,
+                    fortnight: response[0][st].fortnight,
+                    begining: response[0][st].begining,
+                    count: response[0][st].count,
+                    position: response[0][st].position,
+                    location: response[0][st].location,
+                };
+                annualLeave.push(entry);
+            };
+            resolve(annualLeave);
+            }
+        );
+        });
+    },
+    visboardSickness: function visboardSickness() {
+        const Sequelize = require('sequelize');
+        let moment = require('moment-timezone');
+        moment().tz('Pacific/Auckland').format();
+        return new Promise((resolve, reject) => {
+        let rosterQueryString = 'SELECT * FROM [VDS_TDW].[WEBSN].[visBoardSickness] ORDER BY 3,5,6';
+        let sequelize = new Sequelize(credentials.VDSSQL.database,
+                                        credentials.VDSSQL.username,
+                                        credentials.VDSSQL.password, {
+            logging: false,
+            host: credentials.VDSSQL.host,
+            dialect: 'mssql',
+            options: {
+            encrypt: false,
+            },
+            dialectOptions: {
+            instanceName: credentials.VDSSQL.instanceName,
+            },
+        });
+        let sickness = [];
+        let entry = {};
+        sequelize.query(rosterQueryString)
+            .then(function(response) {
+            for (st = 0; st < response[0].length; st++) {
+                entry = {};
+                entry = {
+                    year: response[0][st].year,
+                    fortnight: response[0][st].fortnight,
+                    begining: response[0][st].begining,
+                    count: response[0][st].count,
+                    position: response[0][st].position,
+                    location: response[0][st].location,
+                };
+                sickness.push(entry);
+            };
+            resolve(sickness);
+            }
+        );
+        });
+    },
+    visboardAltDuties: function visboardAltDuties() {
+        const Sequelize = require('sequelize');
+        let moment = require('moment-timezone');
+        moment().tz('Pacific/Auckland').format();
+        return new Promise((resolve, reject) => {
+        let rosterQueryString = 'SELECT * FROM [VDS_TDW].[WEBSN].[visBoardAltDuties] ORDER BY 3,5,6';
+        let sequelize = new Sequelize(credentials.VDSSQL.database,
+                                        credentials.VDSSQL.username,
+                                        credentials.VDSSQL.password, {
+            logging: false,
+            host: credentials.VDSSQL.host,
+            dialect: 'mssql',
+            options: {
+            encrypt: false,
+            },
+            dialectOptions: {
+            instanceName: credentials.VDSSQL.instanceName,
+            },
+        });
+        let altDuties = [];
+        let entry = {};
+        sequelize.query(rosterQueryString)
+            .then(function(response) {
+            for (st = 0; st < response[0].length; st++) {
+                entry = {};
+                entry = {
+                    year: response[0][st].year,
+                    fortnight: response[0][st].fortnight,
+                    begining: response[0][st].begining,
+                    count: response[0][st].count,
+                    position: response[0][st].position,
+                    location: response[0][st].location,
+                };
+                altDuties.push(entry);
+            };
+            resolve(altDuties);
+            }
+        );
+        });
+    },
         // other exports here
     };

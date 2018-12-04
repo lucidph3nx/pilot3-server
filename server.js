@@ -29,7 +29,7 @@ let current = {
 };
 // let geVisToken = [undefined, moment('1970-01-01')];
 //  for live debugging, put the key here and update time to less than an hour
-let geVisToken = ['Or7GGHShFz-kgOXGvQwrZexehTsgSPLp58ChP35fBj8.', moment('2018-12-04 15:56:00')];
+let geVisToken = ['d3eM3SuQuMUuo5S4OL2S9UTO2WIc_vEpnI1DvQNETgs.', moment('2018-12-05 10:24:00')];
 
 // =======API=======
 require('./api/pilotAPI')(app, current);

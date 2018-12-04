@@ -104,6 +104,42 @@ module.exports = function(app, current) {
             console.log(error);
           });
     });
+    // get Annual leave data for vis board
+    app.get('/api/visboardAnnualLeave', (request, response) => {
+        vdsRosterAPI.visboardAnnualLeave().then((result) => {
+            annualLeaveData = result;
+            apiResponse = {'Time': moment(), annualLeaveData};
+            response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+            response.write(JSON.stringify(apiResponse));
+            response.end();
+          }).catch((error) => {
+            console.log(error);
+          });
+    });
+    // get sickness data for vis board
+    app.get('/api/visboardSickness', (request, response) => {
+        vdsRosterAPI.visboardSickness().then((result) => {
+            sicknessData = result;
+            apiResponse = {'Time': moment(), sicknessData};
+            response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+            response.write(JSON.stringify(apiResponse));
+            response.end();
+          }).catch((error) => {
+            console.log(error);
+          });
+    });
+    // get sickness data for vis board
+    app.get('/api/visboardAltDuties', (request, response) => {
+        vdsRosterAPI.visboardAltDuties().then((result) => {
+            altDutiesData = result;
+            apiResponse = {'Time': moment(), altDutiesData};
+            response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+            response.write(JSON.stringify(apiResponse));
+            response.end();
+          }).catch((error) => {
+            console.log(error);
+          });
+    });
     // get uncovered shifts
     app.get('/api/uncoveredShifts', (request, response) => {
         currentRosterDayStatus = current.rosterDayStatus;
