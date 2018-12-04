@@ -239,108 +239,108 @@ module.exports = function Service(CurrentMoment,
               StatusArray[1] = TempStatus;
             };
           };
-      if (this.departed == false && TempStatus == '') {
-        TempStatus = 'Awaiting Departure';
-        StatusArray[0] = TempStatus;
-        StatusArray[1] = TempStatus;
-      } else if (this.secondUnit !== '' && TempStatus == '') {
-        let first = {latitude: this.lat,
-                    longitude: this.lon};
-        let sec = {latitude: this.secondUnitLat,
-                    longitude: this.secondUnitLon};
-        if (distance(first, sec)>2000) {
-          console.log('distance between units exceeds 2km');
-          TempStatus = 'GPS Fault';
+        };
+        if (this.departed == false && TempStatus == '') {
+          TempStatus = 'Awaiting Departure';
+          StatusArray[0] = TempStatus;
           StatusArray[1] = TempStatus;
-        } else {
+        } else if (this.secondUnit !== '' && TempStatus == '') {
+          let first = {latitude: this.lat,
+                      longitude: this.lon};
+          let sec = {latitude: this.secondUnitLat,
+                      longitude: this.secondUnitLon};
+          if (distance(first, sec)>2000) {
+            console.log('distance between units exceeds 2km');
+            TempStatus = 'GPS Fault';
+            StatusArray[1] = TempStatus;
+           } else {
+              TempStatus = 'Check OMS Linking';
+              StatusArray[1] = TempStatus;
+            };
+        } else if (TempStatus == '') {
           TempStatus = 'Check OMS Linking';
           StatusArray[1] = TempStatus;
         };
-      } else {
-        TempStatus = 'Check OMS Linking';
-        StatusArray[1] = TempStatus;
-      };
-    };
     if (stopProcessing == false) {
       StatusMessage = TempStatus;
     };
-  };
-  if (this.departed == false && this.kiwirail == false) {
-    TempStatus = 'Awaiting Departure';
-    StatusArray[0] = TempStatus;
-    StatusArray[1] = TempStatus;
-    StatusMessage = TempStatus;
-    stopProcessing = true;
-  };
-  if (this.speed == 0 && this.lastStationCurrent == false) {
-    if (this.lastStation == 'POMA' && this.origin == 'TAIT') {
-      this.lastStation = 'TAIT';
-      TempStatus = 'In Storage Road';
-      StatusArray[2] = TempStatus;
-    } else if (this.lastStation == 'TEHO' && this.origin == 'WAIK') {
-      this.lastStation = 'WAIK';
-      TempStatus = 'In Turn Back Road';
-      StatusArray[2] = TempStatus;
-    } else {
-      TempStatus = 'Stopped between stations';
-      StatusArray[2] = TempStatus;
-  };
-  if (StatusMessage == '' && !stopProcessing) {
-    StatusMessage = TempStatus;
-  };
-  stopProcessing = true;
-  };
-  if (StatusMessage == 0 || StatusMessage == false || typeof StatusMessage == 'undefined') {
-    StatusMessage = '';
-  };
-  this.statusMessage = StatusMessage;
-  this.statusArray = StatusArray;
-  this.web = function() {
-    // generate slim version of service for transmition over web
-    let servicelite = {
-      serviceId: this.serviceId,
-      blockId: this.blockId,
-      line: this.line,
-      kiwirail: this.kiwirail,
-      direction: this.direction,
-      linkedUnit: this.linkedUnit,
-      cars: this.cars,
-      speed: this.speed,
-      locationAge: this.locationAge,
-      locationAgeSeconds: this.locationAgeSeconds,
-      varianceFriendly: this.varianceFriendly,
-      scheduleVariance: this.scheduleVariance,
-      varianceKiwirail: this.varianceKiwirail,
-      departs: this.departsString,
-      origin: this.origin,
-      arrives: this.arrivesString,
-      destination: this.destination,
-      lastStation: this.lastStation,
-      lastStationCurrent: this.lastStationCurrent,
-      LastService: this.LastService,
-      hasNextService: this.hasNextService,
-      nextService: this.nextService,
-      nextTime: this.NextTimeString,
-      LE: this.crewDetails.LE.staffName,
-      LEExists: this.crewDetails.LEExists,
-      LEShift: this.crewDetails.LE.shiftId,
-      LENextService: this.crewDetails.LE.nextService.serviceId,
-      LENextServiceTime: this.crewDetails.LE.nextService.serviceDepartsString,
-      TM: this.crewDetails.TM.staffName,
-      TMExists: this.crewDetails.TMExists,
-      TMShift: this.crewDetails.TM.shiftId,
-      TMNextService: this.crewDetails.TM.nextService.serviceId,
-      TMNextServiceTime: this.crewDetails.TM.nextService.serviceDepartsString,
-      passengerOperatorList: this.crewDetails.PO,
-      POExists: this.crewDetails.POExists,
-      statusMessage: this.statusMessage,
-      statusArray: this.statusArray,
-      lat: this.lat,
-      long: this.lon,
-      meterage: this.meterage,
+      };
+      if (this.departed == false && this.kiwirail == false) {
+        TempStatus = 'Awaiting Departure';
+        StatusArray[0] = TempStatus;
+        StatusArray[1] = TempStatus;
+        StatusMessage = TempStatus;
+        stopProcessing = true;
+      };
+      if (this.speed == 0 && this.lastStationCurrent == false) {
+        if (this.lastStation == 'POMA' && this.origin == 'TAIT') {
+          this.lastStation = 'TAIT';
+          TempStatus = 'In Storage Road';
+          StatusArray[2] = TempStatus;
+        } else if (this.lastStation == 'TEHO' && this.origin == 'WAIK') {
+          this.lastStation = 'WAIK';
+          TempStatus = 'In Turn Back Road';
+          StatusArray[2] = TempStatus;
+        } else {
+          TempStatus = 'Stopped between stations';
+          StatusArray[2] = TempStatus;
+      };
+      if (StatusMessage == '' && !stopProcessing) {
+        StatusMessage = TempStatus;
+      };
+      stopProcessing = true;
+      };
+      if (StatusMessage == 0 || StatusMessage == false || typeof StatusMessage == 'undefined') {
+        StatusMessage = '';
+      };
+      this.statusMessage = StatusMessage;
+      this.statusArray = StatusArray;
+      this.web = function() {
+      // generate slim version of service for transmition over web
+      let servicelite = {
+        serviceId: this.serviceId,
+        blockId: this.blockId,
+        line: this.line,
+        kiwirail: this.kiwirail,
+        direction: this.direction,
+        linkedUnit: this.linkedUnit,
+        cars: this.cars,
+        speed: this.speed,
+        locationAge: this.locationAge,
+        locationAgeSeconds: this.locationAgeSeconds,
+        varianceFriendly: this.varianceFriendly,
+        scheduleVariance: this.scheduleVariance,
+        varianceKiwirail: this.varianceKiwirail,
+        departs: this.departsString,
+        origin: this.origin,
+        arrives: this.arrivesString,
+        destination: this.destination,
+        lastStation: this.lastStation,
+        lastStationCurrent: this.lastStationCurrent,
+        LastService: this.LastService,
+        hasNextService: this.hasNextService,
+        nextService: this.nextService,
+        nextTime: this.NextTimeString,
+        LE: this.crewDetails.LE.staffName,
+        LEExists: this.crewDetails.LEExists,
+        LEShift: this.crewDetails.LE.shiftId,
+        LENextService: this.crewDetails.LE.nextService.serviceId,
+        LENextServiceTime: this.crewDetails.LE.nextService.serviceDepartsString,
+        TM: this.crewDetails.TM.staffName,
+        TMExists: this.crewDetails.TMExists,
+        TMShift: this.crewDetails.TM.shiftId,
+        TMNextService: this.crewDetails.TM.nextService.serviceId,
+        TMNextServiceTime: this.crewDetails.TM.nextService.serviceDepartsString,
+        passengerOperatorList: this.crewDetails.PO,
+        POExists: this.crewDetails.POExists,
+        statusMessage: this.statusMessage,
+        statusArray: this.statusArray,
+        lat: this.lat,
+        long: this.lon,
+        meterage: this.meterage,
+      };
+      return servicelite;
     };
-    return servicelite;
-  };
   /**
    *performs a look up of the current timetable to get the number of cars
    * @param {string} serviceId
