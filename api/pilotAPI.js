@@ -62,6 +62,16 @@ module.exports = function(app, current) {
         response.end();
     });
     // get all roster duties today
+    app.get('/api/test', (request, response) => {
+        vdsRosterAPI.testfunction().then((result) => {
+            currentRosterDuties = response;
+            let apiResponse = {'Time': moment(), currentRosterDuties};
+            response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+            response.write(JSON.stringify(apiResponse));
+            response.end();
+        });
+    });
+    // get all roster duties today
     app.get('/api/currentRoster', (request, response) => {
         currentRosterDuties = current.rosterDuties;
         let apiResponse = {'Time': moment(), currentRosterDuties};

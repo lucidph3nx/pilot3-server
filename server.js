@@ -36,7 +36,7 @@ require('./api/pilotAPI')(app, current);
 let kiwirailAPI = require('./api/kiwirailAPI');
 let vdsRosterAPI = require('./api/vdsRosterAPI');
 let compassAPI = require('./api/compassAPI');
-// let PilotSQLLog = require('./api/pilotSQLLog');
+let PilotSQLLog = require('./api/pilotSQLLog');
 
 // =======time logs=======
 let timetableLastUpdated;
@@ -63,7 +63,7 @@ async function getGeVisToken() {
     const args = ['--enable-features=NetworkService'];
     const options = {
       args,
-      headless: false,
+      headless: true,
       ignoreHTTPSErrors: false,
     };
     const browser = await puppeteer.launch(options);
@@ -124,7 +124,7 @@ function refreshData() {
       if (!current.debug && current.rosterDuties !== [] && current.timetable !== []
            && current.tripSheet !== [] && geVisVehicles.features !== undefined) {
         current.services = getCurrentServices(geVisVehicles, current);
-        // PilotSQLLog.pilotSQLLog(current);
+        PilotSQLLog.pilotSQLLog(current);
       }
       if (current.debug) {
         current.services = dummyCurrentServices;

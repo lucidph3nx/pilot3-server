@@ -1,10 +1,30 @@
+const Sequelize = require('sequelize');
+
+
+let moment = require('moment-timezone');
+moment().tz('Pacific/Auckland').format();
+const sequelize = new Sequelize({
+    database: 'PILOTSQL',
+    username: 'PilotLoggingService',
+    password: 'test',
+    logging: false,
+    host: 'D-3VZ5CD2',
+    port: 1433,
+    dialect: 'mssql',
+    options: {
+        encrypt: false,
+    },
+    pool: {
+        max: 5,
+        min: 0,
+        acquire: 30000,
+        idle: 10000,
+      },
+});
 
 module.exports = {
     // loggs all currentServices into SQL DB
     pilotSQLLog: function pilotSQLLog(current) {
-        const Sequelize = require('sequelize');
-        let moment = require('moment-timezone');
-        moment().tz('Pacific/Auckland').format();
         let currentServices = current.services;
         if (currentServices.length !== 0) {
             // console.log('SQL logging: ' + currentServices.length + ' services');
@@ -119,18 +139,6 @@ module.exports = {
                         ,`+long+`
                         ,`+currentService.meterage+`)
                 `;
-                        let sequelize = new Sequelize({
-                            database: 'PILOTSQL',
-                            username: 'PilotLoggingService',
-                            password: 'test',
-                            logging: false,
-                            host: 'D-3VZ5CD2',
-                            port: 1433,
-                            dialect: 'mssql',
-                            options: {
-                                encrypt: false,
-                            },
-                        });
                         sequelize.query(rosterQueryString)
                             .then(function(response) {
                                 // console.log(response);
