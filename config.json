@@ -1,5 +1,0 @@
-﻿{
-    "connectionString": "mongodb://localhost:27017/pilot2",
-    "apiUrl": "http://localhost:4000",
-    "secret": "coffee"
-}

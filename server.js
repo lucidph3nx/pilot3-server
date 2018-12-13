@@ -124,7 +124,7 @@ function refreshData() {
       if (!current.debug && current.rosterDuties !== [] && current.timetable !== []
            && current.tripSheet !== [] && geVisVehicles.features !== undefined) {
         current.services = getCurrentServices(geVisVehicles, current);
-        // PilotSQLLog.pilotSQLLog(current);
+        PilotSQLLog.pilotSQLLog(current);
       }
       if (current.debug) {
         current.services = dummyCurrentServices;

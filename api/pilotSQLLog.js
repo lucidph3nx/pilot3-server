@@ -28,8 +28,13 @@ module.exports = {
         let currentServices = current.services;
         if (currentServices.length !== 0) {
             // console.log('SQL logging: ' + currentServices.length + ' services');
-            for (let s = 0; s < currentServices.length; s++) {
-                sqlLogThisService(currentServices[s]);
+            // for (let s = 0; s < currentServices.length; s++) {
+            //     sqlLogThisService(currentServices[s]);
+            // }
+            for (let s = 0; p = Promise.resolve(), s < currentServices.length; s++) {
+                p = p.then(
+                    sqlLogThisService(currentServices[s])
+                );
             }
         }
         /**
@@ -141,8 +146,7 @@ module.exports = {
                 `;
                         sequelize.query(rosterQueryString)
                             .then(function(response) {
-                                // console.log(response);
-                                resolve('done');
+                                resolve(response[1]);
                             }
                         );
                         });
