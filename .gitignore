@@ -1,5 +1,4 @@
 node_modules/
 node_modules/**
 credentials.js
-data\img/**
-data\img/**
+data/img/staff/**
