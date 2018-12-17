@@ -17,7 +17,7 @@ module.exports = {
       const args = ['--enable-features=NetworkService'];
       const options = {
         args,
-        headless: false,
+        headless: true,
         ignoreHTTPSErrors: false,
       };
       let browser = await puppeteer.launch(options);

@@ -52,55 +52,6 @@ let rosterStatusLastUpdated;
 // app.use(bodyParser.urlencoded({ extended: false }));
 // app.use(bodyParser.json());
 
-/**
- * uses pupperteer to log into mobile GeVis and retrieve an authentication token
- */
-// async function getGeVisToken() {
-//   return (async () => {
-//     pilotLog('GeVis Auth Token Retrival Begun');
-//     let token;
-//     let thisgeVisToken;
-//     let tokenURL = 'https://gis.kiwirail.co.nz/arcgis/rest/services/External/gevisOpData/MapServer/export';
-//     // let t0 = Date.now();
-//     const args = ['--enable-features=NetworkService'];
-//     const options = {
-//       args,
-//       headless: false,
-//       ignoreHTTPSErrors: false,
-//     };
-//     let browser = await puppeteer.launch(options);
-//     let page = await browser.newPage();
-//     await page.setCacheEnabled(false);
-//     await page.goto('https://gis.kiwirail.co.nz/maps/?viewer=gevis', {waitUntil: 'networkidle0'});
-//     await page.click('[value="External Identity"]'),
-//       await page.waitForSelector('#UserName');
-//     await page.type('#UserName', credentials.GeVis.username),
-//       await page.type('#Password', credentials.GeVis.password),
-//       await page.click('[value="Sign In"]'),
-//       await page.waitForNavigation();
-//     await page.setRequestInterception(true);
-//     page.on('request', (interceptedRequest) => {
-//       // eslint-disable-next-line max-len
-//       if (interceptedRequest.url().endsWith('.png') || interceptedRequest.url().endsWith('.jpg')) {
-//         interceptedRequest.abort();
-//       } else if (interceptedRequest.url().startsWith(tokenURL)) {
-//         let url = interceptedRequest.url();
-//         let stringarray = url.split('&');
-//         token = stringarray[0].split('=')[1];
-//         thisgeVisToken = [token, moment()];
-//         pilotLog('GeVis Auth Token Retrieved Ok');
-//         return thisgeVisToken;
-//       } else {
-//         interceptedRequest.continue();
-//       }
-//     });
-//     await page.waitForRequest('https://gis.kiwirail.co.nz/maps/Resources/Compiled/Alert.js');
-//     await browser.close();
-//     return thisgeVisToken;
-//   })().catch((error) => {
-//     pilotLog(error);
-//   });
-// };
 // begin server
 refreshData();
 /**
