@@ -907,28 +907,27 @@ module.exports = function Service(CurrentMoment,
     let station;
     let time;
     let stationMeterage;
-
-    for (st = 0; st < currentTimetable.length; st++) {
-      if ((direction == 'UP' && nextOrPrev == 'next')
-      || (direction == 'DOWN' && nextOrPrev == 'prev')) {
-          if (currentTimetable[st].serviceId == serviceId
-            && getMeterageOfStation(currentTimetable[st].station) > trainMeterage) {
-              station = currentTimetable[st].station;
-              time = currentTimetable[st].departs;
-              stationMeterage = getMeterageOfStation(currentTimetable[st].station);
-              break;
-          }
-      } else if ((direction == 'DOWN' && nextOrPrev == 'next')
-      || (direction == 'UP' && nextOrPrev == 'prev')) {
-          if (currentTimetable[st].serviceId == serviceId
-            && getMeterageOfStation(currentTimetable[st].station) < trainMeterage) {
-              station = currentTimetable[st].station;
-              time = currentTimetable[st].departs;
-              stationMeterage = getMeterageOfStation(currentTimetable[st].station);
-              break;
+    let serviceTimetable = current.timetable.filter((currentTimetable) => currentTimetable.serviceId == serviceId);
+    if ((direction == 'UP' && nextOrPrev == 'next') || (direction == 'DOWN' && nextOrPrev == 'prev')) {
+      for (st = 0; st < serviceTimetable.length; st++) {
+          let thisStationMeterage = getMeterageOfStation(serviceTimetable[st].station)
+          if (thisStationMeterage > trainMeterage) {
+              station = serviceTimetable[st].station;
+              time = serviceTimetable[st].departs;
+              stationMeterage = thisStationMeterage;
           }
       }
-    }
+  }
+  if ((direction == 'DOWN' && nextOrPrev == 'next') || (direction == 'UP' && nextOrPrev == 'prev')) {
+      for (st = 0; st < serviceTimetable.length; st++) {
+          let thisStationMeterage = getMeterageOfStation(serviceTimetable[st].station)
+          if (thisStationMeterage < trainMeterage) {
+              station = serviceTimetable[st].station;
+              time = serviceTimetable[st].departs;
+              stationMeterage = thisStationMeterage;
+          }
+      }
+  }
     return [time, stationMeterage, station];
   };
   /**
