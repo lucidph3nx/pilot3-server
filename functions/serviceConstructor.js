@@ -257,7 +257,7 @@ module.exports = function Service(CurrentMoment,
     } else if (this.secondUnit !== '' && TempStatus == '') {
       let first = {
         latitude: this.lat,
-        longitude: this.lon
+        longitude: this.lon,
       };
       let sec = {
         latitude: this.secondUnitLat,
@@ -927,18 +927,18 @@ module.exports = function Service(CurrentMoment,
     }
     if ((direction == 'UP' && nextOrPrev == 'next') || (direction == 'DOWN' && nextOrPrev == 'prev')) {
       for (st = 0; st < serviceTimetable.length; st++) {
-        let thisStationMeterage = getMeterageOfStation(serviceTimetable[st].station)
+        let thisStationMeterage = getMeterageOfStation(serviceTimetable[st].station);
         if (thisStationMeterage > trainMeterage) {
           station = serviceTimetable[st].station;
           time = serviceTimetable[st].departs;
           stationMeterage = thisStationMeterage;
-          break
+          break;
         }
       }
     }
     if ((direction == 'DOWN' && nextOrPrev == 'next') || (direction == 'UP' && nextOrPrev == 'prev')) {
       for (st = 0; st < serviceTimetable.length; st++) {
-        let thisStationMeterage = getMeterageOfStation(serviceTimetable[st].station)
+        let thisStationMeterage = getMeterageOfStation(serviceTimetable[st].station);
         if (thisStationMeterage < trainMeterage) {
           station = serviceTimetable[st].station;
           time = serviceTimetable[st].departs;
@@ -987,8 +987,9 @@ module.exports = function Service(CurrentMoment,
       && prevStationMeterage !== undefined
       && meterage !== -1) {
       // the time you would expect the service to be in its current position
-      let ExpectedTime = moment(prevStationTime + (nextStationTime - prevStationTime) * ((meterage - prevStationMeterage)
-        / (nextStationMeterage - prevStationMeterage)));
+      let ExpectedTime = moment(prevStationTime +
+        (nextStationTime - prevStationTime) * ((meterage - prevStationMeterage)
+                                  / (nextStationMeterage - prevStationMeterage)));
       // the difference between actual and expected tells you how late the service is
       let CurrentDelay = moment(currentTime.diff(ExpectedTime));
       CurrentDelay.subtract(locationAgeSeconds, 'seconds');
