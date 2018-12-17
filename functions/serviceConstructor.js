@@ -907,10 +907,10 @@ module.exports = function Service(CurrentMoment,
     let station;
     let time;
     let stationMeterage;
-    let serviceTimetable = current.timetable.filter((currentTimetable) => currentTimetable.serviceId == serviceId);
+    let serviceTimetable = currentTimetable.filter((currentTimetable) => currentTimetable.serviceId == serviceId);
     if ((direction == 'UP' && nextOrPrev == 'next') || (direction == 'DOWN' && nextOrPrev == 'prev')) {
       for (st = 0; st < serviceTimetable.length; st++) {
-          let thisStationMeterage = getMeterageOfStation(serviceTimetable[st].station)
+          let thisStationMeterage = getMeterageOfStation(serviceTimetable[st].station);
           if (thisStationMeterage > trainMeterage) {
               station = serviceTimetable[st].station;
               time = serviceTimetable[st].departs;
@@ -920,7 +920,7 @@ module.exports = function Service(CurrentMoment,
   }
   if ((direction == 'DOWN' && nextOrPrev == 'next') || (direction == 'UP' && nextOrPrev == 'prev')) {
       for (st = 0; st < serviceTimetable.length; st++) {
-          let thisStationMeterage = getMeterageOfStation(serviceTimetable[st].station)
+          let thisStationMeterage = getMeterageOfStation(serviceTimetable[st].station);
           if (thisStationMeterage < trainMeterage) {
               station = serviceTimetable[st].station;
               time = serviceTimetable[st].departs;
