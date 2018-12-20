@@ -18,15 +18,16 @@ let current = {
   debug: false,
   services: [],
   unitList: [],
+  carList: [],
   timetable: [],
   tripSheet: [],
   busReplacementList: [],
   rosterDuties: [],
   rosterDayStatus: [],
 };
-let geVisToken = [undefined, moment('1970-01-01')];
+//let geVisToken = [undefined, moment('1970-01-01')];
 //  for live debugging, put the key here and update time to less than an hour
-// let geVisToken = ['d3eM3SuQuMUuo5S4OL2S9UTO2WIc_vEpnI1DvQNETgs.', moment('2018-12-17 10:24:00')];
+let geVisToken = ['XFaTTVCub8WSOgcfAWi3IEhJqVU3qCiicD5QgkLEktc.', moment('2018-12-20 11:51:00')];
 let geVisTokenRetrievalInProgress = false;
 
 // =======API=======
@@ -82,7 +83,9 @@ function refreshData() {
         if (current.debug) {
           current.services = dummyCurrentServices;
         }
-        current.unitList = getCurrentUnitList(geVisVehicles);
+        unitsAndCars = getCurrentUnitList(geVisVehicles);
+        current.unitList = unitsAndCars[0];
+        current.carList = unitsAndCars[1];
 
         pilotLog('GeVis Vehicles loaded ok');
       }).catch((error) => {

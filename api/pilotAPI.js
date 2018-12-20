@@ -61,6 +61,14 @@ module.exports = function(app, current) {
         response.write(JSON.stringify(apiResponse));
         response.end();
     });
+    // get the status for all Matangi Cars
+    app.get('/api/currentCarList', (request, response) => {
+        currentCarList = current.carList;
+        let apiResponse = {'Time': moment(), currentCarList};
+        response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+        response.write(JSON.stringify(apiResponse));
+        response.end();
+    });
     // get all roster duties today
     app.get('/api/test', (request, response) => {
         vdsRosterAPI.testfunction().then((result) => {
