@@ -31,6 +31,7 @@ module.exports = function(geVisVehicles) {
         + parseInt(locationAge.toString().split(':')[1]),
         positionAge: locationAge,
         speed: train.VEHSPD,
+        compass: train.VEHDIR,
         linked: isLinked,
         linkedServiceId: train.TRNID,
       };
@@ -67,11 +68,15 @@ module.exports = function(geVisVehicles) {
 
     let closestStation = getClosestStation(trackingPreference.lat, trackingPreference.lon);
     let guessLineArray = guessLine(closestStation.stationId);
+    let line = guessLineArray[0];
     let meterage;
+    let direction;
     if (line !== '???') {
-      meterage = meterageCalculation.getmeterage(trackingPreference.lat, trackingPreference.lon, line);
+      meterage = meterageCalculation.getmeterage(trackingPreference.lat, trackingPreference.lon, line, trackingPreference.compass)[0];
+      direction = meterageCalculation.getmeterage(trackingPreference.lat, trackingPreference.lon, line, trackingPreference.compass)[1];
     } else {
       meterage = guessLineArray[1];
+      direction = '?';
     }
     let speed = trackingPreference.speed;
     let unit = {
@@ -80,6 +85,7 @@ module.exports = function(geVisVehicles) {
       speed: speed,
       line: guessLineArray[0],
       meterage: meterage,
+      direction,
       closestStation: closestStation.stationId,
       FP: FP,
       FT: FT,

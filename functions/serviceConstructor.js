@@ -56,8 +56,9 @@ module.exports = function Service(CurrentMoment,
   this.destination = this.timetableDetails.destination;
   this.lat = lat;
   this.lon = lon;
-  this.meterage = meterageCalculation.getmeterage(this.lat, this.lon, this.KRline);
-  if (this.meterage == '') {
+  this.meterage = meterageCalculation.getmeterage(this.lat, this.lon, this.KRline, this.compass)[0];
+  this.estimatedDirection = meterageCalculation.getmeterage(this.lat, this.lon, this.KRline, this.compass)[1];
+  if (this.meterage == '' || this.meterage == undefined) {
     this.meterage = -1;
   }
   let lastStationDetails = getlaststation(this.lat, this.lon,

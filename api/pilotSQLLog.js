@@ -143,12 +143,13 @@ module.exports = {
                         ,`+lat+`
                         ,`+long+`
                         ,`+currentService.meterage+`)
-                `;
+                        `;
                         sequelize.query(rosterQueryString)
                             .then(function(response) {
                                 resolve(response[1]);
-                            }
-                        );
+                            }).catch((error) =>{
+                                console.log(error);
+                            });
                         });
         };
     },

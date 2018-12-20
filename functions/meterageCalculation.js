@@ -9,7 +9,7 @@ let lineshapes = require('../Data/lineshapes');
  * @return {number} Meterage of train service
  */
 module.exports = {
-    getmeterage: function getmeterage(lat, long, KRline) {
+    getmeterage: function getmeterage(lat, long, KRline, trainBearing) {
         // if rail line is undefined, give up
         if (typeof KRline == 'undefined' || KRline == '' || lat == '' || long == '') {
             return '';
@@ -73,9 +73,11 @@ module.exports = {
             closest = pointB;
             nextclosest = pointA;
         };
+        let bearingUp;
         // checks the order (direction) of the points selected
         if (closest.order < nextclosest.order) {
             // beyond closest meterage
+            bearingUp = bearing(closest, nextclosest); // wanted for up down estimation
             let XX = nextclosest.latitude - closest.latitude;
             let YY = nextclosest.longitude - closest.longitude;
             let ShortestLength = ((XX * (position.coords.latitude - closest.latitude))
@@ -87,6 +89,7 @@ module.exports = {
             meterage = closest.meterage + distance(Vlocation, closest);
         } else {
             // behind closest meterage
+            bearingUp = bearing(nextclosest, closest); // wanted for up down estimation
             let XX = closest.latitude - nextclosest.latitude;
             let YY = closest.longitude - nextclosest.longitude;
             let ShortestLength = ((XX * (position.coords.latitude - nextclosest.latitude))
@@ -97,7 +100,25 @@ module.exports = {
             };
             meterage = closest.meterage - distance(Vlocation, closest);
         };
-        return Math.floor(meterage);
+
+        // us the bearingUp to see if train seems to be traveling up or down
+        let direction;
+        //let bearingOffset = bearingUp - 90;
+        // //let adjustedTrainBearing = trainBearing + bearingOffset;
+        if (trainBearing > 180) {
+            adjustedTrainBearing = trainBearing - 360;
+        } else {
+            adjustedTrainBearing = trainBearing;
+        }
+        let bearingUpMin = bearingUp - 90;
+        let bearingUpMax = bearingUp + 90;
+        if ((bearingUpMin < adjustedTrainBearing) && (adjustedTrainBearing < bearingUpMax)) {
+            direction = 'UP';
+        } else {
+            direction = 'DOWN';
+        };
+
+        return [Math.floor(meterage), direction];
         /**
      * Works out if position 2 is inbetween positions 1 & 3
      * @param {object} position1 lat long pair
@@ -152,6 +173,7 @@ module.exports = {
             } else {
                 return true;
             }
+        };
             /**
              * Finds bearing (degrees) of position2 from position 1
              * @param {object} position1 lat long pair
@@ -173,7 +195,6 @@ module.exports = {
                 let bearing = Math.atan2(y, x) * 180 / Math.PI;
                 return bearing;
             };
-        };
         /**
         * gets distance in meters between 2 points
         * @param {object} position1 lat long pair
