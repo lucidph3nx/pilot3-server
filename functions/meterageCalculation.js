@@ -20,11 +20,14 @@ module.exports = {
         let locations = lineshapes.filter((lineshapes) => lineshapes.lineId == KRline);
         let pointA = locations[0];
         let pointB = locations[1];
+        // let pointC = locations[2];
         let closest;
         let nextclosest;
         // on a corner, a location could exist out of bounds, in this case, mark it for future comparison.
         let suspectedOutofboundsPoint;
         let distancePointA = distance(pointA, position.coords);
+        // let distancePointB = distance(pointB, position.coords);
+        // let distancePointC = distance(pointC, position.coords);
         // loop through all line points from lowest to highest meterage
         for (i = 1; i < locations.length; i++) {
             // loop component
@@ -63,7 +66,7 @@ module.exports = {
         // if out of bounds point is not undefined
         // it is the closest match, so use it and skip over the rest of the code
         if (suspectedOutofboundsPoint !== undefined) {
-            return Math.floor(suspectedOutofboundsPoint.meterage);
+            return [Math.floor(suspectedOutofboundsPoint.meterage), ''];
         }
         // now that the looping is finished, the two closest points are left over, work out which is closest
         if (distance(pointA, position.coords) < distance(pointB, position.coords)) {
@@ -103,7 +106,7 @@ module.exports = {
 
         // us the bearingUp to see if train seems to be traveling up or down
         let direction;
-        //let bearingOffset = bearingUp - 90;
+        // let bearingOffset = bearingUp - 90;
         // //let adjustedTrainBearing = trainBearing + bearingOffset;
         if (trainBearing > 180) {
             adjustedTrainBearing = trainBearing - 360;
@@ -117,6 +120,10 @@ module.exports = {
         } else {
             direction = 'DOWN';
         };
+
+        if (meterage == undefined) {
+            console.log('undefined Meterage');
+        }
 
         return [Math.floor(meterage), direction];
         /**

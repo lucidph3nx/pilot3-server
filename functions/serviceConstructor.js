@@ -25,18 +25,30 @@ module.exports = function Service(CurrentMoment,
   this.serviceId = serviceId;
   this.serviceDescription = serviceDescription;
   this.line = getlinefromserviceid(this.serviceId)[0];
+  if (this.line == undefined) {
+    this.line = '';
+  }
   this.kiwirail = getlinefromserviceid(this.serviceId, serviceDescription)[1];
   this.direction = getdirectionfromserviceid(this.serviceId);
+  if (this.direction == undefined) {
+    this.direction = '';
+  }
   this.KRline = lineToKiwiRailLine(this.line);
   this.linkedUnit = linkedUnit;
   // if linked unit is track machine, this.kiwirail is true
   if (this.linkedUnit.substring(0, 3) == 'ETM') {
     this.kiwirail = true;
   };
+  if (this.kiwirail == undefined) {
+    this.kiwirail = true;
+  }
   this.secondUnit = secondUnit;
   this.secondUnitLat = secondUnitLat;
   this.secondUnitLon = secondUnitLon;
   this.cars = getCarsCurrentTimetable(this.serviceId);
+  if (this.cars == undefined) {
+    this.cars = '';
+  }
   this.blockId = getBlockIdCurrentTimetable(this.serviceId);
   this.speed = speed;
   this.compass = compass;
@@ -59,6 +71,8 @@ module.exports = function Service(CurrentMoment,
   this.meterage = meterageCalculation.getmeterage(this.lat, this.lon, this.KRline, this.compass)[0];
   this.estimatedDirection = meterageCalculation.getmeterage(this.lat, this.lon, this.KRline, this.compass)[1];
   if (this.meterage == '' || this.meterage == undefined) {
+    // console.log(this.serviceId + 'meterage -1 due to meterage = ' + this.meterage);
+    // console.log(this.lat + ' ' + this.lon + ' ' + this.KRline + ' ' + this.compass);
     this.meterage = -1;
   }
   let lastStationDetails = getlaststation(this.lat, this.lon,

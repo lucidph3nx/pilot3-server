@@ -80,12 +80,12 @@ module.exports = function(geVisVehicles) {
     }
     let speed = trackingPreference.speed;
     let unit = {
-      uniId: activeUnits[u],
+      unitId: activeUnits[u],
       linkedServiceId: linkedServiceId,
       speed: speed,
       line: guessLineArray[0],
       meterage: meterage,
-      direction,
+      direction: direction,
       closestStation: closestStation.stationId,
       FP: FP,
       FT: FT,
