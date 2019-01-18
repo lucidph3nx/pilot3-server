@@ -56,6 +56,7 @@ module.exports = {
       await browser.close();
       return thisgeVisToken;
     })().catch((error) => {
+      browser.close();
       console.log(error);
     });
   },
