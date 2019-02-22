@@ -78,7 +78,6 @@ function refreshData() {
         if (!current.debug && current.rosterDuties !== [] && current.timetable !== []
           && current.tripSheet !== [] && geVisVehicles.features !== undefined) {
           current.services = getCurrentServices(geVisVehicles, current);
-          PilotSQLLog.pilotSQLLog(current);
         }
         if (current.debug) {
           current.services = dummyCurrentServices;
@@ -86,6 +85,10 @@ function refreshData() {
         unitsAndCars = getCurrentUnitList(geVisVehicles);
         current.unitList = unitsAndCars[0];
         current.carList = unitsAndCars[1];
+        if (!current.debug && current.rosterDuties !== [] && current.timetable !== []
+          && current.tripSheet !== [] && geVisVehicles.features !== undefined) {
+          PilotSQLLog.pilotSQLLog(current);
+        }
 
         pilotLog('GeVis Vehicles loaded ok');
       }).catch((error) => {

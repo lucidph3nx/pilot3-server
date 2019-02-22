@@ -37,6 +37,89 @@ module.exports = {
                 );
             }
         }
+        let currentCars = current.carList;
+        if (currentCars.length !== 0) {
+            // console.log('SQL logging: ' + currentServices.length + ' services');
+            // for (let s = 0; s < currentServices.length; s++) {
+            //     sqlLogThisService(currentServices[s]);
+            // }
+            for (let c = 0; p = Promise.resolve(), c < currentCars.length; c++) {
+                p = p.then(
+                    sqlLogThisCar(currentCars[c])
+                );
+            }
+        }
+        /**
+         * loggs a car snapshot to sql db
+         * @param {*} currentCar
+         * @return {string} except it doesnt really
+         */
+        function sqlLogThisCar(currentCar) {
+            let now = moment();
+            return new Promise((resolve, reject) => {
+                // code goes here
+                let timeStamp = now.format('YYYY-MM-DD HH:mm:ss');
+                let carId = currentCar.carId;
+                let linked;
+                if (currentCar.linked) {
+                    linked=1;
+                } else {
+                    linked=0;
+                }
+                let linkedServiceId = currentCar.linkedServiceId;
+                if (linkedServiceId == '') {
+                    linkedServiceId = '\'\'';
+                };
+                let speed = currentCar.speed;
+                if (speed == '') {
+                    speed = '\'\'';
+                };
+                let compass = currentCar.compass;
+                if (compass == '') {
+                    compass = '\'\'';
+                };
+                let lat = currentCar.lat;
+                if (lat == '') {
+                    lat = '\'\'';
+                };
+                let lon = currentCar.lon;
+                if (lon == '') {
+                    lon = '\'\'';
+                };
+                let positionAge = currentCar.positionAge;
+                let positionAgeSeconds = currentCar.positionAgeSeconds;
+                let rosterQueryString = `
+                INSERT INTO [dbo].[carLog]
+                    ([timeStamp]
+                    ,[carID]
+                    ,[lat]
+                    ,[lon]
+                    ,[positionAge]
+                    ,[positionAgeSeconds]
+                    ,[speed]
+                    ,[compass]
+                    ,[linked]
+                    ,[linkedServiceId])
+                VALUES
+                    ('`+timeStamp+`'
+                    ,'`+carId+`'
+                    ,'`+lat+`'
+                    ,'`+lon+`'
+                    ,'`+positionAge+`'
+                    ,'`+positionAgeSeconds+`'
+                    ,'`+speed+`'
+                    ,'`+compass+`'
+                    ,'`+linked+`'
+                    ,'`+linkedServiceId+`')
+                `;
+                sequelize.query(rosterQueryString)
+                .then(function(response) {
+                    resolve(response[1]);
+                }).catch((error) =>{
+                    console.log(error);
+                });
+            });
+            };
         /**
          * loggs a service snapshot to sql db
          * @param {object} currentService
