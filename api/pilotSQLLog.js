@@ -103,13 +103,13 @@ module.exports = {
                 VALUES
                     ('`+timeStamp+`'
                     ,'`+carId+`'
-                    ,'`+lat+`'
-                    ,'`+lon+`'
+                    ,`+lat+`
+                    ,`+lon+`
                     ,'`+positionAge+`'
-                    ,'`+positionAgeSeconds+`'
-                    ,'`+speed+`'
-                    ,'`+compass+`'
-                    ,'`+linked+`'
+                    ,`+positionAgeSeconds+`
+                    ,`+speed+`
+                    ,`+compass+`
+                    ,`+linked+`
                     ,'`+linkedServiceId+`')
                 `;
                 sequelize.query(rosterQueryString)
