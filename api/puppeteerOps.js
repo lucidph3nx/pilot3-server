@@ -20,7 +20,7 @@ module.exports = {
       const args = ['--enable-features=NetworkService', '--disable-setuid-sandbox', '--no-sandbox'];
       const options = {
         args,
-        headless: false,
+        headless: true,
         ignoreHTTPSErrors: true,
       };
       browser = await puppeteer.launch(options);
