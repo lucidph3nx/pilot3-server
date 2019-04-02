@@ -4,6 +4,9 @@ const puppeteer = require('puppeteer');
 // ======Authentication credentials=======
 let credentials = require('../credentials');
 
+// browser variable
+let browser;
+
 module.exports = {
   /**
    * uses pupperteer to log into mobile GeVis and retrieve an authentication token
@@ -14,13 +17,13 @@ module.exports = {
       let thisgeVisToken;
       // URL to scrape API token from
       let tokenURL = 'https://gis.kiwirail.co.nz/arcgis/rest/services/External/gevisOpData/MapServer/export';
-      const args = ['--enable-features=NetworkService'];
+      const args = ['--enable-features=NetworkService', '--disable-setuid-sandbox', '--no-sandbox'];
       const options = {
         args,
-        headless: true,
-        ignoreHTTPSErrors: false,
+        headless: false,
+        ignoreHTTPSErrors: true,
       };
-      let browser = await puppeteer.launch(options);
+      browser = await puppeteer.launch(options);
       let page = await browser.newPage();
       // disable cache to ensure fresh log in each time
       await page.setCacheEnabled(false);
@@ -53,6 +56,11 @@ module.exports = {
         }
       });
       await page.waitForRequest('https://gis.kiwirail.co.nz/maps/Resources/Compiled/Alert.js');
+      // // code to close browser on timeout
+      // new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 60000)).catch((error) => {
+      //   browser.close();
+      //   console.log(error);
+      // });
       await browser.close();
       return thisgeVisToken;
     })().catch((error) => {
