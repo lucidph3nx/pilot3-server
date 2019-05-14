@@ -442,6 +442,9 @@ module.exports = function Service(CurrentMoment,
      */
     function guessKiwiRailTimetableDetails() {
       description = description.toUpperCase();
+      if (description.search('-') == -1) {
+        return ['', ''];
+      } else {
       description = description.split('-');
       description[0] = description[0].trim();
       description[1] = description[1].trim();
@@ -484,6 +487,7 @@ module.exports = function Service(CurrentMoment,
         destination = 'MAST';
       };
       return [origin, destination];
+    };
     };
   };
   /**
