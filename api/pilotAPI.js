@@ -5,6 +5,7 @@ let getDayRosterFromShift = require('./../functions/dayRosterFromShift');
 let getStaffPhotoFromId = require('./../functions/staffImage');
 let getRunningSheetForStation = require('./../functions/runningSheetForStation');
 let vdsRosterAPI = require('./vdsRosterAPI');
+let compassAPI = require('./compassAPI');
 const path = require('path');
 // const fs = require('fs');
 let express = require('express');
@@ -209,7 +210,18 @@ module.exports = function(app, current) {
         response.write(JSON.stringify(runningSheetResponse));
         response.end();
         });
-
+    // get peak performance statistics by line
+    app.get('/api/currentPeakPerformance', (request, response) => {
+        let currentPeakPerformance;
+        compassAPI.currentPeakPerformance().then((result) => {
+            currentPeakPerformance = result;
+            response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+            response.write(JSON.stringify(currentPeakPerformance));
+            response.end();
+        }).catch((error) => {
+            console.log(error);
+            });
+        });
     let port = 4000;
     app.listen(port, '0.0.0.0');
     console.log('Pilot API listening on ' + port);

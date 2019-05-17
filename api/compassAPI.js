@@ -103,5 +103,47 @@ module.exports = {
           );
         });
     },
+    // returns current peak reliability and punctuality stats
+    currentPeakPerformance: function() {
+        const Sequelize = require('sequelize');
+        let moment = require('moment-timezone');
+        moment().tz('Pacific/Auckland').format();
+        return new Promise((resolve, reject) => {
+            let currentPeakPerformanceQueryString = 'SELECT * FROM [Compass].[dbo].[currentPeakOverall]';
+            let sequelize = new Sequelize(
+                credentials.CompassSQL.database,
+                credentials.CompassSQL.username,
+                credentials.CompassSQL.password,
+                        {
+                            logging: false,
+                            host: credentials.CompassSQL.host,
+                            dialect: 'mssql',
+                            options: {
+                                encrypt: false,
+                            },
+                        });
+            let currentPeakPerformance = [];
+            let linePerformance = {};
+            sequelize.query(currentPeakPerformanceQueryString)
+            .then(function(response) {
+            for (lp = 0; lp < response[0].length; lp++) {
+                linePerformance = {};
+                linePerformance = {
+                        date: response[0][lp].date,
+                        line: response[0][lp].line,
+                        peak: response[0][lp].peak,
+                        reliabilityFailure: response[0][lp].reliabilityFailure,
+                        punctualityFailure: response[0][lp].punctualityFailure,
+                        totalServices: response[0][lp].totalServices,
+                        percentPunctualityFailure: response[0][lp].percentPunctualityFailure,
+                        percentReliabilityFailure: response[0][lp].percentReliabilityFailure,
+                    };
+                    currentPeakPerformance.push(linePerformance);
+            };
+            resolve(currentPeakPerformance);
+            }
+        );
+        });
+    },
     // other functions
 };
