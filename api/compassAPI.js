@@ -130,13 +130,13 @@ module.exports = {
                 linePerformance = {};
                 linePerformance = {
                         date: response[0][lp].date,
-                        line: response[0][lp].line,
+                        line: response[0][lp].Line,
                         peak: response[0][lp].peak,
                         reliabilityFailure: response[0][lp].reliabilityFailure,
                         punctualityFailure: response[0][lp].punctualityFailure,
                         totalServices: response[0][lp].totalServices,
-                        percentPunctualityFailure: response[0][lp].percentPunctualityFailure,
-                        percentReliabilityFailure: response[0][lp].percentReliabilityFailure,
+                        percentPunctualityFailure: parseFloat(response[0][lp].percentPunctualityFailure.toFixed(1)),
+                        percentReliabilityFailure: parseFloat(response[0][lp].percentReliabilityFailure.toFixed(1)),
                     };
                     currentPeakPerformance.push(linePerformance);
             };
