@@ -2,6 +2,9 @@
 let moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 
+// ======functions flags=======
+let pilotSQLLogging = false; // log to local MSSQL DB
+
 // ======supporting functions=======
 let getCurrentServices = require('./functions/currentServices');
 let getCurrentUnitList = require('./functions/currentUnitList');
@@ -87,7 +90,9 @@ function refreshData() {
         current.carList = unitsAndCars[1];
         if (!current.debug && current.rosterDuties !== [] && current.timetable !== []
           && current.tripSheet !== [] && geVisVehicles.features !== undefined) {
-          PilotSQLLog.pilotSQLLog(current);
+            if (pilotSQLLogging) {
+              PilotSQLLog.pilotSQLLog(current);
+            }
         }
 
         pilotLog('GeVis Vehicles loaded ok');
