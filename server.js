@@ -3,7 +3,7 @@ let moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 
 // ======functions flags=======
-let pilotSQLLogging = false; // log to local MSSQL DB
+let pilotSQLLogging = true; // log to local MSSQL DB
 
 // ======supporting functions=======
 let getCurrentServices = require('./functions/currentServices');
