@@ -12,7 +12,7 @@ module.exports = function(geVisVehicles, current) {
   // itterate through all items in geVisVehicles and use all relevant ones
   for (gj = 0; gj < trains.length; gj++) {
     let train = trains[gj].attributes;
-  if (meetsTrainSelectionCriteria(train)) {
+  if (checkTrainMeetsSelectionCriteria(train)) {
         let serviceId = train.TRNID;
         let serviceDescription = train.TRNDESCRP;
         let linkedUnit = train.VEHID;
@@ -123,7 +123,7 @@ module.exports = function(geVisVehicles, current) {
    * - a train object from GeVis API
    * @return {boolean} true if meets criteria
    */
-  function meetsTrainSelectionCriteria(train) {
+  function checkTrainMeetsSelectionCriteria(train) {
       const northernBoundary = -40.625887; // Levin
       const westernBoundary = 174.5; // cook strait
       const meetsLocationCondition = (train.LON > westernBoundary && train.LAT < northernBoundary);

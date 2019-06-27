@@ -62,7 +62,7 @@ module.exports = function Service(CurrentMoment,
   this.timetableDetails = getTimetableDetails(this.serviceId, this.serviceDescription, this.kiwirail);
   this.departs = this.timetableDetails.departs;
   this.departsString = this.timetableDetails.departsString;
-  this.departed = getdepartedornot(this.currenttime, this.departs);
+  this.departed = getDepartedBoolean(this.currenttime, this.departs);
   this.arrives = this.timetableDetails.arrives;
   this.arrivesString = this.timetableDetails.arrivesString;
   this.origin = this.timetableDetails.origin;
@@ -498,7 +498,7 @@ module.exports = function Service(CurrentMoment,
    * @param {object} departureTime - moment Object
    * @return {boolean}
    */
-  function getdepartedornot(CurrentTime, departureTime) {
+  function getDepartedBoolean(CurrentTime, departureTime) {
     if (CurrentTime > departureTime) {
       return true;
     } else if (CurrentTime < departureTime) {
@@ -514,6 +514,68 @@ module.exports = function Service(CurrentMoment,
    * @return {object} crew details object
    */
   function getCrewDetails(serviceId, currentRosterDuties) {
+    /**
+     * represents a crew member
+     * @class CrewMember
+     */
+    class CrewMember {
+      /**
+       *Creates an instance of CrewMember.
+       * @param {string} shiftId
+       * @memberof CrewMember
+       */
+      constructor(shiftId) {
+        // defaults
+        this.staffId = '';
+          this.staffName = '';
+          this.shiftId = '';
+          this.nextService = {
+            serviceId: '',
+            serviceDeparts: '',
+            serviceDepartsString: '',
+            turnaround: '',
+          };
+        if (shiftId) {
+          let staffRosterItems = currentRosterDuties.filter((currentRosterDuties) =>
+                                                currentRosterDuties.shiftId == shiftId);
+          this.staffId = staffRosterItems[0].staffId;
+          this.staffName = staffRosterItems[0].staffName;
+          this.shiftId = shiftId;
+          this.nextService = {
+            serviceId: '',
+            serviceDeparts: '',
+            serviceDepartsString: '',
+            turnaround: '',
+          };
+          let dutyIndex = staffRosterItems.findIndex(function(duty) {
+            return duty.dutyName == serviceId;
+          });
+          for (d = dutyIndex + 1; d < staffRosterItems.length; d++) {
+            if (staffRosterItems[d].dutyType.substring(0, 4) == 'TRIP') {
+              let nextServiceDepart = getTimetableDetails(staffRosterItems[d].dutyName, '', false).departs;
+              let thisServiceArrives = getTimetableDetails(serviceId, '', false).arrives;
+              this.nextService = {
+                serviceId: staffRosterItems[d].dutyName,
+                serviceDeparts: nextServiceDepart,
+                serviceDepartsString: moment(nextServiceDepart).format('HH:mm'),
+                turnaround: getTurnaroundFrom2Times(thisServiceArrives, nextServiceDepart),
+              };
+              break;
+            };
+            if (staffRosterItems[d].dutyType == 'SOF') {
+              this.nextService = {
+                serviceId: staffRosterItems[d].dutyName,
+                serviceDeparts: '',
+                serviceDepartsString: '',
+                turnaround: '',
+              };
+              break;
+            };
+          }
+        }
+      }
+    }
+
     let crewDetails = {
       LE: '',
       LEExists: false,
@@ -555,66 +617,12 @@ module.exports = function Service(CurrentMoment,
     }
     // fill in blank staff if none exist
     if (crewDetails.LE.staffName == undefined) {
-      crewDetails.LE = new CrewMember('BLANK');
+      crewDetails.LE = new CrewMember();
     }
     if (crewDetails.TM.staffName == undefined) {
-      crewDetails.TM = new CrewMember('BLANK');
+      crewDetails.TM = new CrewMember();
     }
     return crewDetails;
-    /**
-     * CrewMember Constructor
-     * @param {string} shiftId or 'BLANK' to generate a blank crewmember
-     */
-    function CrewMember(shiftId) {
-      if (shiftId == 'BLANK') {
-        this.staffId = '';
-        this.staffName = '';
-        this.shiftId = '';
-        this.nextService = {
-          serviceId: '',
-          serviceDeparts: '',
-          serviceDepartsString: '',
-          turnaround: '',
-        };
-      } else {
-        let staffRosterItems = currentRosterDuties.filter(
-          (currentRosterDuties) => currentRosterDuties.shiftId == shiftId);
-        this.staffId = staffRosterItems[0].staffId;
-        this.staffName = staffRosterItems[0].staffName;
-        this.shiftId = shiftId;
-        this.nextService = {
-          serviceId: '',
-          serviceDeparts: '',
-          serviceDepartsString: '',
-          turnaround: '',
-        };
-        let dutyIndex = staffRosterItems.findIndex(function(duty) {
-          return duty.dutyName == serviceId;
-        });
-        for (d = dutyIndex + 1; d < staffRosterItems.length; d++) {
-          if (staffRosterItems[d].dutyType.substring(0, 4) == 'TRIP') {
-            let nextServiceDepart = getTimetableDetails(staffRosterItems[d].dutyName, '', false).departs;
-            let thisServiceArrives = getTimetableDetails(serviceId, '', false).arrives;
-            this.nextService = {
-              serviceId: staffRosterItems[d].dutyName,
-              serviceDeparts: nextServiceDepart,
-              serviceDepartsString: moment(nextServiceDepart).format('HH:mm'),
-              turnaround: getTurnaroundFrom2Times(thisServiceArrives, nextServiceDepart),
-            };
-            break;
-          };
-          if (staffRosterItems[d].dutyType == 'SOF') {
-            this.nextService = {
-              serviceId: staffRosterItems[d].dutyName,
-              serviceDeparts: '',
-              serviceDepartsString: '',
-              turnaround: '',
-            };
-            break;
-          };
-        }
-      }
-    }
   };
   /**
    * returns the next or previous service for that unit roster block
