@@ -121,17 +121,16 @@ module.exports = function(geVisVehicles, current) {
    * decides if train meets selection criteria
    * @param {object} train
    * - a train object from GeVis API
-   * @return {boolean}
+   * @return {boolean} true if meets criteria
    */
   function meetsTrainSelectionCriteria(train) {
       const northernBoundary = -40.625887; // Levin
       const westernBoundary = 174.5; // cook strait
+      const meetsLocationCondition = (train.LON > westernBoundary && train.LAT < northernBoundary);
+      const excludedEquiptment = ['KAIARAHI', 'ARATERE', 'KAITAKI'].includes(train.EQUIPDESC);
       if (train.TRNID !== null &&
-      train.LON > westernBoundary &&
-      train.LAT < northernBoundary &&
-      train.EQUIPDESC !== 'KAIARAHI' &&
-      train.EQUIPDESC !== 'ARATERE' &&
-      train.EQUIPDESC !== 'KAITAKI') {
+        meetsLocationCondition &&
+        !excludedEquiptment) {
           return true;
       } else {
       return false;

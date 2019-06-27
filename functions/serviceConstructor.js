@@ -1,3 +1,4 @@
+'use strict';
 let moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 // supporting data files
