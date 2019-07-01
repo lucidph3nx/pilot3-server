@@ -15,21 +15,21 @@ module.exports = function(geVisVehicles, current) {
   if (checkTrainMeetsSelectionCriteria(train)) {
         let serviceId = train.TRNID;
         let serviceDescription = train.TRNDESCRP;
-        let linkedUnit = train.VEHID;
-        let secondUnit = '';
-        let secondUnitLat = '';
-        let secondUnitLong = '';
+        let linkedCar = train.VEHID;
+        let secondCar = '';
+        let secondCarLat = '';
+        let secondCarLong = '';
         //  work out what the second half of the train unit is
         if (train.EQUIPDESC.trim() == 'Matangi Power Car') {
-            secondUnit = 'FT' + linkedUnit.substring(2, 6);
+            secondCar = 'FT' + linkedCar.substring(2, 6);
         } else if (train.EQUIPDESC.trim() == 'Matangi Trailer Car') {
-            secondUnit = 'FP' + linkedUnit.substring(2, 6);
+            secondCar = 'FP' + linkedCar.substring(2, 6);
         }
-        if (secondUnit !== '') {
+        if (secondCar !== '') {
           for (su = 0; su < trains.length; su++) {
-            if (trains[su].attributes.VEHID == secondUnit) {
-              secondUnitLat = trains[su].attributes.LAT;
-              secondUnitLong = trains[su].attributes.LON;
+            if (trains[su].attributes.VEHID == secondCar) {
+              secondCarLat = trains[su].attributes.LAT;
+              secondCarLong = trains[su].attributes.LON;
               break;
             }
           }
@@ -51,10 +51,10 @@ module.exports = function(geVisVehicles, current) {
         let service = new Service(currentMoment,
                                   serviceId,
                                   serviceDescription,
-                                  linkedUnit,
-                                  secondUnit,
-                                  secondUnitLat,
-                                  secondUnitLong,
+                                  linkedCar,
+                                  secondCar,
+                                  secondCarLat,
+                                  secondCarLong,
                                   speed,
                                   compass,
                                   locationAge,
