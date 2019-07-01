@@ -3,7 +3,7 @@ let moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 
 // ======functions flags=======
-let pilotSQLLogging = true; // log to local MSSQL DB
+let pilotSQLLogging = false; // log to local MSSQL DB
 
 // ======supporting functions=======
 let getCurrentServices = require('./functions/currentServices');
@@ -28,9 +28,9 @@ let current = {
   rosterDuties: [],
   rosterDayStatus: [],
 };
-let geVisToken = [undefined, moment('1970-01-01')];
+// let geVisToken = [undefined, moment('1970-01-01')];
 //  for live debugging, put the key here and update time to less than an hour
-// let geVisToken = ['Al6x4ZusL1NsdmMUn9aPBsZFPD1yI9H2cfIcQuZh0Lc.', moment('2019-05-21 11:00:00')];
+let geVisToken = ['2rqcYlS9LZejEJYkkAg2WDjnokIN3aGvcEelc6JWmuM.', moment('2019-07-01 16:00:00')];
 let geVisTokenRetrievalInProgress = false;
 
 // =======API=======

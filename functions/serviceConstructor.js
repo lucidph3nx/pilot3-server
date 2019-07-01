@@ -248,7 +248,7 @@ module.exports = function Service(CurrentMoment,
     ];
     // identify tunnel tracking issues
     if (this.direction == 'UP') {
-      for (tunnel of tunnelExceptionsList) {
+      for (let tunnel of tunnelExceptionsList) {
         if (tunnel.southStation == this.lastStation
           && tunnel.secondsTheshold > this.locationAgeSeconds
           && tunnel.line == this.line) {
@@ -257,7 +257,7 @@ module.exports = function Service(CurrentMoment,
         };
       };
     } else if (this.direction == 'DOWN') {
-      for (tunnel of tunnelExceptionsList) {
+      for (let tunnel of tunnelExceptionsList) {
         if (tunnel.northStation == this.lastStation
           && tunnel.secondsTheshold > this.locationAgeSeconds
           && tunnel.line == this.line) {
@@ -454,14 +454,14 @@ module.exports = function Service(CurrentMoment,
       ];
       const locationMap = new Map(locations);
       description = description.toUpperCase();
+      // check for the '-' if it isnt there then done even try to guess
       if (description.search('-') == -1) {
         return ['', ''];
       } else {
+        // split the description by '-', format is usually 'ORIGIN - DESTINATION'
       description = description.split('-');
-      description[0] = description[0].trim();
-      description[1] = description[1].trim();
-      origin = '';
-      destination = '';
+      let origin = '';
+      let destination = '';
       for (let location of locationMap.keys()) {
         if (description[0].includes(location)) {
           origin = locationMap.get(location);
@@ -533,7 +533,7 @@ module.exports = function Service(CurrentMoment,
           let dutyIndex = staffRosterItems.findIndex(function(duty) {
             return duty.dutyName == serviceId;
           });
-          for (d = dutyIndex + 1; d < staffRosterItems.length; d++) {
+          for (let d = dutyIndex + 1; d < staffRosterItems.length; d++) {
             if (staffRosterItems[d].dutyType.substring(0, 4) == 'TRIP') {
               let nextServiceDepart = getTimetableDetails(staffRosterItems[d].dutyName, '', false).departs;
               let thisServiceArrives = getTimetableDetails(serviceId, '', false).arrives;
@@ -569,7 +569,7 @@ module.exports = function Service(CurrentMoment,
     };
     let serviceRosterItems = currentRosterDuties.filter(
       (currentRosterDuties) => currentRosterDuties.dutyName == serviceId);
-    for (c = 0; c < serviceRosterItems.length; c++) {
+    for (let c = 0; c < serviceRosterItems.length; c++) {
       if (serviceRosterItems[c].dutyType == 'TRIP') {
         crewDetails.LE = new CrewMember(serviceRosterItems[c].shiftId);
         crewDetails.LEExists = true;
@@ -584,7 +584,7 @@ module.exports = function Service(CurrentMoment,
       }
     }
     // extra pass to find things marked as 'OTH' and 'SHUNT'
-    for (c = 0; c < serviceRosterItems.length; c++) {
+    for (let c = 0; c < serviceRosterItems.length; c++) {
       if (crewDetails.LE.staffName == undefined && serviceRosterItems[c].shiftType == 'LE') {
         crewDetails.LE = new CrewMember(serviceRosterItems[c].shiftId);
         crewDetails.LEExists = true;
@@ -619,7 +619,7 @@ module.exports = function Service(CurrentMoment,
       return '';
     };
     let seqServiceId;
-    for (s = 0; s < currentTimetable.length; s++) {
+    for (let s = 0; s < currentTimetable.length; s++) {
       if (nextOrPrev == 'prev') {
         if (currentTimetable[s].blockId == blockId
           && currentTimetable[s].serviceId == serviceId
@@ -698,7 +698,7 @@ module.exports = function Service(CurrentMoment,
     let networkServicesAssociations = ['WT'];
     // looks for service id's with a random letter on the end
     // treat as a 3 digit
-    for (p = 0; p < serviceId.length; p++) {
+    for (let p = 0; p < serviceId.length; p++) {
       if (isNaN(serviceId[p])) {
         numcharId = numcharId + 'C';
       } else {
@@ -762,7 +762,7 @@ module.exports = function Service(CurrentMoment,
   function getdirectionfromserviceid(serviceId) {
     let numcharId = '';
     // remove characters for odd even purposes
-    for (p = 0; p < serviceId.length; p++) {
+    for (let p = 0; p < serviceId.length; p++) {
       if (isNaN(serviceId[p])) {
         numcharId = numcharId + 'C';
       } else {
@@ -887,7 +887,7 @@ module.exports = function Service(CurrentMoment,
     }
 
     // checks lat long for current stations first
-    for (j = 0; j < StationGeoboundaries.length; j++) {
+    for (let j = 0; j < StationGeoboundaries.length; j++) {
       thisId = StationGeoboundaries[j].station_id;
       thisNorth = StationGeoboundaries[j].north;
       thisWest = StationGeoboundaries[j].west;
@@ -901,7 +901,7 @@ module.exports = function Service(CurrentMoment,
     };
     // works out last station based on line, direction and meterage
     if (!lastStation[1]) {
-      for (m = 0; m < StationMeterage.length; m++) {
+      for (let m = 0; m < StationMeterage.length; m++) {
         if (StationMeterage[m].KRLine == KRLine) {
           if (direction == 'UP') {
             if (StationMeterage[m - 1] !== undefined && StationMeterage[m].meterage >= meterage) {
@@ -937,7 +937,7 @@ module.exports = function Service(CurrentMoment,
       serviceTimetable.reverse();
     }
     if ((direction == 'UP' && nextOrPrev == 'next') || (direction == 'DOWN' && nextOrPrev == 'prev')) {
-      for (st = 0; st < serviceTimetable.length; st++) {
+      for (let st = 0; st < serviceTimetable.length; st++) {
         let thisStationMeterage = getMeterageOfStation(serviceTimetable[st].station);
         if (thisStationMeterage > trainMeterage) {
           station = serviceTimetable[st].station;
@@ -948,7 +948,7 @@ module.exports = function Service(CurrentMoment,
       }
     }
     if ((direction == 'DOWN' && nextOrPrev == 'next') || (direction == 'UP' && nextOrPrev == 'prev')) {
-      for (st = 0; st < serviceTimetable.length; st++) {
+      for (let st = 0; st < serviceTimetable.length; st++) {
         let thisStationMeterage = getMeterageOfStation(serviceTimetable[st].station);
         if (thisStationMeterage < trainMeterage) {
           station = serviceTimetable[st].station;
@@ -965,7 +965,7 @@ module.exports = function Service(CurrentMoment,
    * @return {number} meterage of station
    */
   function getMeterageOfStation(stationId) {
-    for (sm = 0; sm < StationMeterage.length; sm++) {
+    for (let sm = 0; sm < StationMeterage.length; sm++) {
       if (stationId == StationMeterage[sm].station_id) {
         return StationMeterage[sm].meterage;
       }
