@@ -424,7 +424,7 @@ module.exports = function Service(CurrentMoment,
       arrivesString = servicePoints[servicePoints.length - 1].arrives.format('HH:mm');
       destination = servicePoints[servicePoints.length - 1].station;
     } else if (kiwirailBoolean) {
-      let KiwiRailDetails = guessKiwiRailTimetableDetails();
+      let KiwiRailDetails = guessKiwiRailTimetableDetails(description);
       origin = KiwiRailDetails[0];
       destination = KiwiRailDetails[1];
     }
@@ -437,11 +437,22 @@ module.exports = function Service(CurrentMoment,
       destination: destination,
     };
     return timetableDetails;
+
     /**
      * Takes a wild stab at what the Kiwirail origin and destination stations are
+     * @param {*} description
      * @return {array} with [origin, destination]
      */
-    function guessKiwiRailTimetableDetails() {
+    function guessKiwiRailTimetableDetails(description) {
+      const locations = [
+        ['AUCKLAND', 'AUCK'],
+        ['WELLINGTON', 'WELL'],
+        ['PALMERSTON NORTH', 'PALM'],
+        ['MT MAUNGANUI', 'TAUR'],
+        ['HAMILTON', 'HAMI'],
+        ['MASTERTON', 'MAST'],
+      ];
+      const locationMap = new Map(locations);
       description = description.toUpperCase();
       if (description.search('-') == -1) {
         return ['', ''];
@@ -451,45 +462,17 @@ module.exports = function Service(CurrentMoment,
       description[1] = description[1].trim();
       origin = '';
       destination = '';
-      if (description[0].substring(0, 8) == 'AUCKLAND') {
-        origin = 'AUCK';
-      };
-      if (description[0].substring(0, 10) == 'WELLINGTON') {
-        origin = 'WELL';
-      };
-      if (description[0].substring(0, 16) == 'PALMERSTON NORTH') {
-        origin = 'PALM';
-      };
-      if (description[0].substring(0, 12) == 'MT MAUNGANUI') {
-        origin = 'TAUR';
-      };
-      if (description[0].substring(0, 8) == 'HAMILTON') {
-        origin = 'HAMI';
-      };
-      if (description[0].substring(0, 9) == 'MASTERTON') {
-        origin = 'MAST';
-      };
-      if (description[1].substring(0, 8) == 'AUCKLAND') {
-        destination = 'AUCK';
-      };
-      if (description[1].substring(0, 10) == 'WELLINGTON') {
-        destination = 'WELL';
-      };
-      if (description[1].substring(0, 16) == 'PALMERSTON NORTH') {
-        destination = 'PALM';
-      };
-      if (description[1].substring(0, 12) == 'MT MAUNGANUI') {
-        destination = 'TAUR';
-      };
-      if (description[1].substring(0, 8) == 'HAMILTON') {
-        destination = 'HAMI';
-      };
-      if (description[1].substring(0, 9) == 'MASTERTON') {
-        destination = 'MAST';
+      for (let location of locationMap.keys()) {
+        if (description[0].includes(location)) {
+          origin = locationMap.get(location);
+        };
+        if (description[1].includes(location)) {
+          destination = locationMap.get(location);
+        };
       };
       return [origin, destination];
     };
-    };
+  };
   };
   /**
    * finds out if service
