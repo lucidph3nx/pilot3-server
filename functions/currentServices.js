@@ -2,6 +2,57 @@ let moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 let Service = require('./serviceConstructor');
 module.exports = function(geVisVehicles, current) {
+  /**
+   * represents a Train Vehicle, usually a EMU Car, Loco or Generator Carriage
+   * @class Vehicle
+   */
+  class Vehicle {
+    /**
+     *Creates an instance of Unit.
+     * @param {object} geVisVehicle
+     * @memberof Unit
+     */
+    constructor(geVisVehicle) {
+      this.VehicleId = geVisVehicle.VEHID.trim();
+      this.selcall = geVisVehicle.SELCALL.trim();
+      this.equipmentDescription = geVisVehicle.EQUIPDESC.trim();
+      this.lat = geVisVehicle.LON;
+      this.long = geVisVehicle.LAT;
+      this.speed = geVisVehicle.VEHSPD;
+      this.compass = geVisVehicle.VEHDIR;
+      this.loadTime = moment(geVisVehicle.TIMESTMPGIS);
+      this.positionTime = moment(geVisVehicle.TIMESTMPNZ);
+      this.locationAge = function() {
+        let locationAgeRAW = this.loadTime.diff(this.positionTime);
+        return moment.utc(locationAgeRAW).format('mm:ss'); ;
+      };
+      this.locationAgeSeconds = function() {
+        let locationAgeRAW = this.loadTime.diff(this.positionTime);
+        return Number(moment.utc(locationAgeRAW).valueOf()/1000);
+      };
+      this.serviceId = geVisVehicle.TRNID.trim();
+      this.serviceDescription = geVisVehicle.TRNDESCRP.trim();
+      this.varianceKiwirail = geVisVehicle.DELAYTIME;
+      this.linked = function() {
+        if (this.serviceId) {
+          return true;
+        } else {
+          return false;
+        }
+      };
+      this.secondVehicleId = function() {
+        //  if EMU, work out what the second half of the train unit is
+        let secondCar = '';
+        if (this.equipmentDescription == 'Matangi Power Car') {
+          secondCar = 'FT' + linkedCar.substring(2, 6);
+        } else if (this.equipmentDescription == 'Matangi Trailer Car') {
+          secondCar = 'FP' + linkedCar.substring(2, 6);
+        }
+        return secondCar;
+      };
+    }
+  }
+
   let currentRosterDuties = current.rosterDuties;
   let currentTimetable = current.timetable;
   let currentTripSheet = current.tripSheet;
@@ -13,6 +64,8 @@ module.exports = function(geVisVehicles, current) {
   for (gj = 0; gj < trains.length; gj++) {
     let train = trains[gj].attributes;
   if (checkTrainMeetsSelectionCriteria(train)) {
+    let vehicle = new Vehicle(train);
+    // work in progress, this new 'Vehicle' object will replace a lot of the below code
         let serviceId = train.TRNID;
         let serviceDescription = train.TRNDESCRP;
         let linkedCar = train.VEHID;
@@ -117,6 +170,7 @@ module.exports = function(geVisVehicles, current) {
       };
   };
   return currentServices;
+  
   /**
    * decides if train meets selection criteria
    * @param {object} train
