@@ -1,10 +1,15 @@
+<<<<<<< HEAD
 const compassAPI = require('./../api/compassAPI');
+=======
+const compassAPI = require('../api/compassAPI');
+>>>>>>> 080ba4c31e9f2b238795b860c520394481ed6b29
 
 module.exports = function() {
   return new Promise((resolve, reject) => {
     compassAPI.currentTimetable().then((response) => {
       if (response !== undefined) {
         currentTimetable = [];
+<<<<<<< HEAD
         currenttripSheet = [];
         currentTimetable = response;
         /* get current trip sheet (list of services)*/
@@ -22,6 +27,9 @@ module.exports = function() {
             }
           }
         }
+=======
+        currentTimetable = response;
+>>>>>>> 080ba4c31e9f2b238795b860c520394481ed6b29
       }
       resolve(currentTimetable);
     });

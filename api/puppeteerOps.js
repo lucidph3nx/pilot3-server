@@ -1,8 +1,8 @@
-let moment = require('moment-timezone');
+const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 const puppeteer = require('puppeteer');
 // ======Authentication credentials=======
-let credentials = require('../credentials');
+const credentials = require('../credentials');
 
 // browser variable
 let browser;
@@ -16,7 +16,7 @@ module.exports = {
       let token;
       let thisgeVisToken;
       // URL to scrape API token from
-      let tokenURL = 'https://gis.kiwirail.co.nz/arcgis/rest/services/External/gevisOpData/MapServer/export';
+      const tokenURL = 'https://gis.kiwirail.co.nz/arcgis/rest/services/External/gevisOpData/MapServer/export';
       const args = ['--enable-features=NetworkService', '--disable-setuid-sandbox', '--no-sandbox'];
       const options = {
         args,
@@ -24,7 +24,7 @@ module.exports = {
         ignoreHTTPSErrors: true,
       };
       browser = await puppeteer.launch(options);
-      let page = await browser.newPage();
+      const page = await browser.newPage();
       // disable cache to ensure fresh log in each time
       await page.setCacheEnabled(false);
       // navigate to GeVis page
@@ -45,8 +45,8 @@ module.exports = {
           interceptedRequest.abort();
         } else if (interceptedRequest.url().startsWith(tokenURL)) {
           // get token from URL string
-          let url = interceptedRequest.url();
-          let stringarray = url.split('&');
+          const url = interceptedRequest.url();
+          const stringarray = url.split('&');
           token = stringarray[0].split('=')[1];
           // format with time retrieved
           thisgeVisToken = [token, moment()];

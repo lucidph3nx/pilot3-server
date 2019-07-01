@@ -1,0 +1,45 @@
+/**
+ * represents a EMU Unit, designed for Matangi in Wellington
+ * @class Unit
+ */
+module.exports = class Unit {
+  /**
+     *Creates an instance of Unit.
+     * @param {object} powerCar vehicle object
+     * @param {object} trailerCar vehicle object
+     * @memberof Unit
+     */
+  constructor(powerCar, trailerCar) {
+    if (powerCar !== undefined) {
+      this.unitId = powerCar.vehicleId.substring(2, 6);
+    } else {
+      this.unitId = trailerCar.vehicleId.substring(2, 6);
+    }
+    this.FP = powerCar;
+    this.FT = trailerCar;
+    this.linkedCar = '';
+    this.linkedServiceId = '';
+    // work out which car is linked to a service, if any
+    if (this.FP !== undefined && this.FP.linkedServiceId !== '') {
+      this.linkedServiceId = this.FP.linkedServiceId;
+      this.linkedCar = 'FP';
+    } else if (this.FT.linkedServiceId !== '') {
+      this.linkedServiceId = this.FT.linkedServiceId;
+      this.linkedCar = 'FP';
+    };
+    // if trailer is linked use it, else just use the power car
+    if (this.linkedCar == 'FT' || this.FP == undefined) {
+      this.speed = this.FT.speed;
+      this.line = this.FT.location.estimatedLine;
+      this.meterage = this.FT.location.estimatedMeterage;
+      this.direction = this.FT.location.estimatedDirection;
+      this.closestStationId = this.FT.location.closestStation.stationId;
+    } else {
+      this.speed = this.FP.speed;
+      this.line = this.FP.location.estimatedLine;
+      this.meterage = this.FP.location.estimatedMeterage;
+      this.direction = this.FP.location.estimatedDirection;
+      this.closestStationId = this.FP.location.closestStation.stationId;
+    };
+  }
+};

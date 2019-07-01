@@ -1,263 +1,263 @@
 // ======Authentication credentials=======
-let credentials = require('../credentials');
+const credentials = require('../credentials');
 const Sequelize = require('sequelize');
 const sequelize = new Sequelize(credentials.VDSSQL.database,
-                                credentials.VDSSQL.username,
-                                credentials.VDSSQL.password, {
-    logging: false,
-    host: credentials.VDSSQL.host,
-    dialect: 'mssql',
-    options: {
-    encrypt: true,
-    },
-    dialectOptions: {
+    credentials.VDSSQL.username,
+    credentials.VDSSQL.password, {
+      logging: false,
+      host: credentials.VDSSQL.host,
+      dialect: 'mssql',
+      options: {
+        encrypt: true,
+      },
+      dialectOptions: {
         instanceName: credentials.VDSSQL.instanceName,
-    },
-    pool: {
+      },
+      pool: {
         max: 5,
         min: 0,
         acquire: 30000,
         idle: 10000,
       },
-});
-let moment = require('moment-timezone');
+    });
+const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 
 module.exports = {
-    // returns current datetime and object with todays VDS roster per trip
-    rosterDuties: function rosterDuties() {
-        return new Promise((resolve, reject) => {
-        let today = moment().format('YYYY-MM-DD');
-        let rosterQueryString = `
+  // returns current datetime and object with todays VDS roster per trip
+  rosterDuties: function rosterDuties() {
+    return new Promise((resolve, reject) => {
+      const today = moment().format('YYYY-MM-DD');
+      const rosterQueryString = `
             DECLARE @ThisDate datetime;
             SET @ThisDate = '`+today+`'
             SELECT * FROM [VDS_TDW].[WEBSN].[actualDuties]
             WHERE [date] = @ThisDate
             ORDER BY [date], [staffId], [minutesFrom]
         `;
-        let currentRoster = [];
-        let serviceRoster = {};
-        sequelize.query(rosterQueryString)
-            .then(function(response) {
+      const currentRoster = [];
+      let serviceRoster = {};
+      sequelize.query(rosterQueryString)
+          .then(function(response) {
             for (trp = 0; trp < response[0].length; trp++) {
-                serviceRoster = {};
-                let staffId;
-                let staffName;
-                let shiftCovered;
-                if (response[0][trp].uncovered !== 1) {
-                    staffId = response[0][trp].staffId.trim();
-                    staffName = response[0][trp].firstName.trim() + ' ' + response[0][trp].lastName.trim();
-                    shiftCovered = true;
-                } else {
-                    staffId = '';
-                    staffName = '';
-                    shiftCovered = false;
-                }
-                if (response[0][trp].dutyName !== null && response[0][trp].dutyType
+              serviceRoster = {};
+              let staffId;
+              let staffName;
+              let shiftCovered;
+              if (response[0][trp].uncovered !== 1) {
+                staffId = response[0][trp].staffId.trim();
+                staffName = response[0][trp].firstName.trim() + ' ' + response[0][trp].lastName.trim();
+                shiftCovered = true;
+              } else {
+                staffId = '';
+                staffName = '';
+                shiftCovered = false;
+              }
+              if (response[0][trp].dutyName !== null && response[0][trp].dutyType
                     !== null && response[0][trp].dutyType !== 'REC') {
-                    serviceRoster = {
-                        shiftId: response[0][trp].shiftName.trim(),
-                        shiftType: response[0][trp].shiftType.trim(),
-                        staffId: staffId,
-                        staffName: staffName,
-                        dutyName: response[0][trp].dutyName.trim(),
-                        dutyType: response[0][trp].dutyType.trim(),
-                        dutyStartTime: mpm2m(response[0][trp].minutesFrom),
-                        dutyStartTimeString: mpm2m(response[0][trp].minutesFrom).format('HH:mm'),
-                        dutyEndTime: mpm2m(response[0][trp].minutesTo),
-                        dutyEndTimeString: mpm2m(response[0][trp].minutesTo).format('HH:mm'),
-                        shiftCovered: shiftCovered,
-                    };
-                    currentRoster.push(serviceRoster);
-                    };
+                serviceRoster = {
+                  shiftId: response[0][trp].shiftName.trim(),
+                  shiftType: response[0][trp].shiftType.trim(),
+                  staffId: staffId,
+                  staffName: staffName,
+                  dutyName: response[0][trp].dutyName.trim(),
+                  dutyType: response[0][trp].dutyType.trim(),
+                  dutyStartTime: mpm2m(response[0][trp].minutesFrom),
+                  dutyStartTimeString: mpm2m(response[0][trp].minutesFrom).format('HH:mm'),
+                  dutyEndTime: mpm2m(response[0][trp].minutesTo),
+                  dutyEndTimeString: mpm2m(response[0][trp].minutesTo).format('HH:mm'),
+                  shiftCovered: shiftCovered,
+                };
+                currentRoster.push(serviceRoster);
+              };
             };
             resolve(currentRoster);
-            }
-        );
-        });
+          }
+          );
+    });
 
-        /**
+    /**
          * Takes a time in min past midnight
          * Converts it into a moment object
          * @param {string} minutesPastMidnight
          * @return {object} - Moment object
          */
-        function mpm2m(minutesPastMidnight) {
-            let thisMoment = moment();
-            thisMoment.set('hour', 0);
-            thisMoment.set('minute', 0);
-            thisMoment.set('seconds', 0);
-            thisMoment.set('miliseconds', 0);
-            thisMoment.add(minutesPastMidnight, 'minutes');
-            return thisMoment;
-        };
-    },
-    // returns current counters for each location and position - days roster status
-    dayRosterStatus: function dayStatus(date) {
-        return new Promise((resolve, reject) => {
-        let searchdate = moment(date).format('YYYY-MM-DD');
-        let rosterQueryString = `
+    function mpm2m(minutesPastMidnight) {
+      const thisMoment = moment();
+      thisMoment.set('hour', 0);
+      thisMoment.set('minute', 0);
+      thisMoment.set('seconds', 0);
+      thisMoment.set('miliseconds', 0);
+      thisMoment.add(minutesPastMidnight, 'minutes');
+      return thisMoment;
+    };
+  },
+  // returns current counters for each location and position - days roster status
+  dayRosterStatus: function dayStatus(date) {
+    return new Promise((resolve, reject) => {
+      const searchdate = moment(date).format('YYYY-MM-DD');
+      const rosterQueryString = `
             SELECT * FROM [VDS_TDW].[WEBSN].[dayStatus] WHERE [date] = '`+searchdate+`'
         `;
-        let dayStatus = [];
-        let rosterStatus = {};
+      const dayStatus = [];
+      let rosterStatus = {};
 
-        sequelize.query(rosterQueryString)
-            .then(function(response) {
+      sequelize.query(rosterQueryString)
+          .then(function(response) {
             for (st = 0; st < response[0].length; st++) {
-                rosterStatus = {};
-                rosterStatus = {
-                    staffType: response[0][st].staffType.trim(),
-                    location: response[0][st].location.trim(),
-                    counterType: response[0][st].counterType.trim(),
-                    count: response[0][st].count,
-                };
-                dayStatus.push(rosterStatus);
+              rosterStatus = {};
+              rosterStatus = {
+                staffType: response[0][st].staffType.trim(),
+                location: response[0][st].location.trim(),
+                counterType: response[0][st].counterType.trim(),
+                count: response[0][st].count,
+              };
+              dayStatus.push(rosterStatus);
             };
             resolve(dayStatus);
-            }
-        );
-        });
-        },
-    // returns uncovered shifts for day
-    uncoveredShifts: function uncoveredShifts(date) {
-        return new Promise((resolve, reject) => {
-        let searchdate = moment(date).format('YYYY-MM-DD');
-        let rosterQueryString = `
+          }
+          );
+    });
+  },
+  // returns uncovered shifts for day
+  uncoveredShifts: function uncoveredShifts(date) {
+    return new Promise((resolve, reject) => {
+      const searchdate = moment(date).format('YYYY-MM-DD');
+      const rosterQueryString = `
             SELECT * FROM [VDS_TDW].[WEBSN].[uncoveredShifts] WHERE [date] = '`+searchdate+`'
         `;
-        let uncoveredShifts = [];
-        let shift = {};
+      const uncoveredShifts = [];
+      let shift = {};
 
-        sequelize.query(rosterQueryString)
-            .then(function(response) {
+      sequelize.query(rosterQueryString)
+          .then(function(response) {
             for (st = 0; st < response[0].length; st++) {
-                shift = {};
-                shift = {
-                    shiftName: response[0][st].shiftName.trim(),
-                    staffType: response[0][st].staffType.trim(),
-                    startTime: mpm2m(response[0][st].minutesStart).format('HH:mm'),
-                    endTime: mpm2m(response[0][st].minutesEnd).format('HH:mm'),
-                    location: response[0][st].location.trim(),
-                };
-                uncoveredShifts.push(shift);
+              shift = {};
+              shift = {
+                shiftName: response[0][st].shiftName.trim(),
+                staffType: response[0][st].staffType.trim(),
+                startTime: mpm2m(response[0][st].minutesStart).format('HH:mm'),
+                endTime: mpm2m(response[0][st].minutesEnd).format('HH:mm'),
+                location: response[0][st].location.trim(),
+              };
+              uncoveredShifts.push(shift);
             };
             resolve(uncoveredShifts);
-            }
-        );
-        });
-                /**
+          }
+          );
+    });
+    /**
          * Takes a time in min past midnight
          * Converts it into a moment object
          * @param {string} minutesPastMidnight
          * @return {object} - Moment object
          */
-        function mpm2m(minutesPastMidnight) {
-            let thisMoment = moment();
-            thisMoment.set('hour', 0);
-            thisMoment.set('minute', 0);
-            thisMoment.set('seconds', 0);
-            thisMoment.set('miliseconds', 0);
-            thisMoment.add(minutesPastMidnight, 'minutes');
-            return thisMoment;
-        };
-        },
-    visboardHeadcount: function visboardHeadcount() {
-        return new Promise((resolve, reject) => {
-        let rosterQueryString = 'SELECT * FROM [VDS_TDW].[WEBSN].[visBoardHeadcount] ORDER BY 3,5,6';
-        let headcounts = [];
-        let entry = {};
+    function mpm2m(minutesPastMidnight) {
+      const thisMoment = moment();
+      thisMoment.set('hour', 0);
+      thisMoment.set('minute', 0);
+      thisMoment.set('seconds', 0);
+      thisMoment.set('miliseconds', 0);
+      thisMoment.add(minutesPastMidnight, 'minutes');
+      return thisMoment;
+    };
+  },
+  visboardHeadcount: function visboardHeadcount() {
+    return new Promise((resolve, reject) => {
+      const rosterQueryString = 'SELECT * FROM [VDS_TDW].[WEBSN].[visBoardHeadcount] ORDER BY 3,5,6';
+      const headcounts = [];
+      let entry = {};
 
-        sequelize.query(rosterQueryString)
-            .then(function(response) {
+      sequelize.query(rosterQueryString)
+          .then(function(response) {
             for (st = 0; st < response[0].length; st++) {
-                entry = {};
-                entry = {
-                    year: response[0][st].year,
-                    fortnight: response[0][st].fortnight,
-                    begining: response[0][st].begining,
-                    count: response[0][st].count,
-                    position: response[0][st].position,
-                    location: response[0][st].location,
-                };
-                headcounts.push(entry);
+              entry = {};
+              entry = {
+                year: response[0][st].year,
+                fortnight: response[0][st].fortnight,
+                begining: response[0][st].begining,
+                count: response[0][st].count,
+                position: response[0][st].position,
+                location: response[0][st].location,
+              };
+              headcounts.push(entry);
             };
             resolve(headcounts);
-            }
-        );
-        });
-    },
-    visboardAnnualLeave: function visboardAnnualLeave() {
-        return new Promise((resolve, reject) => {
-        let rosterQueryString = 'SELECT * FROM [VDS_TDW].[WEBSN].[visBoardAnnualLeave] ORDER BY 3,5,6';
-        let annualLeave = [];
-        let entry = {};
-        sequelize.query(rosterQueryString)
-            .then(function(response) {
+          }
+          );
+    });
+  },
+  visboardAnnualLeave: function visboardAnnualLeave() {
+    return new Promise((resolve, reject) => {
+      const rosterQueryString = 'SELECT * FROM [VDS_TDW].[WEBSN].[visBoardAnnualLeave] ORDER BY 3,5,6';
+      const annualLeave = [];
+      let entry = {};
+      sequelize.query(rosterQueryString)
+          .then(function(response) {
             for (st = 0; st < response[0].length; st++) {
-                entry = {};
-                entry = {
-                    year: response[0][st].year,
-                    fortnight: response[0][st].fortnight,
-                    begining: response[0][st].begining,
-                    count: response[0][st].count,
-                    position: response[0][st].position,
-                    location: response[0][st].location,
-                };
-                annualLeave.push(entry);
+              entry = {};
+              entry = {
+                year: response[0][st].year,
+                fortnight: response[0][st].fortnight,
+                begining: response[0][st].begining,
+                count: response[0][st].count,
+                position: response[0][st].position,
+                location: response[0][st].location,
+              };
+              annualLeave.push(entry);
             };
             resolve(annualLeave);
-            }
-        );
-        });
-    },
-    visboardSickness: function visboardSickness() {
-        return new Promise((resolve, reject) => {
-        let rosterQueryString = 'SELECT * FROM [VDS_TDW].[WEBSN].[visBoardSickness] ORDER BY 3,5,6';
-        let sickness = [];
-        let entry = {};
-        sequelize.query(rosterQueryString)
-            .then(function(response) {
+          }
+          );
+    });
+  },
+  visboardSickness: function visboardSickness() {
+    return new Promise((resolve, reject) => {
+      const rosterQueryString = 'SELECT * FROM [VDS_TDW].[WEBSN].[visBoardSickness] ORDER BY 3,5,6';
+      const sickness = [];
+      let entry = {};
+      sequelize.query(rosterQueryString)
+          .then(function(response) {
             for (st = 0; st < response[0].length; st++) {
-                entry = {};
-                entry = {
-                    year: response[0][st].year,
-                    fortnight: response[0][st].fortnight,
-                    begining: response[0][st].begining,
-                    count: response[0][st].count,
-                    position: response[0][st].position,
-                    location: response[0][st].location,
-                };
-                sickness.push(entry);
+              entry = {};
+              entry = {
+                year: response[0][st].year,
+                fortnight: response[0][st].fortnight,
+                begining: response[0][st].begining,
+                count: response[0][st].count,
+                position: response[0][st].position,
+                location: response[0][st].location,
+              };
+              sickness.push(entry);
             };
             resolve(sickness);
-            }
-        );
-        });
-    },
-    visboardAltDuties: function visboardAltDuties() {
-        return new Promise((resolve, reject) => {
-        let rosterQueryString = 'SELECT * FROM [VDS_TDW].[WEBSN].[visBoardAltDuties] ORDER BY 3,5,6';
-        let altDuties = [];
-        let entry = {};
-        sequelize.query(rosterQueryString)
-            .then(function(response) {
+          }
+          );
+    });
+  },
+  visboardAltDuties: function visboardAltDuties() {
+    return new Promise((resolve, reject) => {
+      const rosterQueryString = 'SELECT * FROM [VDS_TDW].[WEBSN].[visBoardAltDuties] ORDER BY 3,5,6';
+      const altDuties = [];
+      let entry = {};
+      sequelize.query(rosterQueryString)
+          .then(function(response) {
             for (st = 0; st < response[0].length; st++) {
-                entry = {};
-                entry = {
-                    year: response[0][st].year,
-                    fortnight: response[0][st].fortnight,
-                    begining: response[0][st].begining,
-                    count: response[0][st].count,
-                    position: response[0][st].position,
-                    location: response[0][st].location,
-                };
-                altDuties.push(entry);
+              entry = {};
+              entry = {
+                year: response[0][st].year,
+                fortnight: response[0][st].fortnight,
+                begining: response[0][st].begining,
+                count: response[0][st].count,
+                position: response[0][st].position,
+                location: response[0][st].location,
+              };
+              altDuties.push(entry);
             };
             resolve(altDuties);
-            }
-        );
-        });
-    },
-        // other exports here
-    };
+          }
+          );
+    });
+  },
+  // other exports here
+};

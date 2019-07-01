@@ -1,94 +1,94 @@
 const Sequelize = require('sequelize');
 
 
-let moment = require('moment-timezone');
+const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 const sequelize = new Sequelize({
-    database: 'PILOTSQL',
-    username: 'PilotLoggingService',
-    password: 'test',
-    logging: false,
-    host: 'D-3VZ5CD2',
-    port: 1433,
-    dialect: 'mssql',
-    options: {
-        encrypt: false,
-    },
-    pool: {
-        max: 5,
-        min: 0,
-        acquire: 30000,
-        idle: 10000,
-      },
+  database: 'PILOTSQL',
+  username: 'PilotLoggingService',
+  password: 'test',
+  logging: false,
+  host: 'D-3VZ5CD2',
+  port: 1433,
+  dialect: 'mssql',
+  options: {
+    encrypt: false,
+  },
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000,
+  },
 });
 
 module.exports = {
-    // loggs all currentServices into SQL DB
-    pilotSQLLog: function pilotSQLLog(current) {
-        let currentServices = current.services;
-        if (currentServices.length !== 0) {
-            // console.log('SQL logging: ' + currentServices.length + ' services');
-            // for (let s = 0; s < currentServices.length; s++) {
-            //     sqlLogThisService(currentServices[s]);
-            // }
-            for (let s = 0; p = Promise.resolve(), s < currentServices.length; s++) {
-                p = p.then(
-                    sqlLogThisService(currentServices[s])
-                );
-            }
-        }
-        let currentCars = current.carList;
-        if (currentCars.length !== 0) {
-            // console.log('SQL logging: ' + currentServices.length + ' services');
-            // for (let s = 0; s < currentServices.length; s++) {
-            //     sqlLogThisService(currentServices[s]);
-            // }
-            for (let c = 0; p = Promise.resolve(), c < currentCars.length; c++) {
-                p = p.then(
-                    sqlLogThisCar(currentCars[c])
-                );
-            }
-        }
-        /**
+  // loggs all currentServices into SQL DB
+  pilotSQLLog: function pilotSQLLog(current) {
+    const currentServices = current.services;
+    if (currentServices.length !== 0) {
+      // console.log('SQL logging: ' + currentServices.length + ' services');
+      // for (let s = 0; s < currentServices.length; s++) {
+      //     sqlLogThisService(currentServices[s]);
+      // }
+      for (let s = 0; p = Promise.resolve(), s < currentServices.length; s++) {
+        p = p.then(
+            sqlLogThisService(currentServices[s])
+        );
+      }
+    }
+    const currentCars = current.carList;
+    if (currentCars.length !== 0) {
+      // console.log('SQL logging: ' + currentServices.length + ' services');
+      // for (let s = 0; s < currentServices.length; s++) {
+      //     sqlLogThisService(currentServices[s]);
+      // }
+      for (let c = 0; p = Promise.resolve(), c < currentCars.length; c++) {
+        p = p.then(
+            sqlLogThisCar(currentCars[c])
+        );
+      }
+    }
+    /**
          * loggs a car snapshot to sql db
          * @param {*} currentCar
          * @return {string} except it doesnt really
          */
-        function sqlLogThisCar(currentCar) {
-            let now = moment();
-            return new Promise((resolve, reject) => {
-                // code goes here
-                let timeStamp = now.format('YYYY-MM-DD HH:mm:ss');
-                let carId = currentCar.carId;
-                let linked;
-                if (currentCar.linked) {
-                    linked=1;
-                } else {
-                    linked=0;
-                }
-                let linkedServiceId = currentCar.linkedServiceId;
-                if (linkedServiceId == '') {
-                    linkedServiceId = '\'\'';
-                };
-                let speed = currentCar.speed;
-                if (speed == '') {
-                    speed = '\'\'';
-                };
-                let compass = currentCar.compass;
-                if (compass == '') {
-                    compass = '\'\'';
-                };
-                let lat = currentCar.lat;
-                if (lat == '') {
-                    lat = '\'\'';
-                };
-                let lon = currentCar.lon;
-                if (lon == '') {
-                    lon = '\'\'';
-                };
-                let positionAge = currentCar.positionAge;
-                let positionAgeSeconds = currentCar.positionAgeSeconds;
-                let rosterQueryString = `
+    function sqlLogThisCar(currentCar) {
+      const now = moment();
+      return new Promise((resolve, reject) => {
+        // code goes here
+        const timeStamp = now.format('YYYY-MM-DD HH:mm:ss');
+        const carId = currentCar.carId;
+        let linked;
+        if (currentCar.linked) {
+          linked=1;
+        } else {
+          linked=0;
+        }
+        let linkedServiceId = currentCar.linkedServiceId;
+        if (linkedServiceId == '') {
+          linkedServiceId = '\'\'';
+        };
+        let speed = currentCar.speed;
+        if (speed == '') {
+          speed = '\'\'';
+        };
+        let compass = currentCar.compass;
+        if (compass == '') {
+          compass = '\'\'';
+        };
+        let lat = currentCar.lat;
+        if (lat == '') {
+          lat = '\'\'';
+        };
+        let lon = currentCar.lon;
+        if (lon == '') {
+          lon = '\'\'';
+        };
+        const positionAge = currentCar.positionAge;
+        const positionAgeSeconds = currentCar.positionAgeSeconds;
+        const rosterQueryString = `
                 INSERT INTO [dbo].[carLog]
                     ([timeStamp]
                     ,[carID]
@@ -112,58 +112,58 @@ module.exports = {
                     ,`+linked+`
                     ,'`+linkedServiceId+`')
                 `;
-                sequelize.query(rosterQueryString)
-                .then(function(response) {
-                    resolve(response[1]);
-                }).catch((error) =>{
-                    console.log(error);
-                });
+        sequelize.query(rosterQueryString)
+            .then(function(response) {
+              resolve(response[1]);
+            }).catch((error) =>{
+              console.log(error);
             });
-            };
-        /**
+      });
+    };
+    /**
          * loggs a service snapshot to sql db
          * @param {object} currentService
          * @return {string} except it doesnt really
          */
-        function sqlLogThisService(currentService) {
-            let now = moment();
-            return new Promise((resolve, reject) => {
-                let timeStamp = now.format('YYYY-MM-DD HH:mm:ss');
-                let serviceId = currentService.serviceId;
-                let blockId = currentService.blockId;
-                let kiwirail;
-                let lastStationCurrent;
-                if (currentService.kiwirail) {
-                    kiwirail=1;
-                } else {
-                    kiwirail=0;
-                }
-                if (currentService.lastStationCurrent) {
-                    lastStationCurrent=1;
-                } else {
-                    lastStationCurrent=0;
-                }
-                let thisLE = currentService.LE;
-                let thisTM = currentService.TM;
-                let cars = currentService.cars;
-                if (cars == '') {
-                    cars = '\'\'';
-                };
-                let speed = currentService.speed;
-                if (speed == '') {
-                    speed = '\'\'';
-                };
-                thisLE= thisLE.replace(/'/g, '\'\'');
-                thisTM = thisTM.replace(/'/g, '\'\'');
-                let lat = currentService.lat;
-                if (lat == '') {
-                    lat = '\'\'';
-                };
-                let long = currentService.long;
-                if (long == '') {
-                    long = '\'\'';
-                };
-                let rosterQueryString = `
+    function sqlLogThisService(currentService) {
+      const now = moment();
+      return new Promise((resolve, reject) => {
+        const timeStamp = now.format('YYYY-MM-DD HH:mm:ss');
+        const serviceId = currentService.serviceId;
+        const blockId = currentService.blockId;
+        let kiwirail;
+        let lastStationCurrent;
+        if (currentService.kiwirail) {
+          kiwirail=1;
+        } else {
+          kiwirail=0;
+        }
+        if (currentService.lastStationCurrent) {
+          lastStationCurrent=1;
+        } else {
+          lastStationCurrent=0;
+        }
+        let thisLE = currentService.LE;
+        let thisTM = currentService.TM;
+        let cars = currentService.cars;
+        if (cars == '') {
+          cars = '\'\'';
+        };
+        let speed = currentService.speed;
+        if (speed == '') {
+          speed = '\'\'';
+        };
+        thisLE= thisLE.replace(/'/g, '\'\'');
+        thisTM = thisTM.replace(/'/g, '\'\'');
+        let lat = currentService.lat;
+        if (lat == '') {
+          lat = '\'\'';
+        };
+        let long = currentService.long;
+        if (long == '') {
+          long = '\'\'';
+        };
+        const rosterQueryString = `
                 INSERT INTO [dbo].[pilotLog]
                         ([timeStamp]
                         ,[serviceId]
@@ -227,13 +227,13 @@ module.exports = {
                         ,`+long+`
                         ,`+currentService.meterage+`)
                         `;
-                        sequelize.query(rosterQueryString)
-                            .then(function(response) {
-                                resolve(response[1]);
-                            }).catch((error) =>{
-                                console.log(error);
-                            });
-                        });
-        };
-    },
+        sequelize.query(rosterQueryString)
+            .then(function(response) {
+              resolve(response[1]);
+            }).catch((error) =>{
+              console.log(error);
+            });
+      });
+    };
+  },
 };

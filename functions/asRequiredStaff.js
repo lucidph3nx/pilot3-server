@@ -1,8 +1,8 @@
-let moment = require('moment-timezone');
+const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 module.exports = function(currentRosterDuties) {
   asReqReport = [];
-  let currentMoment = moment();
+  const currentMoment = moment();
   if (currentRosterDuties == []) {
     return asReqReport;
   } else {

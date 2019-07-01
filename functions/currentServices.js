@@ -1,6 +1,7 @@
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 const Service = require('./serviceConstructor');
+<<<<<<< HEAD
 module.exports = function(geVisVehicles, currentWorkingData) {
   /**
    * represents a Train Vehicle, usually a EMU Car, Loco or Generator Carriage
@@ -52,6 +53,12 @@ module.exports = function(geVisVehicles, currentWorkingData) {
   const currentTimetable = currentWorkingData.timetable;
   const currentTripSheet = currentWorkingData.tripSheet;
   const currentBusReplacementList = currentWorkingData.busReplacementList;
+=======
+const Vehicle = require('./vehicleConstructor');
+module.exports = function(geVisVehicles, current) {
+  const currentTimetable = current.timetable;
+  const currentTripSheet = current.tripSheet;
+>>>>>>> 080ba4c31e9f2b238795b860c520394481ed6b29
   const trains = geVisVehicles.features;
   const currentServices = [];
   const currentMoment = moment();
@@ -59,6 +66,7 @@ module.exports = function(geVisVehicles, currentWorkingData) {
   for (gj = 0; gj < trains.length; gj++) {
     const train = trains[gj].attributes;
     if (checkTrainMeetsSelectionCriteria(train)) {
+<<<<<<< HEAD
       // work in progress, this new 'Vehicle' object will replace a lot of the below code
       // const vehicle = new Vehicle(train);
       // let secondVehicle;
@@ -97,10 +105,20 @@ module.exports = function(geVisVehicles, currentWorkingData) {
           if (trains[su].attributes.VEHID == secondCar) {
             secondCarLat = trains[su].attributes.LAT;
             secondCarLong = trains[su].attributes.LON;
+=======
+      const vehicle = new Vehicle(train);
+      // work in progress, this new 'Vehicle' object will replace a lot of the below code
+      let secondVehicle;
+      if (vehicle.secondVehicleId !== '') {
+        for (su = 0; su < trains.length; su++) {
+          if (trains[su].attributes.VEHID == vehicle.secondVehicleId) {
+            secondVehicle = new Vehicle(trains[su].attributes);
+>>>>>>> 080ba4c31e9f2b238795b860c520394481ed6b29
             break;
           }
         }
       }
+<<<<<<< HEAD
       const speed = train.VEHSPD;
       const compass = train.VEHDIR;
       const loadTime = moment(train.TIMESTMPGIS);
@@ -129,6 +147,15 @@ module.exports = function(geVisVehicles, currentWorkingData) {
           currentRosterDuties,
           currentTimetable,
           currentBusReplacementList);
+=======
+
+      const service = new Service(currentMoment,
+          vehicle.serviceId,
+          vehicle.serviceDescription,
+          vehicle,
+          secondVehicle,
+          current);
+>>>>>>> 080ba4c31e9f2b238795b860c520394481ed6b29
       currentServices.push(service.web());
     };
   }
@@ -160,6 +187,7 @@ module.exports = function(geVisVehicles, currentWorkingData) {
         const service = new Service(currentMoment,
             timetabledService.serviceId,
             'FROM TIMETABLE',
+<<<<<<< HEAD
             '', '', '', '',
             '', '',
             '00:00',
@@ -169,6 +197,11 @@ module.exports = function(geVisVehicles, currentWorkingData) {
             currentRosterDuties,
             currentTimetable,
             currentBusReplacementList);
+=======
+            null,
+            null,
+            current);
+>>>>>>> 080ba4c31e9f2b238795b860c520394481ed6b29
         // look for previous service and mark if still running
         for (csa = 0; csa < currentServices.length; csa++) {
           if (service.statusMessage !== 'Previous Service Delayed'
@@ -181,7 +214,6 @@ module.exports = function(geVisVehicles, currentWorkingData) {
     };
   };
   return currentServices;
-  
   /**
    * decides if train meets selection criteria
    * @param {object} train
@@ -200,5 +232,9 @@ module.exports = function(geVisVehicles, currentWorkingData) {
     } else {
       return false;
     }
+<<<<<<< HEAD
   }
+=======
+  };
+>>>>>>> 080ba4c31e9f2b238795b860c520394481ed6b29
 };

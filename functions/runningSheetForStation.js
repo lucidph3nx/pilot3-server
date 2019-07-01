@@ -1,3 +1,10 @@
+
+/**
+ * produces array of all arrivals and departures for a given station
+ * @param {string} stationId
+ * @param {Object} current contains current information
+ * @return {Array} all services arriving and departing that station
+ */
 module.exports = function(stationId, current) {
 // Gets a arrivals and departures list for a particular station
   runningSheet = [];
@@ -12,14 +19,14 @@ module.exports = function(stationId, current) {
         runningSheetDirection = 'DOWN';
       }
       // get rostered staff
-      let currentRosterDuties = current.rosterDuties;
-      let staff = currentRosterDuties.filter(
+      const currentRosterDuties = current.rosterDuties;
+      const staff = currentRosterDuties.filter(
           (currentRosterDuties) => currentRosterDuties.dutyName == current.timetable[s].serviceId);
       let LE = '';
       let LEShift = '';
       let TM = '';
       let TMShift = '';
-      let PO = [];
+      const PO = [];
       for (st = 0; st < staff.length; st++) {
         if (staff[st].dutyType == 'TRIP') {
           LE = staff[st].staffName + ' (' + staff[st].staffId + ')';
