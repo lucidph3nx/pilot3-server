@@ -16,23 +16,23 @@ module.exports = function(geVisVehicles, current) {
       this.VehicleId = geVisVehicle.VEHID.trim();
       this.selcall = geVisVehicle.SELCALL.trim();
       this.equipmentDescription = geVisVehicle.EQUIPDESC.trim();
-      this.lat = geVisVehicle.LON;
-      this.long = geVisVehicle.LAT;
-      this.speed = geVisVehicle.VEHSPD;
-      this.compass = geVisVehicle.VEHDIR;
+      this.location = {
+        lat: geVisVehicle.LON,
+        long: geVisVehicle.LAT,
+        speed: geVisVehicle.VEHSPD,
+        compass: geVisVehicle.VEHDIR,
+        meterage: -1,
+        kiwirailLineId: '',
+        estimatedDirection: '',
+      }
       this.loadTime = moment(geVisVehicle.TIMESTMPGIS);
       this.positionTime = moment(geVisVehicle.TIMESTMPNZ);
-      this.locationAge = function() {
-        let locationAgeRAW = this.loadTime.diff(this.positionTime);
-        return moment.utc(locationAgeRAW).format('mm:ss'); ;
-      };
-      this.locationAgeSeconds = function() {
-        let locationAgeRAW = this.loadTime.diff(this.positionTime);
-        return Number(moment.utc(locationAgeRAW).valueOf()/1000);
-      };
+      let locationAgeRAW = this.loadTime.diff(this.positionTime);
+      this.locationAge = moment.utc(locationAgeRAW).format('mm:ss');
+      this.locationAgeSeconds = Number(moment.utc(locationAgeRAW).valueOf()/1000);
       this.serviceId = geVisVehicle.TRNID.trim();
       this.serviceDescription = geVisVehicle.TRNDESCRP.trim();
-      this.varianceKiwirail = geVisVehicle.DELAYTIME;
+      this.varianceKiwirail = gevisvariancefix(geVisVehicle.DELAYTIME);
       this.linked = function() {
         if (this.serviceId) {
           return true;
@@ -44,12 +44,30 @@ module.exports = function(geVisVehicles, current) {
         //  if EMU, work out what the second half of the train unit is
         let secondCar = '';
         if (this.equipmentDescription == 'Matangi Power Car') {
-          secondCar = 'FT' + linkedCar.substring(2, 6);
+          secondCar = 'FT' + this.VehicleId.substring(2, 6);
         } else if (this.equipmentDescription == 'Matangi Trailer Car') {
-          secondCar = 'FP' + linkedCar.substring(2, 6);
+          secondCar = 'FP' + this.VehicleId.substring(2, 6);
         }
         return secondCar;
       };
+      /**
+     * Converts GeVis API schedule variance from negative is late to negative is early
+     * @param {number} scheduleVariance
+     * @return {number} corrected scheduleVariance
+     */
+    function gevisvariancefix(scheduleVariance) {
+      let fixedvariance;
+      if (scheduleVariance < 0) {
+        fixedvariance = Math.abs(scheduleVariance);
+      };
+      if (scheduleVariance == 0) {
+        fixedvariance = 0;
+      };
+      if (scheduleVariance > 0) {
+        fixedvariance = 0 - scheduleVariance;
+      };
+      return fixedvariance;
+    };
     }
   }
 
@@ -66,40 +84,56 @@ module.exports = function(geVisVehicles, current) {
   if (checkTrainMeetsSelectionCriteria(train)) {
     let vehicle = new Vehicle(train);
     // work in progress, this new 'Vehicle' object will replace a lot of the below code
-        let serviceId = train.TRNID;
-        let serviceDescription = train.TRNDESCRP;
-        let linkedCar = train.VEHID;
-        let secondCar = '';
-        let secondCarLat = '';
-        let secondCarLong = '';
-        //  work out what the second half of the train unit is
-        if (train.EQUIPDESC.trim() == 'Matangi Power Car') {
-            secondCar = 'FT' + linkedCar.substring(2, 6);
-        } else if (train.EQUIPDESC.trim() == 'Matangi Trailer Car') {
-            secondCar = 'FP' + linkedCar.substring(2, 6);
+    let secondVehicle;
+    if (vehicle.secondVehicleId !== '') {
+      for (su = 0; su < trains.length; su++) {
+        if (trains[su].attributes.VEHID == vehicle.secondVehicleId) {
+          secondVehicle = new Vehicle(trains[su].attributes)
+          break;
         }
-        if (secondCar !== '') {
-          for (su = 0; su < trains.length; su++) {
-            if (trains[su].attributes.VEHID == secondCar) {
-              secondCarLat = trains[su].attributes.LAT;
-              secondCarLong = trains[su].attributes.LON;
-              break;
-            }
-          }
-        }
-        let speed = train.VEHSPD;
-        let compass = train.VEHDIR;
-        let loadTime = moment(train.TIMESTMPGIS);
-        let positionTime = moment(train.TIMESTMPNZ);
-        let locationAgeRAW = loadTime.diff(positionTime);
-        // console.log(locationAgeRAW);
-        // console.log(Number(moment.utc(locationAgeRAW).format('s')));
-        // console.log(Number(moment.utc(locationAgeRAW).valueOf()/1000));
-        let locationAge = moment.utc(locationAgeRAW).format('mm:ss'); // locationAgeRAW.format('mmm:ss');
-        let locationAgeSeconds = Number(moment.utc(locationAgeRAW).valueOf()/1000);
-        let varianceKiwirail = train.DELAYTIME;
-        let lat = train.LAT;
-        let long = train.LON;
+      }
+    }
+    let service = new Service(currentMoment,
+      serviceId,
+      serviceDescription,
+      vehicle,
+      secondVehicle,
+      current);
+
+        // let serviceId = train.TRNID;
+        // let serviceDescription = train.TRNDESCRP;
+        // let linkedCar = train.VEHID;
+        // let secondCar = '';
+        // let secondCarLat = '';
+        // let secondCarLong = '';
+        // //  work out what the second half of the train unit is
+        // if (train.EQUIPDESC.trim() == 'Matangi Power Car') {
+        //     secondCar = 'FT' + linkedCar.substring(2, 6);
+        // } else if (train.EQUIPDESC.trim() == 'Matangi Trailer Car') {
+        //     secondCar = 'FP' + linkedCar.substring(2, 6);
+        // }
+        // if (secondCar !== '') {
+        //   for (su = 0; su < trains.length; su++) {
+        //     if (trains[su].attributes.VEHID == secondCar) {
+        //       secondCarLat = trains[su].attributes.LAT;
+        //       secondCarLong = trains[su].attributes.LON;
+        //       break;
+        //     }
+        //   }
+        // }
+        // let speed = train.VEHSPD;
+        // let compass = train.VEHDIR;
+        // let loadTime = moment(train.TIMESTMPGIS);
+        // let positionTime = moment(train.TIMESTMPNZ);
+        // let locationAgeRAW = loadTime.diff(positionTime);
+        // // console.log(locationAgeRAW);
+        // // console.log(Number(moment.utc(locationAgeRAW).format('s')));
+        // // console.log(Number(moment.utc(locationAgeRAW).valueOf()/1000));
+        // let locationAge = moment.utc(locationAgeRAW).format('mm:ss'); // locationAgeRAW.format('mmm:ss');
+        // let locationAgeSeconds = Number(moment.utc(locationAgeRAW).valueOf()/1000);
+        // let varianceKiwirail = train.DELAYTIME;
+        // let lat = train.LAT;
+        // let long = train.LON;
         //  new service object
         let service = new Service(currentMoment,
                                   serviceId,
@@ -189,5 +223,5 @@ module.exports = function(geVisVehicles, current) {
       } else {
       return false;
       }
-  }
+  };
 };

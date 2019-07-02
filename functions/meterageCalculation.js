@@ -3,21 +3,23 @@ let lineshapes = require('../Data/lineshapes');
 /**
  * Takes GPS coodinates and which line the train/point belongs to
  * works out what the current meterage should be (closest intesect)
- * @param {number} lat
- * @param {number} long
- * @param {string} KRline
- * @return {number} Meterage of train service
+ * @param {object} Location
+ * @return {object} Location now with Meterage of train service and estimated direction
  */
 module.exports = {
-    getmeterage: function getmeterage(lat, long, KRline, trainBearing) {
+    getmeterage: function getmeterage(location) {
+        let lat = location.lat;
+        let long = location.long;
+        let trainBearing = location.compass;
+        let kiwirailLine = location.kiwirailLine;
         // if rail line is undefined, give up
-        if (typeof KRline == 'undefined' || KRline == '' || lat == '' || long == '') {
-            return '';
+        if (typeof kiwirailLine == 'undefined' || kiwirailLine == '' || lat == '' || long == '') {
+            return location;
         }
         // position we are solving for
         let position = {'coords': {'latitude': lat, 'longitude': long}};
         // array of line locations of known meterage
-        let locations = lineshapes.filter((lineshapes) => lineshapes.lineId == KRline);
+        let locations = lineshapes.filter((lineshapes) => lineshapes.lineId == kiwirailLine);
         let pointA = locations[0];
         let pointB = locations[1];
         // let pointC = locations[2];
@@ -66,7 +68,8 @@ module.exports = {
         // if out of bounds point is not undefined
         // it is the closest match, so use it and skip over the rest of the code
         if (suspectedOutofboundsPoint !== undefined) {
-            return [Math.floor(suspectedOutofboundsPoint.meterage), ''];
+            location.meterage = Math.floor(suspectedOutofboundsPoint.meterage);
+            return location;
         }
         // now that the looping is finished, the two closest points are left over, work out which is closest
         if (distance(pointA, position.coords) < distance(pointB, position.coords)) {
@@ -124,8 +127,9 @@ module.exports = {
         if (meterage == undefined) {
             console.log('undefined Meterage');
         }
-
-        return [Math.floor(meterage), direction];
+        location.meterage = Math.floor(meterage);
+        location.estimatedDirection = direction;
+        return location;
         /**
      * Works out if position 2 is inbetween positions 1 & 3
      * @param {object} position1 lat long pair

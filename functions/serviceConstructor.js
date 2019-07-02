@@ -2,10 +2,349 @@
 let moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 // supporting data files
-let StationGeoboundaries = require('../Data/StationGeoboundaries');
-let StationMeterage = require('../Data/StationMeterage');
+let stationGeoboundaries = require('../Data/StationGeoboundaries');
+let stationMeterage = require('../Data/StationMeterage');
 // let lineshapes = require('../Data/lineshapes');
 let meterageCalculation = require('./meterageCalculation');
+
+/**
+ * represents a train service
+ * @class Service
+ */
+class Service {
+  /**
+   *Creates an instance of Service.
+    * @param {object} currentMoment
+    * @param {string} serviceId
+    * @param {string} serviceDescription
+    * @param {object} vehicle
+    * @param {object} secondVehicle
+    * @param {object} current
+    * @memberof Service
+    */
+  constructor(currentMoment,
+    serviceId,
+    serviceDescription,
+    vehicle,
+    secondVehicle,
+    current) {
+    this.currenttime = moment(currentMoment);
+    this.serviceId = serviceId;
+    this.serviceDescription = serviceDescription;
+    let lineTemp = getLineDirection(this.serviceId, this.serviceDescription);
+    this.line = lineTemp.lineId;
+    this.kiwirailLineId = lineTemp.kiwirailLineId;
+    this.kiwirail = lineTemp.kiwirailBoolean;
+    this.direction = lineTemp.direction;
+    this.linkedVehicle = vehicle;
+    this.secondVehicle = secondVehicle;
+    this.locationAge = this.linkedVehicle.locationAge;
+    this.location = this.linkedVehicle.location;
+    this.moving = (this.location.speed >= 1);
+    this.location.kiwirailLineId = this.kiwirailLineId;
+    this.location = meterageCalculation.getmeterage(this.location);
+    // several functions downstream depend on -1 meterage as universal invalid meterage
+    if (this.location.meterage == '' || this.location.meterage == undefined) {
+      this.location.meterage = -1;
+    }
+    let lastStationDetails = getlaststationDetails(this.location);
+    this.lastStation = lastStationDetails.stationId;
+    this.lastStationCurrent = lastStationDetails.stationCurrent;
+    this.timetable = getTimetableDetails(this.serviceId, current.timetable);
+    this.varianceKiwirail = this.linkedVehicle.varianceKiwirail;
+    // next thing needed is previousStationDetails and nextStationDetails
+    // I think this should be moved into the getScheduleVariance since it is never needed outside that.
+    // this.scheduleVariance = getScheduleVariance(this.kiwirail,
+    //   this.currenttime,
+    //   this.direction,
+    //   this.location,
+    //   this.locationAge);
+
+
+
+    /**
+     * gets the line based on the serviceId
+     * and/or the serviceDescription
+     * @param {string} serviceId
+     * @param {string} serviceDescription
+     * @return {object} line object
+     */
+    function getLineDirection(serviceId, serviceDescription) {
+      let numcharId = convertToNumChar(serviceId);
+      let serviceIdSuffix = '';
+      let line = {
+        lineId: '',
+        kiwirailBoolean: false,
+        direction: '',
+      };
+      let freightdetect = false;
+      if (serviceDescription !== null && serviceDescription !== undefined) {
+        if (serviceDescription.includes('FREIGHT')) {
+          freightdetect = true;
+        };
+      };
+      // list of passenger serviceId prefixes and the line they relate to.
+      let passengerLineAssociations = {
+        PNL: ['12'],
+        WRL: ['16', 'MA'],
+        HVL: ['26', '36', '38', '39', '46', '49', 'PT', 'TA', 'TN', 'UH', 'WA'],
+        MEL: ['56', '59', 'ML'],
+        KPL: ['60', '62', '63', '64', '69', '72', '79', '82', '89', 'PA', 'PM', 'PU', 'PL', 'TW', 'WK'],
+        JVL: ['92', '93', '99', 'JV'],
+      };
+      // list of freight serviceId prefixes and the line they relate to.
+      let freightLineAssociations = {
+        WRL: ['6', 'F'],
+        KPL: ['2', '3', '5', 'B', 'E'],
+      };
+      // list of network infrastructure serviceId prefixes
+      let networkServicesAssociations = ['WT'];
+
+      // look for service id's with a random letter on the end
+      // treat as a 3 digit
+      if (numcharId === 'NNNC') {
+        serviceId = serviceId.substring(0, 3);
+      }
+      // if a 4 digit serviceId, run the following checks
+      if (serviceId.length == 4) {
+        let tempServiceSubstring = serviceId.substring(0, 2);
+        if (passengerLineAssociations.PNL.includes(tempServiceSubstring)) {
+          line.lineId = 'PNL';
+        } else if (passengerLineAssociations.WRL.includes(tempServiceSubstring)) {
+          line.lineId = 'WRL';
+        } else if (passengerLineAssociations.HVL.includes(tempServiceSubstring)) {
+          line.lineId = 'HVL';
+        } else if (passengerLineAssociations.MEL.includes(tempServiceSubstring)) {
+          line.lineId = 'MEL';
+        } else if (passengerLineAssociations.KPL.includes(tempServiceSubstring)) {
+          line.lineId = 'KPL';
+        } else if (passengerLineAssociations.JVL.includes(tempServiceSubstring)) {
+          line.lineId = 'JVL';
+        } else if (networkServicesAssociations.includes(tempServiceSubstring)) {
+          line.lineId = '';
+          line.kiwirailBoolean = true;
+        } else {
+          line.lineId = '';
+        };
+        if (numcharId === 'NNNC') {
+          serviceIdSuffix = serviceId.substring(0, 3);
+        }
+        if (numcharId === 'CCNN') {
+          serviceIdSuffix = serviceId.substring(2, 4);
+        }
+        // if a 3 digit serviceId, run the following checks
+      } else if (serviceId.length == 3) {
+        let tempServiceSubstring = serviceId.substring(0, 1);
+        if (freightLineAssociations.KPL.includes(tempServiceSubstring)) {
+          if (tempServiceSubstring == 'B') {
+            line.lineId = 'KPL';
+            if (freightdetect) {
+              line.kiwirailBoolean = true;
+            } else {
+              line.kiwirailBoolean = false;
+            };
+          } else {
+            line.lineId = 'KPL';
+            line.kiwirailBoolean = true;
+          };
+        } else if (freightLineAssociations.WRL.includes(tempServiceSubstring)) {
+          if (freightdetect) {
+            line.lineId = 'WRL';
+            line.kiwirailBoolean = true;
+          } else {
+            line.lineId = 'WRL';
+            line.kiwirailBoolean = false;
+          };
+        } else {
+          line.lineId = '';
+        }
+        if (numcharId === 'CCN') {
+          serviceIdSuffix = serviceId.substring(2, 3);
+        }
+        if (numcharId === 'CNN') {
+          serviceIdSuffix = serviceId.substring(1, 3);
+        }
+      };
+      if (serviceIdSuffix % 2 == 0) {
+        line.direction = 'UP';
+      } else {
+        line.direction = 'DOWN';
+      };
+      line.kiwirailLine = lineToKiwirailLine(line);
+      return line;
+      /**
+       * converts service ID into a numchar format
+       * each digit is C for char or N for number
+       * @param {string} text
+       * @return {string} numchar
+       */
+      function convertToNumChar(text) {
+        let numchar = '';
+        for (let p = 0; p < text.length; p++) {
+          if (isNaN(text[p])) {
+            numchar = numchar + 'C';
+          } else {
+            numchar = numchar + 'N';
+          };
+        };
+        return numchar
+      }
+      /**
+       * Takes a line and coverts it to
+       * the corresponding KiwiRail line
+       * @param {string} line
+       * @return {string} - KiwiRail Line
+       */
+      function lineToKiwirailLine(line) {
+        let KRLine;
+        switch (line) {
+          case 'PNL':
+          case 'KPL':
+            KRLine = 'NIMT';
+            break;
+          case 'HVL':
+          case 'WRL':
+            KRLine = 'WRAPA';
+            break;
+          case 'MEL':
+            KRLine = 'MLING';
+            break;
+          case 'JVL':
+            KRLine = 'JVILL';
+            break;
+          default:
+            KRLine = '';
+        }
+        return KRLine;
+      };
+    }
+    /**
+ * performs a look up of the current timetable
+ * returns details about the service Timetable
+ * @param {String} serviceId
+ * @param {Array} timetable
+ * @param {Boolean} kiwirailBoolean
+ * @param {String} serviceDescription
+ * @return {Object} Timetable details
+ */
+    function getTimetableDetails(serviceId, timetable, kiwirailBoolean, serviceDescription) {
+      let timetableDetails = {
+        consist: '',
+        blockId: '',
+        line: '',
+        direction: '',
+        timingPoints: [],
+        origin: '',
+        departs: '',
+        destination: '',
+        arrives: '',
+      };
+      let timingPoints = timetable.filter((timetable) => timetable.serviceId == serviceId);
+      timetableDetails.timingPoints = timingPoints;
+      if (timingPoints.length !== 0) {
+        timetableDetails.consist = timingPoints[0].consist;
+        timetableDetails.blockId = timingPoints[0].blockId;
+        timetableDetails.line = timingPoints[0].line;
+        timetableDetails.direction = timingPoints[0].direction;
+        timetableDetails.origin = timingPoints[0].origin;
+        timetableDetails.departs = timingPoints[0].departs;
+        timetableDetails.destination = timingPoints[timingPoints.length - 1].destination;
+        timetableDetails.arrives = timingPoints[timingPoints.length - 1].arrives;
+      };
+      if (kiwirailBoolean) {
+        let KiwiRailDetails = guessKiwiRailTimetableDetails(serviceDescription);
+        timetableDetails.origin = KiwiRailDetails[0];
+        timetableDetails.destination = KiwiRailDetails[1];
+      }
+      return timetableDetails;
+      /**
+       * Takes a wild stab at what the Kiwirail origin and destination stations are
+       * @param {*} description
+       * @return {array} with [origin, destination]
+       */
+      function guessKiwiRailTimetableDetails(description) {
+        const locations = [
+          ['AUCKLAND', 'AUCK'],
+          ['WELLINGTON', 'WELL'],
+          ['PALMERSTON NORTH', 'PALM'],
+          ['MT MAUNGANUI', 'TAUR'],
+          ['HAMILTON', 'HAMI'],
+          ['MASTERTON', 'MAST'],
+        ];
+        const locationMap = new Map(locations);
+        description = description.toUpperCase();
+        // check for the '-' if it isnt there then done even try to guess
+        if (description.search('-') == -1) {
+          return ['', ''];
+        } else {
+          // split the description by '-', format is usually 'ORIGIN - DESTINATION'
+          description = description.split('-');
+          let origin = '';
+          let destination = '';
+          for (let location of locationMap.keys()) {
+            if (description[0].includes(location)) {
+              origin = locationMap.get(location);
+            };
+            if (description[1].includes(location)) {
+              destination = locationMap.get(location);
+            };
+          };
+          return [origin, destination];
+        };
+      };
+    };
+    /** looks at location on line and works out
+     *  given the direction,
+     *  what the previous station would be
+     *  and if location is current Station
+     * @param {Object} location - location object
+     * @return {object} - last Station Details
+     */
+    function getlaststationDetails(location) {
+      let lastStation = {
+        stationId: '',
+        stationCurrent: false,
+      };
+      // abort sequence for invalid meterages
+      if (location.meterage === -1) {
+        return lastStation;
+      }
+      // checks lat long for current stations first
+      for (let j = 0; j < stationGeoboundaries.length; j++) {
+        let withinBoundary = (
+          location.long > stationGeoboundaries[j].west
+          && location.long < stationGeoboundaries[j].east
+          && location.lat < stationGeoboundaries[j].north
+          && location.lat > stationGeoboundaries[j].south);
+        if (withinBoundary) {
+          lastStation.stationId = stationGeoboundaries[j].station_id;
+          lastStation.stationCurrent = true;
+          break;
+        }
+      };
+      // works out last station based on line, direction and meterage
+      if (!lastStation.stationCurrent) {
+        let filteredStationMeterage = stationMeterage.filter(filterByLine(stationMeterage));
+        if (location.direction == 'DOWN') {
+          filteredStationMeterage.reverse();// flip order
+        };
+        for (let m = 0; m < filteredStationMeterage.length; m++) {
+          let prevStn = filteredStationMeterage[m-1];
+          let station = filteredStationMeterage[m];
+          // loop until past meterage then use last station
+          if (prevStn !== undefined && station.meterage >= location.meterage) {
+            lastStation.stationId = prevStn.stationId;
+            break;
+          }
+        }
+      };
+      // eslint-disable-next-line require-jsdoc
+      function filterByLine(stationMeterage) {
+        return (stationMeterage.kiwirailLineId == location.kiwirailLineId);
+      };
+    };
+  }
+}
 
 // service constructor Object, represents a single rail service
 module.exports = function Service(CurrentMoment,
@@ -325,7 +664,7 @@ module.exports = function Service(CurrentMoment,
   };
   this.statusMessage = StatusMessage;
   this.statusArray = StatusArray;
-  this.web = function() {
+  this.web = function () {
     // generate slim version of service for transmition over web
     let servicelite = {
       serviceId: this.serviceId,
@@ -459,20 +798,20 @@ module.exports = function Service(CurrentMoment,
         return ['', ''];
       } else {
         // split the description by '-', format is usually 'ORIGIN - DESTINATION'
-      description = description.split('-');
-      let origin = '';
-      let destination = '';
-      for (let location of locationMap.keys()) {
-        if (description[0].includes(location)) {
-          origin = locationMap.get(location);
+        description = description.split('-');
+        let origin = '';
+        let destination = '';
+        for (let location of locationMap.keys()) {
+          if (description[0].includes(location)) {
+            origin = locationMap.get(location);
+          };
+          if (description[1].includes(location)) {
+            destination = locationMap.get(location);
+          };
         };
-        if (description[1].includes(location)) {
-          destination = locationMap.get(location);
-        };
+        return [origin, destination];
       };
-      return [origin, destination];
     };
-  };
   };
   /**
    * finds out if service
@@ -510,17 +849,17 @@ module.exports = function Service(CurrentMoment,
       constructor(shiftId) {
         // defaults
         this.staffId = '';
-          this.staffName = '';
-          this.shiftId = '';
-          this.nextService = {
-            serviceId: '',
-            serviceDeparts: '',
-            serviceDepartsString: '',
-            turnaround: '',
-          };
+        this.staffName = '';
+        this.shiftId = '';
+        this.nextService = {
+          serviceId: '',
+          serviceDeparts: '',
+          serviceDepartsString: '',
+          turnaround: '',
+        };
         if (shiftId) {
           let staffRosterItems = currentRosterDuties.filter((currentRosterDuties) =>
-                                                currentRosterDuties.shiftId == shiftId);
+            currentRosterDuties.shiftId == shiftId);
           this.staffId = staffRosterItems[0].staffId;
           this.staffName = staffRosterItems[0].staffName;
           this.shiftId = shiftId;
@@ -530,7 +869,7 @@ module.exports = function Service(CurrentMoment,
             serviceDepartsString: '',
             turnaround: '',
           };
-          let dutyIndex = staffRosterItems.findIndex(function(duty) {
+          let dutyIndex = staffRosterItems.findIndex(function (duty) {
             return duty.dutyName == serviceId;
           });
           for (let d = dutyIndex + 1; d < staffRosterItems.length; d++) {
@@ -750,7 +1089,6 @@ module.exports = function Service(CurrentMoment,
         line = '';
       }
     };
-
     return line;
   };
   /**
@@ -821,24 +1159,6 @@ module.exports = function Service(CurrentMoment,
     }
     return KRLine;
   };
-  /**
-   * Converts GeVis API schedule variance from negative is late to negative is early
-   * @param {number} scheduleVariance
-   * @return {number} corrected scheduleVariance
-   */
-  function gevisvariancefix(scheduleVariance) {
-    let fixedvariance;
-    if (scheduleVariance < 0) {
-      fixedvariance = Math.abs(scheduleVariance);
-    };
-    if (scheduleVariance == 0) {
-      fixedvariance = 0;
-    };
-    if (scheduleVariance > 0) {
-      fixedvariance = 0 - scheduleVariance;
-    };
-    return fixedvariance;
-  };
   // mathematical functions
   /**
   * gets distance in meters between 2 points
@@ -887,12 +1207,12 @@ module.exports = function Service(CurrentMoment,
     }
 
     // checks lat long for current stations first
-    for (let j = 0; j < StationGeoboundaries.length; j++) {
-      thisId = StationGeoboundaries[j].station_id;
-      thisNorth = StationGeoboundaries[j].north;
-      thisWest = StationGeoboundaries[j].west;
-      thisSouth = StationGeoboundaries[j].south;
-      thisEast = StationGeoboundaries[j].east;
+    for (let j = 0; j < stationGeoboundaries.length; j++) {
+      thisId = stationGeoboundaries[j].station_id;
+      thisNorth = stationGeoboundaries[j].north;
+      thisWest = stationGeoboundaries[j].west;
+      thisSouth = stationGeoboundaries[j].south;
+      thisEast = stationGeoboundaries[j].east;
 
       if (lon > thisWest & lon < thisEast & lat < thisNorth & lat > thisSouth) {
         lastStation = [thisId, true];
@@ -901,17 +1221,17 @@ module.exports = function Service(CurrentMoment,
     };
     // works out last station based on line, direction and meterage
     if (!lastStation[1]) {
-      for (let m = 0; m < StationMeterage.length; m++) {
-        if (StationMeterage[m].KRLine == KRLine) {
+      for (let m = 0; m < stationMeterage.length; m++) {
+        if (stationMeterage[m].KRLine == KRLine) {
           if (direction == 'UP') {
-            if (StationMeterage[m - 1] !== undefined && StationMeterage[m].meterage >= meterage) {
-              lastStation = [StationMeterage[m - 1].station_id, false];
+            if (stationMeterage[m - 1] !== undefined && stationMeterage[m].meterage >= meterage) {
+              lastStation = [stationMeterage[m - 1].station_id, false];
               break;
             }
           };
           if (direction == 'DOWN') {
-            if (StationMeterage[m].meterage >= meterage) {
-              lastStation = [StationMeterage[m].station_id, false];
+            if (stationMeterage[m].meterage >= meterage) {
+              lastStation = [stationMeterage[m].station_id, false];
               break;
             }
           };
@@ -965,9 +1285,9 @@ module.exports = function Service(CurrentMoment,
    * @return {number} meterage of station
    */
   function getMeterageOfStation(stationId) {
-    for (let sm = 0; sm < StationMeterage.length; sm++) {
-      if (stationId == StationMeterage[sm].station_id) {
-        return StationMeterage[sm].meterage;
+    for (let sm = 0; sm < stationMeterage.length; sm++) {
+      if (stationId == stationMeterage[sm].station_id) {
+        return stationMeterage[sm].meterage;
       }
     }
   };
@@ -1000,7 +1320,7 @@ module.exports = function Service(CurrentMoment,
       // the time you would expect the service to be in its current position
       let ExpectedTime = moment(prevStationTime +
         (nextStationTime - prevStationTime) * ((meterage - prevStationMeterage)
-                                  / (nextStationMeterage - prevStationMeterage)));
+          / (nextStationMeterage - prevStationMeterage)));
       // the difference between actual and expected tells you how late the service is
       let CurrentDelay = moment(currentTime.diff(ExpectedTime));
       CurrentDelay.subtract(locationAgeSeconds, 'seconds');

@@ -34,7 +34,7 @@ module.exports = {
                         line: response[0][tp].line,
                         direction: response[0][tp].direction,
                         blockId: response[0][tp].blockId,
-                        units: response[0][tp].units,
+                        consist: response[0][tp].units,
                         arrives: cps2m(response[0][tp].arrives),
                         departs: cps2m(response[0][tp].departs),
                         station: response[0][tp].station,
