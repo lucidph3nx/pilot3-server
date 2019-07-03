@@ -30,7 +30,7 @@ let current = {
 };
 // let geVisToken = [undefined, moment('1970-01-01')];
 //  for live debugging, put the key here and update time to less than an hour
-let geVisToken = ['2rqcYlS9LZejEJYkkAg2WDjnokIN3aGvcEelc6JWmuM.', moment('2019-07-01 16:00:00')];
+let geVisToken = ['EwsgqXw1Z7PPwPI7tqYTrxz6VVtoIFecplHEE4D6L4E.', moment('2019-07-03 16:00:00')];
 let geVisTokenRetrievalInProgress = false;
 
 // =======API=======
@@ -97,6 +97,7 @@ function refreshData() {
 
         pilotLog('GeVis Vehicles loaded ok');
       }).catch((error) => {
+        console.log(error);
         pilotLog(error);
         if (error == 'GeVis Token Invalid Or Expired' && !geVisTokenRetrievalInProgress) {
           geVisTokenRetrievalInProgress = true;

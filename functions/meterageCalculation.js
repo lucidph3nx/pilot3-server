@@ -11,7 +11,7 @@ module.exports = {
         let lat = location.lat;
         let long = location.long;
         let trainBearing = location.compass;
-        let kiwirailLine = location.kiwirailLine;
+        let kiwirailLine = location.kiwirailLineId;
         // if rail line is undefined, give up
         if (typeof kiwirailLine == 'undefined' || kiwirailLine == '' || lat == '' || long == '') {
             return location;
@@ -106,11 +106,8 @@ module.exports = {
             };
             meterage = closest.meterage - distance(Vlocation, closest);
         };
-
         // us the bearingUp to see if train seems to be traveling up or down
         let direction;
-        // let bearingOffset = bearingUp - 90;
-        // //let adjustedTrainBearing = trainBearing + bearingOffset;
         if (trainBearing > 180) {
             adjustedTrainBearing = trainBearing - 360;
         } else {
@@ -118,6 +115,7 @@ module.exports = {
         }
         let bearingUpMin = bearingUp - 90;
         let bearingUpMax = bearingUp + 90;
+
         if ((bearingUpMin < adjustedTrainBearing) && (adjustedTrainBearing < bearingUpMax)) {
             direction = 'UP';
         } else {
