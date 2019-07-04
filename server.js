@@ -1,23 +1,23 @@
 /* eslint-env node */
-let moment = require('moment-timezone');
+const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 
 // ======functions flags=======
-let pilotSQLLogging = false; // log to local MSSQL DB
+const pilotSQLLogging = false; // log to local MSSQL DB
 
 // ======supporting functions=======
-let getCurrentServices = require('./functions/currentServices');
-let getCurrentUnitList = require('./functions/currentUnitList');
-let getCurrentTimetable = require('./functions/currentTimetable');
-let getCurrentTripSheet = require('./functions/currentTripSheet');
+const getCurrentServices = require('./functions/currentServices');
+const getCurrentUnitList = require('./functions/currentUnitList');
+const getCurrentTimetable = require('./functions/currentTimetable');
+const getCurrentTripSheet = require('./functions/currentTripSheet');
 // ======dummy data=======
-let dummyCurrentServices = require('./data/dummyCurrentServices');
+const dummyCurrentServices = require('./data/dummyCurrentServices');
 
 // =======express=======
-let express = require('express');
-let app = express();
+const express = require('express');
+const app = express();
 // =======global variable=======
-let current = {
+const current = {
   debug: false,
   services: [],
   unitList: [],
@@ -30,16 +30,16 @@ let current = {
 };
 // let geVisToken = [undefined, moment('1970-01-01')];
 //  for live debugging, put the key here and update time to less than an hour
-let geVisToken = ['EwsgqXw1Z7PPwPI7tqYTrxz6VVtoIFecplHEE4D6L4E.', moment('2019-07-03 16:00:00')];
+let geVisToken = ['fMRfXA5Ir2CqnU14r6NARaZYEqfYtEUAojILjewTMbY.', moment('2019-07-04 16:00:00')];
 let geVisTokenRetrievalInProgress = false;
 
 // =======API=======
 require('./api/pilotAPI')(app, current);
-let kiwirailAPI = require('./api/kiwirailAPI');
-let vdsRosterAPI = require('./api/vdsRosterAPI');
-let compassAPI = require('./api/compassAPI');
-let PilotSQLLog = require('./api/pilotSQLLog');
-let puppeteerOps = require('./api/puppeteerOps');
+const kiwirailAPI = require('./api/kiwirailAPI');
+const vdsRosterAPI = require('./api/vdsRosterAPI');
+const compassAPI = require('./api/compassAPI');
+const PilotSQLLog = require('./api/pilotSQLLog');
+const puppeteerOps = require('./api/puppeteerOps');
 
 // =======time logs=======
 let timetableLastUpdated;
@@ -90,9 +90,9 @@ function refreshData() {
         current.carList = unitsAndCars[1];
         if (!current.debug && current.rosterDuties !== [] && current.timetable !== []
           && current.tripSheet !== [] && geVisVehicles.features !== undefined) {
-            if (pilotSQLLogging) {
-              PilotSQLLog.pilotSQLLog(current);
-            }
+          if (pilotSQLLogging) {
+            PilotSQLLog.pilotSQLLog(current);
+          }
         }
 
         pilotLog('GeVis Vehicles loaded ok');
@@ -144,7 +144,7 @@ function refreshData() {
       console.log(error);
     });
   }
-  let timetableDay = moment().hour(3).minute(0).second(0);
+  const timetableDay = moment().hour(3).minute(0).second(0);
   // current timetable, updates daily at 3am
   if (timetableLastUpdated == undefined | timetableLastUpdated < timetableDay) {
     getCurrentTimetable().then((result) => {

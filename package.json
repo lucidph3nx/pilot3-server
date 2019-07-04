@@ -24,8 +24,8 @@
     "tedious": "^2.0.0"
   },
   "devDependencies": {
-    "eslint": "^5.16.0",
-    "eslint-config-google": "^0.9.1",
+    "eslint": "^6.0.1",
+    "eslint-config-google": "^0.13.0",
     "jasmine": "^3.4.0"
   },
   "repository": {

@@ -1,12 +1,12 @@
 'use strict';
-let moment = require('moment-timezone');
+const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 // supporting data files
-let stationGeoboundaries = require('../Data/StationGeoboundaries');
-let stationMeterage = require('../Data/StationMeterage');
+const stationGeoboundaries = require('../Data/StationGeoboundaries');
+const stationMeterage = require('../Data/StationMeterage');
 // supporting functions
-let meterageCalculation = require('./meterageCalculation');
-let delayCalculation = require('./delayCalculation');
+const meterageCalculation = require('./meterageCalculation');
+const delayCalculation = require('./delayCalculation');
 
 /**
  * represents a train service
@@ -24,11 +24,11 @@ module.exports = class Service {
     * @memberof Service
     */
   constructor(currentMoment,
-    serviceId,
-    serviceDescription,
-    vehicle,
-    secondVehicle,
-    current) {
+      serviceId,
+      serviceDescription,
+      vehicle,
+      secondVehicle,
+      current) {
     let fromTimetable = false;
     if (vehicle === null) {
       fromTimetable = true;
@@ -36,7 +36,7 @@ module.exports = class Service {
     this.currenttime = moment(currentMoment);
     this.serviceId = serviceId;
     this.serviceDescription = serviceDescription;
-    let lineTemp = getLineDirection(this.serviceId, this.serviceDescription);
+    const lineTemp = getLineDirection(this.serviceId, this.serviceDescription);
     this.line = lineTemp.lineId;
     this.kiwirailLineId = lineTemp.kiwirailLineId;
     this.kiwirail = lineTemp.kiwirailBoolean;
@@ -63,25 +63,31 @@ module.exports = class Service {
       this.location = this.linkedVehicle.location;
       this.moving = (this.location.speed >= 1);
       this.varianceKiwirail = this.linkedVehicle.varianceKiwirail;
-      let lastStationDetails = getlaststationDetails(this.location);
+      const lastStationDetails = getlaststationDetails(this.location);
       this.lastStation = lastStationDetails.stationId;
       this.lastStationCurrent = lastStationDetails.stationCurrent;
     }
     this.location.kiwirailLineId = this.kiwirailLineId;
     this.location = meterageCalculation.getmeterage(this.location);
 
-    // several functions downstream depend on -1 meterage as universal invalid meterage
-    if (this.location.meterage == '' || this.location.meterage == undefined) {
+    // several functions downstream depend on -1 meterage
+    // as universal invalid meterage
+    if (this.location.meterage == ''
+      || this.location.meterage == undefined) {
       this.location.meterage = -1;
     }
 
-    this.timetable = getTimetableDetails(this.serviceId, current.timetable, this.kiwirail, this.serviceDescription);
+    this.timetable = getTimetableDetails(this.serviceId,
+        current.timetable,
+        this.kiwirail,
+        this.serviceDescription);
+    this.departed = (this.currenttime > this.timetable.departs);
     this.scheduleVariance = delayCalculation.getScheduleVariance(this.kiwirail,
-      this.currenttime,
-      this.direction,
-      this.timetable,
-      this.location,
-      this.locationAge);
+        this.currenttime,
+        this.direction,
+        this.timetable,
+        this.location,
+        this.locationAge);
     this.scheduleVarianceMin = this.scheduleVariance.delay;
     // decide correct schedule variance to use
     // fall back to kiwirail variance if no calculation could be done
@@ -95,17 +101,17 @@ module.exports = class Service {
       };
     }
     this.crew = getCrewDetails(this.serviceId, current.rosterDuties);
-    // Want to implement at a later date. wont work currently
-    // Will need to restructure 'this.crew' to be an array of staff.
-    // this.passengers = getCrewDetails('P' + this.serviceId, current.rosterDuties);
-    let lastServiceId = getSequenceUnit(this.serviceId, this.blockId, 'prev');
-    let nextServiceId = getSequenceUnit(this.serviceId, this.blockId, 'next');
+    const lastServiceId = getSequenceUnit(this.serviceId, this.blockId, 'prev');
+    const nextServiceId = getSequenceUnit(this.serviceId, this.blockId, 'next');
     // check last service exists
     if (lastServiceId == '') {
       this.hasLastService = false;
     } else {
       this.hasLastService = true;
-      this.lastService = getTimetableDetails(lastServiceId, current.timetable, false, '');
+      this.lastService = getTimetableDetails(lastServiceId,
+          current.timetable,
+          false,
+          '');
     }
     // check next service exists
     if (nextServiceId == '') {
@@ -123,7 +129,7 @@ module.exports = class Service {
     // this will be in the format of [0] = delays,
     //                               [1] = tracking,
     //                               [2] = stopped
-    let StatusArray = ['', '', ''];
+    const StatusArray = ['', '', ''];
 
     // filter out the non metlinks
     if (this.kiwirail) {
@@ -216,7 +222,7 @@ module.exports = class Service {
     // look at linking issues
     if (this.locationAgeSeconds >= 180 && this.kiwirail == false) {
       // TempStatus = '';
-      let tunnelExceptionsList = [
+      const tunnelExceptionsList = [
         {
           tunnelName: 'Rimutaka', line: 'WRL', statusMessage: 'In Rimutaka Tunnel',
           southStation: 'MAYM', northStation: 'FEAT', secondsTheshold: 900,
@@ -241,7 +247,7 @@ module.exports = class Service {
       ];
       // identify tunnel tracking issues
       if (this.direction == 'UP') {
-        for (let tunnel of tunnelExceptionsList) {
+        for (const tunnel of tunnelExceptionsList) {
           if (tunnel.southStation == this.lastStation
             && tunnel.secondsTheshold > this.locationAgeSeconds
             && tunnel.line == this.line) {
@@ -250,7 +256,7 @@ module.exports = class Service {
           };
         };
       } else if (this.direction == 'DOWN') {
-        for (let tunnel of tunnelExceptionsList) {
+        for (const tunnel of tunnelExceptionsList) {
           if (tunnel.northStation == this.lastStation
             && tunnel.secondsTheshold > this.locationAgeSeconds
             && tunnel.line == this.line) {
@@ -264,11 +270,11 @@ module.exports = class Service {
         StatusArray[0] = TempStatus;
         StatusArray[1] = TempStatus;
       } else if (this.secondUnit !== '' && TempStatus == '') {
-        let first = {
+        const first = {
           latitude: this.lat,
           longitude: this.lon,
         };
-        let sec = {
+        const sec = {
           latitude: this.secondUnitLat,
           longitude: this.secondUnitLon,
         };
@@ -320,7 +326,7 @@ module.exports = class Service {
     this.statusArray = StatusArray;
     this.web = function() {
       // generate slim version of service for transmition over web
-      let servicelite = {
+      const servicelite = {
         serviceId: this.serviceId,
         location: this.location,
         timetable: this.timetable,
@@ -375,9 +381,12 @@ module.exports = class Service {
      * @return {object} line object
      */
     function getLineDirection(serviceId, serviceDescription) {
-      let numcharId = convertToNumChar(serviceId);
+      const numcharId = convertToNumChar(serviceId);
       let serviceIdSuffix = '';
-      let line = {
+      if (numcharId == 'NNNN' || numcharId == 'CCNN') {
+        serviceIdSuffix = serviceId.substring(2, 4);
+      }
+      const line = {
         lineId: '',
         kiwirailLineId: '',
         kiwirailBoolean: false,
@@ -390,7 +399,7 @@ module.exports = class Service {
         };
       };
       // list of passenger serviceId prefixes and the line they relate to.
-      let passengerLineAssociations = {
+      const passengerLineAssociations = {
         PNL: ['12'],
         WRL: ['16', 'MA'],
         HVL: ['26', '36', '38', '39', '46', '49', 'PT', 'TA', 'TN', 'UH', 'WA'],
@@ -399,21 +408,21 @@ module.exports = class Service {
         JVL: ['92', '93', '99', 'JV'],
       };
       // list of freight serviceId prefixes and the line they relate to.
-      let freightLineAssociations = {
+      const freightLineAssociations = {
         WRL: ['6', 'F'],
         KPL: ['2', '3', '5', 'B', 'E'],
       };
       // list of network infrastructure serviceId prefixes
-      let networkServicesAssociations = ['WT'];
+      const networkServicesAssociations = ['WT'];
 
       // look for service id's with a random letter on the end
       // treat as a 3 digit
-      if (numcharId === 'NNNC') {
+      if (numcharId == 'NNNC') {
         serviceId = serviceId.substring(0, 3);
       }
       // if a 4 digit serviceId, run the following checks
       if (serviceId.length == 4) {
-        let tempServiceSubstring = serviceId.substring(0, 2);
+        const tempServiceSubstring = serviceId.substring(0, 2);
         if (passengerLineAssociations.PNL.includes(tempServiceSubstring)) {
           line.lineId = 'PNL';
         } else if (passengerLineAssociations.WRL.includes(tempServiceSubstring)) {
@@ -432,15 +441,15 @@ module.exports = class Service {
         } else {
           line.lineId = '';
         };
-        if (numcharId === 'NNNC') {
+        if (numcharId == 'NNNC') {
           serviceIdSuffix = serviceId.substring(0, 3);
         }
-        if (numcharId === 'CCNN') {
+        if (numcharId == 'CCNN') {
           serviceIdSuffix = serviceId.substring(2, 4);
         }
         // if a 3 digit serviceId, run the following checks
       } else if (serviceId.length == 3) {
-        let tempServiceSubstring = serviceId.substring(0, 1);
+        const tempServiceSubstring = serviceId.substring(0, 1);
         if (freightLineAssociations.KPL.includes(tempServiceSubstring)) {
           if (tempServiceSubstring == 'B') {
             line.lineId = 'KPL';
@@ -464,10 +473,10 @@ module.exports = class Service {
         } else {
           line.lineId = '';
         }
-        if (numcharId === 'CCN') {
+        if (numcharId == 'CCN') {
           serviceIdSuffix = serviceId.substring(2, 3);
         }
-        if (numcharId === 'CNN') {
+        if (numcharId == 'CNN') {
           serviceIdSuffix = serviceId.substring(1, 3);
         }
       };
@@ -534,7 +543,7 @@ module.exports = class Service {
  * @return {Object} Timetable details
  */
     function getTimetableDetails(serviceId, timetable, kiwirailBoolean, serviceDescription) {
-      let timetableDetails = {
+      const timetableDetails = {
         serviceId: serviceId,
         consist: '',
         blockId: '',
@@ -550,7 +559,7 @@ module.exports = class Service {
         // exit condition
         return timetableDetails;
       }
-      let timingPoints = timetable.filter((timetable) => timetable.serviceId == serviceId);
+      const timingPoints = timetable.filter((timetable) => timetable.serviceId == serviceId);
       timetableDetails.timingPoints = timingPoints;
       if (timingPoints.length !== 0) {
         timetableDetails.consist = timingPoints[0].consist;
@@ -563,7 +572,7 @@ module.exports = class Service {
         timetableDetails.arrives = timingPoints[timingPoints.length - 1].arrives;
       };
       if (kiwirailBoolean) {
-        let KiwiRailDetails = guessKiwiRailTimetableDetails(serviceDescription);
+        const KiwiRailDetails = guessKiwiRailTimetableDetails(serviceDescription);
         timetableDetails.origin = KiwiRailDetails[0];
         timetableDetails.destination = KiwiRailDetails[1];
       }
@@ -592,7 +601,7 @@ module.exports = class Service {
           description = description.split('-');
           let origin = '';
           let destination = '';
-          for (let location of locationMap.keys()) {
+          for (const location of locationMap.keys()) {
             if (description[0].includes(location)) {
               origin = locationMap.get(location);
             };
@@ -612,7 +621,7 @@ module.exports = class Service {
      * @return {object} - last Station Details
      */
     function getlaststationDetails(location) {
-      let lastStation = {
+      const lastStation = {
         stationId: '',
         stationCurrent: false,
       };
@@ -622,7 +631,7 @@ module.exports = class Service {
       }
       // checks lat long for current stations first
       for (let j = 0; j < stationGeoboundaries.length; j++) {
-        let withinBoundary = (
+        const withinBoundary = (
           location.long > stationGeoboundaries[j].west
           && location.long < stationGeoboundaries[j].east
           && location.lat < stationGeoboundaries[j].north
@@ -636,13 +645,13 @@ module.exports = class Service {
       // works out last station based on line, direction and meterage
       if (!lastStation.stationCurrent) {
         // eslint-disable-next-line max-len
-        let filteredStationMeterage = stationMeterage.filter((stationMeterage) => stationMeterage.kiwirailLineId == location.kiwirailLineId);
+        const filteredStationMeterage = stationMeterage.filter((stationMeterage) => stationMeterage.kiwirailLineId == location.kiwirailLineId);
         if (location.direction == 'DOWN') {
           filteredStationMeterage.reverse();// flip order
         };
         for (let m = 0; m < filteredStationMeterage.length; m++) {
-          let prevStn = filteredStationMeterage[m - 1];
-          let station = filteredStationMeterage[m];
+          const prevStn = filteredStationMeterage[m - 1];
+          const station = filteredStationMeterage[m];
           // loop until past meterage then use last station
           if (prevStn !== undefined && station.meterage >= location.meterage) {
             lastStation.stationId = prevStn.stationId;
@@ -681,7 +690,7 @@ module.exports = class Service {
             turnaround: '',
           };
           if (shiftId) {
-            let staffRosterItems = currentRosterDuties.filter((currentRosterDuties) =>
+            const staffRosterItems = currentRosterDuties.filter((currentRosterDuties) =>
               currentRosterDuties.shiftId == shiftId);
             this.staffId = staffRosterItems[0].staffId;
             this.staffName = staffRosterItems[0].staffName;
@@ -692,13 +701,21 @@ module.exports = class Service {
               serviceDepartsString: '',
               turnaround: '',
             };
-            let dutyIndex = staffRosterItems.findIndex(function (duty) {
+            const dutyIndex = staffRosterItems.findIndex(function(duty) {
               return duty.dutyName == serviceId;
             });
             for (let d = dutyIndex + 1; d < staffRosterItems.length; d++) {
+              const thisServiceTimetableDetails = getTimetableDetails(serviceId,
+                  current.timetable,
+                  false,
+                  '');
               if (staffRosterItems[d].dutyType.substring(0, 4) == 'TRIP') {
-                let nextServiceDepart = getTimetableDetails(staffRosterItems[d].dutyName, current.timetable, false, '').departs;
-                let thisServiceArrives = getTimetableDetails(serviceId, current.timetable, false, '').arrives;
+                const timetableDetails = getTimetableDetails(staffRosterItems[d].dutyName,
+                    current.timetable,
+                    false,
+                    '');
+                const nextServiceDepart = timetableDetails.departs;
+                const thisServiceArrives = thisServiceTimetableDetails.arrives;
                 this.nextService = {
                   serviceId: staffRosterItems[d].dutyName,
                   serviceDeparts: nextServiceDepart,
@@ -721,7 +738,7 @@ module.exports = class Service {
         }
       }
 
-      let crewDetails = {
+      const crewDetails = {
         LE: '',
         LEExists: false,
         TM: '',
@@ -729,8 +746,8 @@ module.exports = class Service {
         PO: [],
         POExists: false,
       };
-      let serviceRosterItems = currentRosterDuties.filter(
-        (currentRosterDuties) => currentRosterDuties.dutyName == serviceId);
+      const serviceRosterItems = currentRosterDuties.filter(
+          (currentRosterDuties) => currentRosterDuties.dutyName == serviceId);
       for (let c = 0; c < serviceRosterItems.length; c++) {
         if (serviceRosterItems[c].dutyType == 'TRIP') {
           crewDetails.LE = new CrewMember(serviceRosterItems[c].shiftId);
@@ -787,7 +804,7 @@ module.exports = class Service {
             && currentTimetable[s].serviceId == serviceId
             && currentTimetable[s - 1] !== undefined
             && currentTimetable[s - 1].serviceId !== serviceId) {
-            if (currentTimetable[s - 1] !== undefined && currentTimetable[s].blockId == currentTimetable[s - 1].blockId) {
+            if (currentTimetable[s].blockId == currentTimetable[s - 1].blockId) {
               seqServiceId = currentTimetable[s - 1].serviceId;
             } else {
               seqServiceId = '';
