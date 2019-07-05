@@ -37,8 +37,8 @@ module.exports = class Service {
     this.serviceId = serviceId;
     this.serviceDescription = serviceDescription;
     this.line = getLineFromId(this.serviceId);
-    this.kiwirailLineId = lineToKiwirailLine(this.line);
-    this.kiwirail = testIsKiwirail(this.serviceId, this.serviceDescription);
+    this.kiwirailLineId = convertlineToKiwirailLine(this.line);
+    this.kiwirail = checkIfKiwirail(this.serviceId, this.serviceDescription);
     this.direction = getDirectionFromId(this.serviceId);
     this.linkedVehicle = vehicle;
     this.secondVehicle = secondVehicle;
@@ -379,7 +379,7 @@ module.exports = class Service {
      * @param {string} serviceDescription
      * @return {object} line object
      */
-    function testIsKiwirail(serviceId, serviceDescription) {
+    function checkIfKiwirail(serviceId, serviceDescription) {
       let kiwirailBoolean = false;
       // list of freight serviceId prefixes and the line they relate to.
       const freightLineAssociations = {
@@ -592,7 +592,7 @@ module.exports = class Service {
        * @param {string} line
        * @return {string} - KiwiRail Line
        */
-    function lineToKiwirailLine(line) {
+    function convertlineToKiwirailLine(line) {
       let KRLine;
       switch (line.lineId) {
         case 'PNL':
