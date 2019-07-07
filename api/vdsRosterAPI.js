@@ -10,9 +10,6 @@ const sequelize = new Sequelize(credentials.VDSSQL.database,
       options: {
         encrypt: true,
       },
-      dialectOptions: {
-        instanceName: credentials.VDSSQL.instanceName,
-      },
       pool: {
         max: 5,
         min: 0,
