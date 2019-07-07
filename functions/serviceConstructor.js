@@ -657,12 +657,7 @@ module.exports = class Service {
       };
       return nextServiceId;
     };
-    /**
-     * Works out turnaround time between an end time and the next start time
-     * @param {object} EndTime moment object
-     * @param {object} StartTime moment object
-     * @return {number} turnaround time
-     */
+
     function getTurnaroundFrom2Times(EndTime, StartTime) {
       if (EndTime == '' || StartTime == '' || EndTime == undefined || StartTime == undefined) {
         return '';
