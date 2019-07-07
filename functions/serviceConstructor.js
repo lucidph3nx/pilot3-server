@@ -7,6 +7,7 @@ const stationMeterage = require('../Data/StationMeterage');
 // supporting functions
 const meterageCalculation = require('./meterageCalculation');
 const delayCalculation = require('./delayCalculation');
+const linearLogic = require('./linearLogic');
 
 /**
  * represents a train service
@@ -36,10 +37,11 @@ module.exports = class Service {
     this.currenttime = moment(currentMoment);
     this.serviceId = serviceId;
     this.serviceDescription = serviceDescription;
-    this.line = getLineFromId(this.serviceId);
-    this.kiwirailLineId = convertlineToKiwirailLine(this.line);
-    this.kiwirail = checkIfKiwirail(this.serviceId, this.serviceDescription);
-    this.direction = getDirectionFromId(this.serviceId);
+    this.line = linearLogic.getMetlinkLineFromId(this.serviceId);
+    this.kiwirailLineId = linearLogic.convertMetlinkLinetoKiwirailLine(this.line);
+    this.operator = linearLogic.getOperatorFromServiceId(this.serviceId);
+    this.thirdParty = (this.operator !== 'TDW');
+    this.direction = linearLogic.getDirectionFromId(this.serviceId);
     this.linkedVehicle = vehicle;
     this.secondVehicle = secondVehicle;
     if (fromTimetable) {
@@ -78,10 +80,10 @@ module.exports = class Service {
 
     this.timetable = getTimetableDetails(this.serviceId,
         current.timetable,
-        this.kiwirail,
+        this.thirdParty,
         this.serviceDescription);
     this.hasDeparted = (this.currenttime > this.timetable.departs);
-    this.scheduleVariance = delayCalculation.getScheduleVariance(this.kiwirail,
+    this.scheduleVariance = delayCalculation.getScheduleVariance(this.thirdParty,
         this.currenttime,
         this.direction,
         this.timetable,
@@ -100,8 +102,8 @@ module.exports = class Service {
       };
     }
     this.crew = getCrewDetails(this.serviceId, current.rosterDuties);
-    const lastServiceId = getSequenceUnit(this.serviceId, this.blockId, 'prev');
-    const nextServiceId = getSequenceUnit(this.serviceId, this.blockId, 'next');
+    const lastServiceId = getPrevServiceInUnitRoster(this.serviceId, this.blockId);
+    const nextServiceId = getNextServiceInUnitRoster(this.serviceId, this.blockId);
     // check last service exists
     if (lastServiceId == '') {
       this.hasLastService = false;
@@ -120,6 +122,7 @@ module.exports = class Service {
       this.nextTurnaround = getTurnaroundFrom2Times(this.arrives, this.nextService.departs);
       this.nextService = getTimetableDetails(this.lastServiceId, current.timetable, false, '');
     }
+
     // generate Status Messages
     // used to be own function, but needed too many variables
     let stopProcessing = false;
@@ -131,7 +134,7 @@ module.exports = class Service {
     const statusArray = ['', '', ''];
 
     // filter out the non metlinks
-    if (this.kiwirail) {
+    if (this.thirdParty) {
       TempStatus = 'Non-Metlink Service';
       statusArray[0] = TempStatus;
       statusArray[1] = TempStatus;
@@ -173,16 +176,16 @@ module.exports = class Service {
       stopProcessing = true;
     };
     // the early/late status generation
-    if (this.varianceFriendly < -1.5 && this.kiwirail == false) {
+    if (this.varianceFriendly < -1.5 && this.thirdParty == false) {
       TempStatus = 'Running Early';
       statusArray[0] = TempStatus;
-    } else if (this.varianceFriendly < 5 && this.kiwirail == false) {
+    } else if (this.varianceFriendly < 5 && this.thirdParty == false) {
       TempStatus = 'Running Ok';
       statusArray[0] = TempStatus;
-    } else if (this.varianceFriendly < 15 && this.kiwirail == false) {
+    } else if (this.varianceFriendly < 15 && this.thirdParty == false) {
       TempStatus = 'Running Late';
       statusArray[0] = TempStatus;
-    } else if (this.varianceFriendly >= 15 && this.kiwirail == false) {
+    } else if (this.varianceFriendly >= 15 && this.thirdParty == false) {
       TempStatus = 'Running Very Late';
       statusArray[0] = TempStatus;
     };
@@ -219,31 +222,9 @@ module.exports = class Service {
       stopProcessing = true;
     };
     // look at linking issues
-    if (this.locationAgeSeconds >= 180 && this.kiwirail == false) {
+    if (this.locationAgeSeconds >= 180 && this.thirdParty == false) {
       // TempStatus = '';
-      const tunnelExceptionsList = [
-        {
-          tunnelName: 'Rimutaka', line: 'WRL', statusMessage: 'In Rimutaka Tunnel',
-          southStation: 'MAYM', northStation: 'FEAT', secondsTheshold: 900,
-        },
-        {
-          tunnelName: 'Rimutaka', line: 'WRL', statusMessage: 'In Rimutaka Tunnel',
-          southStation: 'UPPE', northStation: 'FEAT', secondsTheshold: 900,
-        },
-        // above entry needed to be in twice due to tracking issues
-        {
-          tunnelName: 'Tawa Tunnel', line: 'KPL', statusMessage: 'In Tawa Tunnel',
-          southStation: 'KAIW', northStation: 'TAKA', secondsTheshold: 600,
-        },
-        {
-          tunnelName: 'Tunnel 1', line: 'KPL', statusMessage: 'In Tawa Tunnel',
-          southStation: 'KAIW', northStation: 'T2', secondsTheshold: 600,
-        },
-        {
-          tunnelName: 'Tunnel 2', line: 'KPL', statusMessage: 'In Tawa Tunnel',
-          southStation: 'T1', northStation: 'TAKA', secondsTheshold: 240,
-        },
-      ];
+      const tunnelExceptionsList = nzRailConventions.tunnelExceptionsList;
       // identify tunnel tracking issues
       if (this.direction == 'UP') {
         for (const tunnel of tunnelExceptionsList) {
@@ -293,7 +274,7 @@ module.exports = class Service {
         StatusMessage = TempStatus;
       };
     };
-    if (this.hasDeparted == false && this.kiwirail == false) {
+    if (this.hasDeparted == false && this.thirdParty == false) {
       TempStatus = 'Awaiting Departure';
       statusArray[0] = TempStatus;
       statusArray[1] = TempStatus;
@@ -332,7 +313,7 @@ module.exports = class Service {
         blockId: this.blockId,
         line: this.line,
         kiwirailLineId: this.kiwirailLineId,
-        kiwirail: this.kiwirail,
+        kiwirail: this.thirdParty,
         direction: this.direction,
         linkedUnit: this.linkedUnit,
         cars: this.cars,
@@ -371,248 +352,6 @@ module.exports = class Service {
         meterage: this.meterage,
       };
       return serviceLite;
-    };
-    /**
-     * gets the line and Direction based on the serviceId
-     * and/or the serviceDescription
-     * @param {string} serviceId
-     * @param {string} serviceDescription
-     * @return {object} line object
-     */
-    function checkIfKiwirail(serviceId, serviceDescription) {
-      let kiwirailBoolean = false;
-      // list of freight serviceId prefixes and the line they relate to.
-      const freightLineAssociations = {
-        WRL: ['6', 'F'],
-        KPL: ['2', '3', '5', 'B', 'E'],
-      };
-      // list of network infrastructure serviceId prefixes
-      const networkServicesAssociations = ['WT'];
-      // convert serviceId to a numcharId to make it easier to interpret.
-      const numcharId = convertToNumChar(serviceId);
-      let serviceIdPrefix = '';
-      // look for service id's with a random letter on the end
-      // treat as a 3 digit
-      if (numcharId == 'NNNC') {
-        serviceId = serviceId.substring(0, 3);
-        serviceIdPrefix = serviceId.substring(0, 1);
-      }
-      if (numcharId == 'NNNN' || numcharId == 'CCNN') {
-        serviceIdPrefix = serviceId.substring(0, 2);
-      }
-      let freightdetect = false;
-      if (serviceDescription !== null && serviceDescription !== undefined) {
-        if (serviceDescription.includes('FREIGHT')) {
-          freightdetect = true;
-        };
-      };
-      // if a 4 digit serviceId, run the following checks
-      if (serviceId.length == 4) {
-        if (networkServicesAssociations.includes(serviceIdPrefix)) {
-          kiwirailBoolean = true;
-        };
-        // if a 3 digit serviceId, run the following checks
-      } else if (serviceId.length == 3) {
-        if (freightLineAssociations.KPL.includes(serviceIdPrefix)) {
-          if (serviceIdPrefix == 'B') {
-            if (freightdetect) {
-              kiwirailBoolean = true;
-            } else {
-              kiwirailBoolean = false;
-            };
-          } else {
-            kiwirailBoolean = true;
-          };
-        } else if (freightLineAssociations.WRL.includes(serviceIdPrefix)) {
-          if (freightdetect) {
-            kiwirailBoolean = true;
-          } else {
-            kiwirailBoolean = false;
-          };
-        };
-      };
-      return kiwirailBoolean;
-      /**
-       * converts service ID into a numchar format
-       * each digit is C for char or N for number
-       * @param {string} text
-       * @return {string} numchar
-       */
-      function convertToNumChar(text) {
-        let numchar = '';
-        for (let p = 0; p < text.length; p++) {
-          if (isNaN(text[p])) {
-            numchar = numchar + 'C';
-          } else {
-            numchar = numchar + 'N';
-          };
-        };
-        return numchar;
-      }
-    }
-    /**
-     * gets the line and Direction based on the serviceId
-     * and/or the serviceDescription
-     * @param {string} serviceId
-     * @return {object} line object
-     */
-    function getLineFromId(serviceId) {
-      // list of passenger serviceId prefixes and the line they relate to.
-      const passengerLineAssociations = {
-        PNL: ['12'],
-        WRL: ['16', 'MA'],
-        HVL: ['26', '36', '38', '39', '46', '49', 'PT', 'TA', 'TN', 'UH', 'WA'],
-        MEL: ['56', '59', 'ML'],
-        KPL: ['60', '62', '63', '64', '69', '72', '79', '82', '89', 'PA', 'PM', 'PU', 'PL', 'TW', 'WK'],
-        JVL: ['92', '93', '99', 'JV'],
-      };
-      // list of freight serviceId prefixes and the line they relate to.
-      const freightLineAssociations = {
-        WRL: ['6', 'F'],
-        KPL: ['2', '3', '5', 'B', 'E'],
-      };
-      // list of network infrastructure serviceId prefixes
-      const networkServicesAssociations = ['WT'];
-      // convert serviceId to a numcharId to make it easier to interpret.
-      const numcharId = convertToNumChar(serviceId);
-      // look for service id's with a random letter on the end
-      // treat as a 3 digit
-      if (numcharId == 'NNNC') {
-        serviceId = serviceId.substring(0, 3);
-      }
-      let serviceIdPrefix = '';
-      switch (numcharId) {
-        case 'NNNC':
-          serviceIdPrefix = serviceId.substring(0, 1);
-          break;
-        case 'NNNN':
-        case 'CCNN':
-          serviceIdSuffix = serviceId.substring(0, 2);
-        case 'CCN':
-          serviceIdSuffix = serviceId.substring(0, 2);
-        case 'CNN':
-          serviceIdSuffix = serviceId.substring(0, 1);
-      };
-      let lineId = '';
-      // if a 4 digit serviceId, run the following checks
-      if (serviceId.length == 4) {
-        if (passengerLineAssociations.PNL.includes(serviceIdPrefix)) {
-          lineId = 'PNL';
-        } else if (passengerLineAssociations.WRL.includes(serviceIdPrefix)) {
-          lineId = 'WRL';
-        } else if (passengerLineAssociations.HVL.includes(serviceIdPrefix)) {
-          lineId = 'HVL';
-        } else if (passengerLineAssociations.MEL.includes(serviceIdPrefix)) {
-          lineId = 'MEL';
-        } else if (passengerLineAssociations.KPL.includes(serviceIdPrefix)) {
-          lineId = 'KPL';
-        } else if (passengerLineAssociations.JVL.includes(serviceIdPrefix)) {
-          lineId = 'JVL';
-        } else if (networkServicesAssociations.includes(serviceIdPrefix)) {
-          lineId = '';
-        };
-        // if a 3 digit serviceId, run the following checks
-      } else if (serviceId.length == 3) {
-        if (freightLineAssociations.KPL.includes(serviceIdPrefix)) {
-          if (serviceIdPrefix == 'B') {
-            lineId = 'KPL';
-          };
-        } else if (freightLineAssociations.WRL.includes(serviceIdPrefix)) {
-          lineId = 'WRL';
-        };
-      };
-      return lineId;
-      /**
-       * converts service ID into a numchar format
-       * each digit is C for char or N for number
-       * @param {string} text
-       * @return {string} numchar
-       */
-      function convertToNumChar(text) {
-        let numchar = '';
-        for (let p = 0; p < text.length; p++) {
-          if (isNaN(text[p])) {
-            numchar = numchar + 'C';
-          } else {
-            numchar = numchar + 'N';
-          };
-        };
-        return numchar;
-      }
-    }
-    /**
-     * gets the Direction based on the serviceId
-     * @param {string} serviceId
-     * @return {object} line object
-     */
-    function getDirectionFromId(serviceId) {
-      let direction = '';
-      // convert serviceId to a numcharId to make it easier to interpret.
-      const numcharId = convertToNumChar(serviceId);
-      let serviceIdSuffix = '';
-      switch (numcharId) {
-        case 'NNNC':
-          serviceIdSuffix = serviceId.substring(2, 3);
-          break;
-        case 'NNNN':
-        case 'CCNN':
-          serviceIdSuffix = serviceId.substring(3, 4);
-        case 'CCN':
-        case 'CNN':
-          serviceIdSuffix = serviceId.substring(2, 3);
-      };
-      // Odd = 'DOWN' and Even = 'UP'
-      if (serviceIdSuffix % 2 == 0) {
-        direction = 'UP';
-      } else {
-        direction = 'DOWN';
-      };
-      return direction;
-      /**
-       * converts service ID into a numchar format
-       * each digit is C for char or N for number
-       * @param {string} text
-       * @return {string} numchar
-       */
-      function convertToNumChar(text) {
-        let numchar = '';
-        for (let p = 0; p < text.length; p++) {
-          if (isNaN(text[p])) {
-            numchar = numchar + 'C';
-          } else {
-            numchar = numchar + 'N';
-          };
-        };
-        return numchar;
-      }
-    }
-    /**
-       * Takes a line and coverts it to
-       * the corresponding KiwiRail line
-       * @param {string} line
-       * @return {string} - KiwiRail Line
-       */
-    function convertlineToKiwirailLine(line) {
-      let KRLine;
-      switch (line.lineId) {
-        case 'PNL':
-        case 'KPL':
-          KRLine = 'NIMT';
-          break;
-        case 'HVL':
-        case 'WRL':
-          KRLine = 'WRAPA';
-          break;
-        case 'MEL':
-          KRLine = 'MLING';
-          break;
-        case 'JVL':
-          KRLine = 'JVILL';
-          break;
-        default:
-          KRLine = '';
-      }
-      return KRLine;
     };
     /**
  * performs a look up of the current timetable
@@ -868,44 +607,55 @@ module.exports = class Service {
       return crewDetails;
     };
     /**
-     * returns the next or previous service for that unit roster block
+     * returns the previous service for that unit roster block
      * @param {string} serviceId
      * @param {integer} blockId
-     * @param {string} nextOrPrev 'next' or 'prev'
-     * @return {string} the service number requested, either next or previous
+     * @return {string} the previous service Id
      */
-    function getSequenceUnit(serviceId, blockId, nextOrPrev) {
+    function getPrevServiceInUnitRoster(serviceId, blockId) {
       if (serviceId == undefined || blockId == undefined || blockId == '') {
         return '';
       };
-      let seqServiceId;
+      let prevServiceId;
       for (let s = 0; s < currentTimetable.length; s++) {
-        if (nextOrPrev == 'prev') {
-          if (currentTimetable[s].blockId == blockId
+        if (currentTimetable[s].blockId == blockId
             && currentTimetable[s].serviceId == serviceId
             && currentTimetable[s - 1] !== undefined
             && currentTimetable[s - 1].serviceId !== serviceId) {
-            if (currentTimetable[s].blockId == currentTimetable[s - 1].blockId) {
-              seqServiceId = currentTimetable[s - 1].serviceId;
-            } else {
-              seqServiceId = '';
-            };
-          };
-        } else if (nextOrPrev == 'next') {
-          if (currentTimetable[s + 1] !== undefined
-            && currentTimetable[s].blockId == blockId
-            && currentTimetable[s].serviceId == (serviceId)
-            && currentTimetable[s + 1].serviceId !== serviceId) {
-            if (currentTimetable[s + 1] !== undefined
-              && currentTimetable[s].blockId == currentTimetable[s + 1].blockId) {
-              seqServiceId = currentTimetable[s + 1].serviceId;
-            } else {
-              seqServiceId = '';
-            };
+          if (currentTimetable[s].blockId == currentTimetable[s - 1].blockId) {
+            prevServiceId = currentTimetable[s - 1].serviceId;
+          } else {
+            prevServiceId = '';
           };
         };
       };
-      return seqServiceId;
+      return prevServiceId;
+    };
+    /**
+     * returns the next service for that unit roster block
+     * @param {string} serviceId
+     * @param {integer} blockId
+     * @return {string} the next service Id
+     */
+    function getNextServiceInUnitRoster(serviceId, blockId) {
+      if (serviceId == undefined || blockId == undefined || blockId == '') {
+        return '';
+      };
+      let nextServiceId;
+      for (let s = 0; s < currentTimetable.length; s++) {
+        if (currentTimetable[s + 1] !== undefined
+            && currentTimetable[s].blockId == blockId
+            && currentTimetable[s].serviceId == (serviceId)
+            && currentTimetable[s + 1].serviceId !== serviceId) {
+          if (currentTimetable[s + 1] !== undefined
+              && currentTimetable[s].blockId == currentTimetable[s + 1].blockId) {
+            nextServiceId = currentTimetable[s + 1].serviceId;
+          } else {
+            nextServiceId = '';
+          };
+        };
+      };
+      return nextServiceId;
     };
     /**
      * Works out turnaround time between an end time and the next start time
