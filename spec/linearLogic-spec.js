@@ -94,3 +94,22 @@ describe('get metlink line Id from serviceId', function() {
   });
 });
 
+describe('check correct line', function() {
+  it('see if there seems to be a point on another line which is closer', function() {
+    // actually on JVL
+    let thislocation = {
+      lat: -41.251132,
+      long: 174.771712,
+      kiwirailLineId: 'WRAPA',
+    };
+    expect(linearLogic.checkCorrectLine(thislocation)).toBe(false);
+
+    thislocation = {
+      lat: -41.251132,
+      long: 174.771712,
+      kiwirailLineId: 'JVILL',
+    };
+    expect(linearLogic.checkCorrectLine(thislocation)).toBe(true);
+  });
+});
+

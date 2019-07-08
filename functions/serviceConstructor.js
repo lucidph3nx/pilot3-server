@@ -8,6 +8,7 @@ const stationMeterage = require('../Data/StationMeterage');
 const meterageCalculation = require('./meterageCalculation');
 const delayCalculation = require('./delayCalculation');
 const linearLogic = require('./linearLogic');
+const rosteringLogic = require('./rosteringLogic');
 
 /**
  * represents a train service
@@ -77,19 +78,21 @@ module.exports = class Service {
       || this.location.meterage == undefined) {
       this.location.meterage = -1;
     }
-
+    this.IncorrectLine = !linearLogic.checkCorrectLine(this.location);
     this.timetable = getTimetableDetails(this.serviceId,
         current.timetable,
         this.thirdParty,
         this.serviceDescription);
     this.hasDeparted = (this.currenttime > this.timetable.departs);
-    this.scheduleVariance = delayCalculation.getScheduleVariance(this.thirdParty,
-        this.currenttime,
-        this.direction,
-        this.timetable,
-        this.location,
-        this.locationAge);
-    this.scheduleVarianceMin = this.scheduleVariance.delay;
+    if (!IncorrectLine) {
+      this.scheduleVariance = delayCalculation.getScheduleVariance(this.thirdParty,
+          this.currenttime,
+          this.direction,
+          this.timetable,
+          this.location,
+          this.locationAge);
+      this.scheduleVarianceMin = this.scheduleVariance.delay;
+    }
     // decide correct schedule variance to use
     // fall back to kiwirail variance if no calculation could be done
     this.varianceFriendly = '';
@@ -102,8 +105,8 @@ module.exports = class Service {
       };
     }
     this.crew = getCrewDetails(this.serviceId, current.rosterDuties);
-    const lastServiceId = getPrevServiceInUnitRoster(this.serviceId, this.blockId);
-    const nextServiceId = getNextServiceInUnitRoster(this.serviceId, this.blockId);
+    const lastServiceId = rosteringLogic.trainRoster.getPrevServiceTrainRoster(this.serviceId, current.tripsheet);
+    const nextServiceId = rosteringLogic.trainRoster.getPrevServiceTrainRoster(this.serviceId, current.tripsheet);
     // check last service exists
     if (lastServiceId == '') {
       this.hasLastService = false;
@@ -119,7 +122,7 @@ module.exports = class Service {
       this.hasNextService = false;
     } else {
       this.hasNextService = true;
-      this.nextTurnaround = getTurnaroundFrom2Times(this.arrives, this.nextService.departs);
+      this.nextTurnaround = rosteringLogic.getTurnaround(this.arrives, this.nextService.departs);
       this.nextService = getTimetableDetails(this.lastServiceId, current.timetable, false, '');
     }
 
@@ -499,6 +502,9 @@ module.exports = class Service {
          * @memberof CrewMember
          */
         constructor(shiftId) {
+          // functions needed
+          const getNextServiceCrewRoster = rosteringLogic.crewRoster.getNextServiceCrewRoster;
+          const getTurnaround = rosteringLogic.common.getTurnaround;
           // defaults
           this.staffId = '';
           this.staffName = '';
@@ -510,6 +516,7 @@ module.exports = class Service {
             turnaround: '',
           };
           if (shiftId) {
+            // filter rosters for just this shift
             const staffRosterItems = currentRosterDuties.filter((currentRosterDuties) =>
               currentRosterDuties.shiftId == shiftId);
             this.staffId = staffRosterItems[0].staffId;
@@ -521,40 +528,22 @@ module.exports = class Service {
               serviceDepartsString: '',
               turnaround: '',
             };
-            const dutyIndex = staffRosterItems.findIndex(function(duty) {
-              return duty.dutyName == serviceId;
-            });
-            for (let d = dutyIndex + 1; d < staffRosterItems.length; d++) {
-              const thisServiceTimetableDetails = getTimetableDetails(serviceId,
-                  current.timetable,
-                  false,
-                  '');
-              if (staffRosterItems[d].dutyType.substring(0, 4) == 'TRIP') {
-                const timetableDetails = getTimetableDetails(staffRosterItems[d].dutyName,
-                    current.timetable,
-                    false,
-                    '');
-                const nextServiceDepart = timetableDetails.departs;
-                const thisServiceArrives = thisServiceTimetableDetails.arrives;
-                this.nextService = {
-                  serviceId: staffRosterItems[d].dutyName,
-                  serviceDeparts: nextServiceDepart,
-                  serviceDepartsString: moment(nextServiceDepart).format('HH:mm'),
-                  turnaround: getTurnaroundFrom2Times(thisServiceArrives, nextServiceDepart),
-                };
-                break;
-              };
-              if (staffRosterItems[d].dutyType == 'SOF') {
-                this.nextService = {
-                  serviceId: staffRosterItems[d].dutyName,
-                  serviceDeparts: '',
-                  serviceDepartsString: '',
-                  turnaround: '',
-                };
-                break;
-              };
+            const thisServiceArrives = getTimetableDetails(serviceId,
+                current.timetable,
+                false,
+                '').arrives;
+            const nextServiceId = getNextServiceCrewRoster(serviceId, shiftId, currentRosterDuties);
+            const nextServiceDeparts = getTimetableDetails(nextServiceId,
+                current.timetable,
+                false,
+                '').departs;
+            if (thisServiceArrives !== '' || nextServiceDeparts !== '') {
+              this.nextService.serviceId = nextServiceId;
+              this.nextService.serviceDeparts = nextServiceDeparts;
+              this.nextService.serviceDepartsString = moment(nextServiceDeparts).format('HH:mm');
+              this.nextService.turnaround = getTurnaround(thisServiceArrives, nextServiceDeparts);
             }
-          }
+          };
         }
       }
 
@@ -605,73 +594,6 @@ module.exports = class Service {
         crewDetails.TM = new CrewMember();
       }
       return crewDetails;
-    };
-    /**
-     * returns the previous service for that unit roster block
-     * @param {string} serviceId
-     * @param {integer} blockId
-     * @return {string} the previous service Id
-     */
-    function getPrevServiceInUnitRoster(serviceId, blockId) {
-      if (serviceId == undefined || blockId == undefined || blockId == '') {
-        return '';
-      };
-      let prevServiceId;
-      for (let s = 0; s < currentTimetable.length; s++) {
-        if (currentTimetable[s].blockId == blockId
-            && currentTimetable[s].serviceId == serviceId
-            && currentTimetable[s - 1] !== undefined
-            && currentTimetable[s - 1].serviceId !== serviceId) {
-          if (currentTimetable[s].blockId == currentTimetable[s - 1].blockId) {
-            prevServiceId = currentTimetable[s - 1].serviceId;
-          } else {
-            prevServiceId = '';
-          };
-        };
-      };
-      return prevServiceId;
-    };
-    /**
-     * returns the next service for that unit roster block
-     * @param {string} serviceId
-     * @param {integer} blockId
-     * @return {string} the next service Id
-     */
-    function getNextServiceInUnitRoster(serviceId, blockId) {
-      if (serviceId == undefined || blockId == undefined || blockId == '') {
-        return '';
-      };
-      let nextServiceId;
-      for (let s = 0; s < currentTimetable.length; s++) {
-        if (currentTimetable[s + 1] !== undefined
-            && currentTimetable[s].blockId == blockId
-            && currentTimetable[s].serviceId == (serviceId)
-            && currentTimetable[s + 1].serviceId !== serviceId) {
-          if (currentTimetable[s + 1] !== undefined
-              && currentTimetable[s].blockId == currentTimetable[s + 1].blockId) {
-            nextServiceId = currentTimetable[s + 1].serviceId;
-          } else {
-            nextServiceId = '';
-          };
-        };
-      };
-      return nextServiceId;
-    };
-
-    function getTurnaroundFrom2Times(EndTime, StartTime) {
-      if (EndTime == '' || StartTime == '' || EndTime == undefined || StartTime == undefined) {
-        return '';
-      };
-      let Turnaround = moment.duration(StartTime.diff(EndTime)) / 1000 / 60;
-
-      if (Turnaround < 0) {
-        console.log(Turnaround);
-      }
-
-      if (Turnaround == NaN) {
-        Turnaround = '';
-      };
-      return Math.floor(Turnaround);
     };
   }
 };

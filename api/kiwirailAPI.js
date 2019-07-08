@@ -4,7 +4,6 @@ const https = require('https');
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 
-
 module.exports = {
   // taking a crack at the new API
   geVisVehicles: function(token) {

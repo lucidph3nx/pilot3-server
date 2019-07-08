@@ -3,7 +3,7 @@ moment().tz('Pacific/Auckland').format();
 const asRequiredStaff = require('./../functions/asRequiredStaff');
 const getDayRosterFromShift = require('./../functions/dayRosterFromShift');
 const getStaffPhotoFromId = require('./../functions/staffImage');
-const getRunningSheetForStation = require('./../functions/runningSheetForStation').default;
+const getRunningSheetForStation = require('./../functions/runningSheetForStation');
 const vdsRosterAPI = require('./vdsRosterAPI');
 const compassAPI = require('./compassAPI');
 const path = require('path');

@@ -30,7 +30,7 @@ const current = {
 };
 // let geVisToken = [undefined, moment('1970-01-01')];
 //  for live debugging, put the key here and update time to less than an hour
-let geVisToken = ['fMRfXA5Ir2CqnU14r6NARaZYEqfYtEUAojILjewTMbY.', moment('2019-07-04 16:00:00')];
+let geVisToken = ['0vcrmTW9UekTdaJ6EoSrd4pJKekmRDn-OiMMTLibYhM.', moment('2019-07-08 16:00:00')];
 let geVisTokenRetrievalInProgress = false;
 
 // =======API=======
@@ -96,22 +96,23 @@ function refreshData() {
         }
 
         pilotLog('GeVis Vehicles loaded ok');
-      }).catch((error) => {
-        console.log(error);
-        pilotLog(error);
-        if (error == 'GeVis Token Invalid Or Expired' && !geVisTokenRetrievalInProgress) {
-          geVisTokenRetrievalInProgress = true;
-          pilotLog('GeVis Auth Token Retrival Begun');
-          puppeteerOps.getGeVisToken().then((result) => {
-            geVisTokenRetrievalInProgress = false;
-            geVisToken = result;
-            pilotLog('GeVis Auth Token Retrieved Ok');
-          }).catch((error) => {
-            geVisTokenRetrievalInProgress = false;
-            pilotLog('GeVis token retreval ' + error);
-          });
-        }
       });
+      // .catch((error) => {
+      //   console.log(error);
+      //   pilotLog(error);
+      //   if (error == 'GeVis Token Invalid Or Expired' && !geVisTokenRetrievalInProgress) {
+      //     geVisTokenRetrievalInProgress = true;
+      //     pilotLog('GeVis Auth Token Retrival Begun');
+      //     puppeteerOps.getGeVisToken().then((result) => {
+      //       geVisTokenRetrievalInProgress = false;
+      //       geVisToken = result;
+      //       pilotLog('GeVis Auth Token Retrieved Ok');
+      //     }).catch((error) => {
+      //       geVisTokenRetrievalInProgress = false;
+      //       pilotLog('GeVis token retreval ' + error);
+      //     });
+      //   }
+      // });
     }
   };
   // roster duties list, updates every 10 minutes
@@ -152,6 +153,14 @@ function refreshData() {
       current.tripSheet = getCurrentTripSheet(result);
       timetableLastUpdated = moment();
       pilotLog('Compass timetable loaded ok');
+      // write to file
+      // const fs = require('fs');
+      // const jsonContent = JSON.stringify(current.timetable);
+      // fs.writeFile('./timetable.json', jsonContent, 'utf8', function(err) {
+      //   if (err) {
+      //     return console.log(err);
+      //   }
+      // });
     }).catch((error) => {
       console.log(error);
     });

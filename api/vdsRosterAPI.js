@@ -1,76 +1,73 @@
 // ======Authentication credentials=======
 const credentials = require('../credentials');
-const Sequelize = require('sequelize');
-const sequelize = new Sequelize(credentials.VDSSQL.database,
-    credentials.VDSSQL.username,
-    credentials.VDSSQL.password, {
-      logging: false,
-      host: credentials.VDSSQL.host,
-      dialect: 'mssql',
-      options: {
-        encrypt: true,
-      },
-      pool: {
-        max: 5,
-        min: 0,
-        acquire: 30000,
-        idle: 10000,
-      },
-    });
+const knex = require('knex')({
+  client: 'mssql',
+  connection: {
+    user: credentials.VDSSQL.username,
+    password: credentials.VDSSQL.password,
+    server: credentials.VDSSQL.host,
+    database: credentials.VDSSQL.database,
+    options: {
+      encrypt: true,
+    },
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000,
+    },
+  },
+});
+
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 
 module.exports = {
   // returns current datetime and object with todays VDS roster per trip
-  rosterDuties: function rosterDuties() {
+  rosterDuties: function() {
     return new Promise((resolve, reject) => {
       const today = moment().format('YYYY-MM-DD');
-      const rosterQueryString = `
-            DECLARE @ThisDate datetime;
-            SET @ThisDate = '`+today+`'
-            SELECT * FROM [VDS_TDW].[WEBSN].[actualDuties]
-            WHERE [date] = @ThisDate
-            ORDER BY [date], [staffId], [minutesFrom]
-        `;
       const currentRoster = [];
       let serviceRoster = {};
-      sequelize.query(rosterQueryString)
+      knex.select()
+          .table('WEBSN.actualDuties')
+          .where('date', today)
+          .orderBy('date', 'staffId', 'minutesFrom')
           .then(function(response) {
-            for (trp = 0; trp < response[0].length; trp++) {
+            for (trp = 0; trp < response.length; trp++) {
               serviceRoster = {};
               let staffId;
               let staffName;
               let shiftCovered;
-              if (response[0][trp].uncovered !== 1) {
-                staffId = response[0][trp].staffId.trim();
-                staffName = response[0][trp].firstName.trim() + ' ' + response[0][trp].lastName.trim();
+              if (response[trp].uncovered !== 1) {
+                staffId = response[trp].staffId.trim();
+                staffName = response[trp].firstName.trim() + ' ' + response[trp].lastName.trim();
                 shiftCovered = true;
               } else {
                 staffId = '';
                 staffName = '';
                 shiftCovered = false;
               }
-              if (response[0][trp].dutyName !== null && response[0][trp].dutyType
-                    !== null && response[0][trp].dutyType !== 'REC') {
+              if (response[trp].dutyName !== null && response[trp].dutyType
+                    !== null && response[trp].dutyType !== 'REC') {
                 serviceRoster = {
-                  shiftId: response[0][trp].shiftName.trim(),
-                  shiftType: response[0][trp].shiftType.trim(),
+                  shiftId: response[trp].shiftName.trim(),
+                  shiftType: response[trp].shiftType.trim(),
                   staffId: staffId,
                   staffName: staffName,
-                  dutyName: response[0][trp].dutyName.trim(),
-                  dutyType: response[0][trp].dutyType.trim(),
-                  dutyStartTime: mpm2m(response[0][trp].minutesFrom),
-                  dutyStartTimeString: mpm2m(response[0][trp].minutesFrom).format('HH:mm'),
-                  dutyEndTime: mpm2m(response[0][trp].minutesTo),
-                  dutyEndTimeString: mpm2m(response[0][trp].minutesTo).format('HH:mm'),
+                  dutyName: response[trp].dutyName.trim(),
+                  dutyType: response[trp].dutyType.trim(),
+                  dutyStartTime: mpm2m(response[trp].minutesFrom),
+                  dutyStartTimeString: mpm2m(response[trp].minutesFrom).format('HH:mm'),
+                  dutyEndTime: mpm2m(response[trp].minutesTo),
+                  dutyEndTimeString: mpm2m(response[trp].minutesTo).format('HH:mm'),
                   shiftCovered: shiftCovered,
                 };
                 currentRoster.push(serviceRoster);
               };
             };
             resolve(currentRoster);
-          }
-          );
+          });
     });
 
     /**
@@ -93,21 +90,19 @@ module.exports = {
   dayRosterStatus: function dayStatus(date) {
     return new Promise((resolve, reject) => {
       const searchdate = moment(date).format('YYYY-MM-DD');
-      const rosterQueryString = `
-            SELECT * FROM [VDS_TDW].[WEBSN].[dayStatus] WHERE [date] = '`+searchdate+`'
-        `;
       const dayStatus = [];
       let rosterStatus = {};
-
-      sequelize.query(rosterQueryString)
+      knex.select()
+          .table('WEBSN.dayStatus')
+          .where('date', searchdate)
           .then(function(response) {
-            for (st = 0; st < response[0].length; st++) {
+            for (st = 0; st < response.length; st++) {
               rosterStatus = {};
               rosterStatus = {
-                staffType: response[0][st].staffType.trim(),
-                location: response[0][st].location.trim(),
-                counterType: response[0][st].counterType.trim(),
-                count: response[0][st].count,
+                staffType: response[st].staffType.trim(),
+                location: response[st].location.trim(),
+                counterType: response[st].counterType.trim(),
+                count: response[st].count,
               };
               dayStatus.push(rosterStatus);
             };
@@ -120,22 +115,20 @@ module.exports = {
   uncoveredShifts: function uncoveredShifts(date) {
     return new Promise((resolve, reject) => {
       const searchdate = moment(date).format('YYYY-MM-DD');
-      const rosterQueryString = `
-            SELECT * FROM [VDS_TDW].[WEBSN].[uncoveredShifts] WHERE [date] = '`+searchdate+`'
-        `;
       const uncoveredShifts = [];
       let shift = {};
-
-      sequelize.query(rosterQueryString)
+      knex.select()
+          .table('WEBSN.uncoveredShifts')
+          .where('date', searchdate)
           .then(function(response) {
-            for (st = 0; st < response[0].length; st++) {
+            for (st = 0; st < response.length; st++) {
               shift = {};
               shift = {
-                shiftName: response[0][st].shiftName.trim(),
-                staffType: response[0][st].staffType.trim(),
-                startTime: mpm2m(response[0][st].minutesStart).format('HH:mm'),
-                endTime: mpm2m(response[0][st].minutesEnd).format('HH:mm'),
-                location: response[0][st].location.trim(),
+                shiftName: response[st].shiftName.trim(),
+                staffType: response[st].staffType.trim(),
+                startTime: mpm2m(response[st].minutesStart).format('HH:mm'),
+                endTime: mpm2m(response[st].minutesEnd).format('HH:mm'),
+                location: response[st].location.trim(),
               };
               uncoveredShifts.push(shift);
             };
@@ -161,21 +154,21 @@ module.exports = {
   },
   visboardHeadcount: function visboardHeadcount() {
     return new Promise((resolve, reject) => {
-      const rosterQueryString = 'SELECT * FROM [VDS_TDW].[WEBSN].[visBoardHeadcount] ORDER BY 3,5,6';
       const headcounts = [];
       let entry = {};
-
-      sequelize.query(rosterQueryString)
+      knex.select()
+          .table('WEBSN.visBoardHeadcount')
+          .orderBy('begining', 'position', 'location')
           .then(function(response) {
-            for (st = 0; st < response[0].length; st++) {
+            for (st = 0; st < response.length; st++) {
               entry = {};
               entry = {
-                year: response[0][st].year,
-                fortnight: response[0][st].fortnight,
-                begining: response[0][st].begining,
-                count: response[0][st].count,
-                position: response[0][st].position,
-                location: response[0][st].location,
+                year: response[st].year,
+                fortnight: response[st].fortnight,
+                begining: response[st].begining,
+                count: response[st].count,
+                position: response[st].position,
+                location: response[st].location,
               };
               headcounts.push(entry);
             };
@@ -186,20 +179,21 @@ module.exports = {
   },
   visboardAnnualLeave: function visboardAnnualLeave() {
     return new Promise((resolve, reject) => {
-      const rosterQueryString = 'SELECT * FROM [VDS_TDW].[WEBSN].[visBoardAnnualLeave] ORDER BY 3,5,6';
       const annualLeave = [];
       let entry = {};
-      sequelize.query(rosterQueryString)
+      knex.select()
+          .table('WEBSN.visBoardAnnualLeave')
+          .orderBy('begining', 'position', 'location')
           .then(function(response) {
-            for (st = 0; st < response[0].length; st++) {
+            for (st = 0; st < response.length; st++) {
               entry = {};
               entry = {
-                year: response[0][st].year,
-                fortnight: response[0][st].fortnight,
-                begining: response[0][st].begining,
-                count: response[0][st].count,
-                position: response[0][st].position,
-                location: response[0][st].location,
+                year: response[st].year,
+                fortnight: response[st].fortnight,
+                begining: response[st].begining,
+                count: response[st].count,
+                position: response[st].position,
+                location: response[st].location,
               };
               annualLeave.push(entry);
             };
@@ -210,20 +204,21 @@ module.exports = {
   },
   visboardSickness: function visboardSickness() {
     return new Promise((resolve, reject) => {
-      const rosterQueryString = 'SELECT * FROM [VDS_TDW].[WEBSN].[visBoardSickness] ORDER BY 3,5,6';
       const sickness = [];
       let entry = {};
-      sequelize.query(rosterQueryString)
+      knex.select()
+          .table('WEBSN.visBoardSickness')
+          .orderBy('begining', 'position', 'location')
           .then(function(response) {
-            for (st = 0; st < response[0].length; st++) {
+            for (st = 0; st < response.length; st++) {
               entry = {};
               entry = {
-                year: response[0][st].year,
-                fortnight: response[0][st].fortnight,
-                begining: response[0][st].begining,
-                count: response[0][st].count,
-                position: response[0][st].position,
-                location: response[0][st].location,
+                year: response[st].year,
+                fortnight: response[st].fortnight,
+                begining: response[st].begining,
+                count: response[st].count,
+                position: response[st].position,
+                location: response[st].location,
               };
               sickness.push(entry);
             };
@@ -234,20 +229,21 @@ module.exports = {
   },
   visboardAltDuties: function visboardAltDuties() {
     return new Promise((resolve, reject) => {
-      const rosterQueryString = 'SELECT * FROM [VDS_TDW].[WEBSN].[visBoardAltDuties] ORDER BY 3,5,6';
       const altDuties = [];
       let entry = {};
-      sequelize.query(rosterQueryString)
+      knex.select()
+          .table('WEBSN.visBoardAltDuties')
+          .orderBy('begining', 'position', 'location')
           .then(function(response) {
-            for (st = 0; st < response[0].length; st++) {
+            for (st = 0; st < response.length; st++) {
               entry = {};
               entry = {
-                year: response[0][st].year,
-                fortnight: response[0][st].fortnight,
-                begining: response[0][st].begining,
-                count: response[0][st].count,
-                position: response[0][st].position,
-                location: response[0][st].location,
+                year: response[st].year,
+                fortnight: response[st].fortnight,
+                begining: response[st].begining,
+                count: response[st].count,
+                position: response[st].position,
+                location: response[st].location,
               };
               altDuties.push(entry);
             };

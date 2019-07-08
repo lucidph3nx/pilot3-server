@@ -1,45 +1,49 @@
-const Sequelize = require('sequelize');
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 // ======Authentication credentials=======
 const credentials = require('../credentials');
-
+const knex = require('knex')({
+  client: 'mssql',
+  connection: {
+    user: credentials.CompassSQL.username,
+    password: credentials.CompassSQL.password,
+    server: credentials.CompassSQL.host,
+    database: credentials.CompassSQL.database,
+    options: {
+      encrypt: true,
+    },
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000,
+    },
+  },
+});
 module.exports = {
   // returns current timetable stop times from Compass DB
   currentTimetable: function() {
     return new Promise((resolve, reject) => {
-      let timetableQueryString = 'SELECT * FROM [Compass].[dbo].[todaysTimetable]';
-      timetableQueryString += 'ORDER BY [blockId], [serviceDeparts], [serviceId], [stationSequence]';
-      const sequelize = new Sequelize(
-          credentials.CompassSQL.database,
-          credentials.CompassSQL.username,
-          credentials.CompassSQL.password,
-          {
-            logging: false,
-            host: credentials.CompassSQL.host,
-            dialect: 'mssql',
-            options: {
-              encrypt: false,
-            },
-          });
       const currentTimetable = [];
       let timingPoint = {};
-      sequelize.query(timetableQueryString)
+      knex.select()
+          .table('dbo.todaysTimetable')
+          .orderBy('blockId', 'serviceDeparts', 'serviceId', 'stationSequence')
           .then(function(response) {
-            for (tp = 0; tp < response[0].length; tp++) {
+            for (tp = 0; tp < response.length; tp++) {
               timingPoint = {};
-              if (response[0][tp].serviceId !== null) {
+              if (response[tp].serviceId !== null) {
                 timingPoint = {
-                  serviceId: response[0][tp].serviceId,
-                  line: response[0][tp].line,
-                  direction: response[0][tp].direction,
-                  blockId: response[0][tp].blockId,
-                  consist: response[0][tp].units,
-                  arrives: cps2m(response[0][tp].arrives),
-                  departs: cps2m(response[0][tp].departs),
-                  station: response[0][tp].station,
-                  stationSequence: (response[0][tp].stationSequence -1),
-                  dayType: response[0][tp].dayType,
+                  serviceId: response[tp].serviceId,
+                  line: response[tp].line,
+                  direction: response[tp].direction,
+                  blockId: response[tp].blockId,
+                  consist: response[tp].units,
+                  arrives: cps2m(response[tp].arrives),
+                  departs: cps2m(response[tp].departs),
+                  station: response[tp].station,
+                  stationSequence: (response[tp].stationSequence -1),
+                  dayType: response[tp].dayType,
                 };
                 currentTimetable.push(timingPoint);
               };
@@ -64,36 +68,18 @@ module.exports = {
     };
   },
   busReplacements: function() {
-    const Sequelize = require('sequelize');
-    const moment = require('moment-timezone');
-    moment().tz('Pacific/Auckland').format();
-
     return new Promise((resolve, reject) => {
-      const busReplacementQueryString = 'SELECT * FROM dbo.[todaysBusReplacements]';
-      const sequelize = new Sequelize(
-          credentials.CompassSQL.database,
-          credentials.CompassSQL.username,
-          credentials.CompassSQL.password,
-          {
-            logging: false,
-            host: credentials.CompassSQL.host,
-            dialect: 'mssql',
-            options: {
-              encrypt: false,
-            },
-          });
-
       const currentBusReplacedList = [];
       let replacementOccurance = {};
-
-      sequelize.query(busReplacementQueryString)
+      knex.select()
+          .table('dbo.todaysBusReplacements')
           .then(function(response) {
-            for (tp = 0; tp < response[0].length; tp++) {
+            for (tp = 0; tp < response.length; tp++) {
               replacementOccurance = {};
-              if (response[0][tp].serviceId !== null) {
+              if (response[tp].serviceId !== null) {
                 replacementOccurance = {
-                  serviceId: response[0][tp].serviceId,
-                  replacementType: response[0][tp].busReplaced,
+                  serviceId: response[tp].serviceId,
+                  replacementType: response[tp].busReplaced,
                 };
                 currentBusReplacedList.push(replacementOccurance);
               };
@@ -105,26 +91,11 @@ module.exports = {
   },
   // returns current peak reliability and punctuality stats
   currentPeakPerformance: function() {
-    const Sequelize = require('sequelize');
-    const moment = require('moment-timezone');
-    moment().tz('Pacific/Auckland').format();
     return new Promise((resolve, reject) => {
-      const currentPeakPerformanceQueryString = 'SELECT * FROM [Compass].[dbo].[currentPeakOverall]';
-      const sequelize = new Sequelize(
-          credentials.CompassSQL.database,
-          credentials.CompassSQL.username,
-          credentials.CompassSQL.password,
-          {
-            logging: false,
-            host: credentials.CompassSQL.host,
-            dialect: 'mssql',
-            options: {
-              encrypt: false,
-            },
-          });
       const currentPeakPerformance = [];
       let linePerformance = {};
-      sequelize.query(currentPeakPerformanceQueryString)
+      knex.select()
+          .table('dbo.currentPeakOverall')
           .then(function(response) {
             for (lp = 0; lp < response[0].length; lp++) {
               linePerformance = {};

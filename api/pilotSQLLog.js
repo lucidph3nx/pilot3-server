@@ -1,6 +1,24 @@
 const Sequelize = require('sequelize');
-
-
+// ======Authentication credentials=======
+const credentials = require('../credentials');
+const knex = require('knex')({
+  client: 'mssql',
+  connection: {
+    user: credentials.PilotSQL.username,
+    password: credentials.PilotSQL.password,
+    server: credentials.PilotSQL.host,
+    database: credentials.PilotSQL.database,
+    options: {
+      encrypt: true,
+    },
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000,
+    },
+  },
+});
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 const sequelize = new Sequelize({
