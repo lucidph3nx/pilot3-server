@@ -48,15 +48,6 @@ let busReplacementsLastUpdated;
 let rosterDutiesLastUpdated;
 let rosterStatusLastUpdated;
 
-// =======users system=======
-// let cors = require('cors');
-// let bodyParser = require('body-parser');
-// let expressJwt = require('express-jwt');
-// let config = require('config.json');
-// app.use(cors());
-// app.use(bodyParser.urlencoded({ extended: false }));
-// app.use(bodyParser.json());
-
 // begin server
 refreshData();
 /**

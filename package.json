@@ -10,18 +10,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "angular-chart.js": "^1.1.1",
-    "body-parser": "^1.18.3",
     "express": "^4.16.3",
     "knex": "^0.18.3",
-    "lodash": "^4.17.11",
     "moment-timezone": "^0.5.26",
     "mssql": "^4.1.0",
     "npm": "^6.10.0",
-    "promise": "^8.0.1",
-    "puppeteer": "^1.18.1",
-    "query-string": "^4.3.4",
-    "tedious": "^2.0.0"
+    "puppeteer": "^1.18.1"
   },
   "devDependencies": {
     "eslint": "^6.0.1",
