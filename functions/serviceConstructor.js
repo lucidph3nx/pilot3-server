@@ -1,9 +1,6 @@
 'use strict';
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
-// supporting data files
-const stationGeoboundaries = require('../Data/StationGeoboundaries');
-const stationMeterage = require('../Data/StationMeterage');
 // supporting functions
 const meterageCalculation = require('./meterageCalculation');
 const delayCalculation = require('./delayCalculation');
@@ -41,9 +38,13 @@ module.exports = class Service {
     this.line = linearLogic.getMetlinkLineFromId(this.serviceId);
     this.kiwirailLineId = linearLogic.convertMetlinkLinetoKiwirailLine(this.line);
     this.operator = linearLogic.getOperatorFromServiceId(this.serviceId);
+    if (this.operator.kiwirail && this.kiwirailLineId == '') {
+      this.kiwirailLineId = linearLogic.getKiwirailLineFromServiceId(this.serviceId);
+    }
     this.thirdParty = (this.operator !== 'TDW');
     this.direction = linearLogic.getDirectionFromId(this.serviceId);
     this.linkedVehicle = vehicle;
+    this.linkedVehicleId = this.linkedVehicle ? this.linkedVehicle.vehicleId : '';
     this.secondVehicle = secondVehicle;
     if (fromTimetable) {
       this.locationAge = 0;
@@ -58,20 +59,23 @@ module.exports = class Service {
       };
       this.moving = false;
       this.varianceKiwirail = 0;
-      this.lastStation = '';
-      this.lastStationCurrent = false;
     } else {
       this.locationAge = this.linkedVehicle.locationAgeSeconds;
       this.location = this.linkedVehicle.location;
+      this.location.direction = this.direction;
       this.moving = (this.location.speed >= 1);
       this.varianceKiwirail = this.linkedVehicle.varianceKiwirail;
-      const lastStationDetails = getlaststationDetails(this.location);
-      this.lastStation = lastStationDetails.stationId;
-      this.lastStationCurrent = lastStationDetails.stationCurrent;
     }
     this.location.kiwirailLineId = this.kiwirailLineId;
     this.location = meterageCalculation.getmeterage(this.location);
-
+    const lastStationDetails = linearLogic.getlaststationDetails(this.location);
+    if (lastStationDetails) {
+      this.lastStation = lastStationDetails.stationId;
+      this.lastStationCurrent = lastStationDetails.stationCurrent;
+    } else {
+      this.lastStation = '';
+      this.lastStationCurrent = false;
+    };
     // several functions downstream depend on -1 meterage
     // as universal invalid meterage
     if (this.location.meterage == ''
@@ -84,7 +88,7 @@ module.exports = class Service {
         this.thirdParty,
         this.serviceDescription);
     this.hasDeparted = (this.currenttime > this.timetable.departs);
-    if (!IncorrectLine) {
+    if (!this.IncorrectLine) {
       this.scheduleVariance = delayCalculation.getScheduleVariance(this.thirdParty,
           this.currenttime,
           this.direction,
@@ -147,10 +151,10 @@ module.exports = class Service {
       stopProcessing = true;
     };
     // filter out things found from timetable
-    if (this.linkedUnit == '') {
+    if (this.linkedVehicle == undefined) {
       let busReplaced = false;
-      for (let svc = 0; svc < currentBusReplacementList.length; svc++) {
-        if (currentBusReplacementList[svc].serviceId == this.serviceId) {
+      for (let svc = 0; svc < current.busReplacementList.length; svc++) {
+        if (current.busReplacementList[svc].serviceId == this.serviceId) {
           busReplaced = true;
         }
       }
@@ -307,55 +311,6 @@ module.exports = class Service {
     };
     this.statusMessage = StatusMessage;
     this.statusArray = statusArray;
-    this.web = function() {
-      // generate slim version of service for transmition over web
-      const serviceLite = {
-        serviceId: this.serviceId,
-        location: this.location,
-        timetable: this.timetable,
-        blockId: this.blockId,
-        line: this.line,
-        kiwirailLineId: this.kiwirailLineId,
-        kiwirail: this.thirdParty,
-        direction: this.direction,
-        linkedUnit: this.linkedUnit,
-        cars: this.cars,
-        speed: this.speed,
-        locationAge: this.locationAge,
-        locationAgeSeconds: this.locationAgeSeconds,
-        varianceFriendly: this.varianceFriendly,
-        scheduleVariance: this.scheduleVariance,
-        varianceKiwirail: this.varianceKiwirail,
-        departs: this.departsString,
-        origin: this.origin,
-        arrives: this.arrivesString,
-        destination: this.destination,
-        lastStation: this.lastStation,
-        lastStationCurrent: this.lastStationCurrent,
-        LastService: this.LastService,
-        hasNextService: this.hasNextService,
-        nextService: this.nextService,
-        nextTime: this.NextTimeString,
-        LE: this.crew.LE.staffName,
-        LEExists: this.crew.LEExists,
-        LEShift: this.crew.LE.shiftId,
-        LENextService: this.crew.LE.nextService.serviceId,
-        LENextServiceTime: this.crew.LE.nextService.serviceDepartsString,
-        TM: this.crew.TM.staffName,
-        TMExists: this.crew.TMExists,
-        TMShift: this.crew.TM.shiftId,
-        TMNextService: this.crew.TM.nextService.serviceId,
-        TMNextServiceTime: this.crew.TM.nextService.serviceDepartsString,
-        passengerOperatorList: this.crew.PO,
-        POExists: this.crew.POExists,
-        statusMessage: this.statusMessage,
-        statusArray: this.statusArray,
-        lat: this.lat,
-        long: this.lon,
-        meterage: this.meterage,
-      };
-      return serviceLite;
-    };
     /**
  * performs a look up of the current timetable
  * returns details about the service Timetable
@@ -434,53 +389,6 @@ module.exports = class Service {
           };
           return [origin, destination];
         };
-      };
-    };
-    /** looks at location on line and works out
-     *  given the direction,
-     *  what the previous station would be
-     *  and if location is current Station
-     * @param {Object} location - location object
-     * @return {object} - last Station Details
-     */
-    function getlaststationDetails(location) {
-      const lastStation = {
-        stationId: '',
-        stationCurrent: false,
-      };
-      // abort sequence for invalid meterages
-      if (location.meterage === -1) {
-        return lastStation;
-      }
-      // checks lat long for current stations first
-      for (let j = 0; j < stationGeoboundaries.length; j++) {
-        const withinBoundary = (
-          location.long > stationGeoboundaries[j].west
-          && location.long < stationGeoboundaries[j].east
-          && location.lat < stationGeoboundaries[j].north
-          && location.lat > stationGeoboundaries[j].south);
-        if (withinBoundary) {
-          lastStation.stationId = stationGeoboundaries[j].station_id;
-          lastStation.stationCurrent = true;
-          break;
-        }
-      };
-      // works out last station based on line, direction and meterage
-      if (!lastStation.stationCurrent) {
-        // eslint-disable-next-line max-len
-        const filteredStationMeterage = stationMeterage.filter((stationMeterage) => stationMeterage.kiwirailLineId == location.kiwirailLineId);
-        if (location.direction == 'DOWN') {
-          filteredStationMeterage.reverse();// flip order
-        };
-        for (let m = 0; m < filteredStationMeterage.length; m++) {
-          const prevStn = filteredStationMeterage[m - 1];
-          const station = filteredStationMeterage[m];
-          // loop until past meterage then use last station
-          if (prevStn !== undefined && station.meterage >= location.meterage) {
-            lastStation.stationId = prevStn.stationId;
-            break;
-          }
-        }
       };
     };
     /**
@@ -596,4 +504,58 @@ module.exports = class Service {
       return crewDetails;
     };
   }
+
+  /**
+   * generates a slim version of service for transmission over web
+   * this is the legacy version to work with the old client
+   * @return {object} service object
+   */
+  webLegacy() {
+    const serviceLite = {
+      serviceId: this.serviceId,
+      location: this.location,
+      timetable: this.timetable,
+      blockId: this.blockId,
+      line: this.line,
+      kiwirailLineId: this.kiwirailLineId,
+      kiwirail: this.thirdParty,
+      direction: this.direction,
+      linkedUnit: this.linkedVehicle,
+      cars: this.cars,
+      speed: this.speed,
+      locationAge: this.locationAge,
+      locationAgeSeconds: this.locationAgeSeconds,
+      varianceFriendly: this.varianceFriendly,
+      scheduleVariance: this.scheduleVariance,
+      varianceKiwirail: this.varianceKiwirail,
+      departs: this.departsString,
+      origin: this.origin,
+      arrives: this.arrivesString,
+      destination: this.destination,
+      lastStation: this.lastStation,
+      lastStationCurrent: this.lastStationCurrent,
+      LastService: this.LastService,
+      hasNextService: this.hasNextService,
+      nextService: this.nextService,
+      nextTime: this.NextTimeString,
+      LE: this.crew.LE.staffName,
+      LEExists: this.crew.LEExists,
+      LEShift: this.crew.LE.shiftId,
+      LENextService: this.crew.LE.nextService.serviceId,
+      LENextServiceTime: this.crew.LE.nextService.serviceDepartsString,
+      TM: this.crew.TM.staffName,
+      TMExists: this.crew.TMExists,
+      TMShift: this.crew.TM.shiftId,
+      TMNextService: this.crew.TM.nextService.serviceId,
+      TMNextServiceTime: this.crew.TM.nextService.serviceDepartsString,
+      passengerOperatorList: this.crew.PO,
+      POExists: this.crew.POExists,
+      statusMessage: this.statusMessage,
+      statusArray: this.statusArray,
+      lat: this.lat,
+      long: this.lon,
+      meterage: this.meterage,
+    };
+    return serviceLite;
+  };
 };

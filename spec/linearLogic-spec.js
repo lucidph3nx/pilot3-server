@@ -39,6 +39,8 @@ describe('get prefix from serviceId', function() {
     expect(serviceIdPrefix).toBe('2');
     serviceIdPrefix = linearLogic.getPrefixFromServiceId('F02');
     expect(serviceIdPrefix).toBe('F');
+    serviceIdPrefix = linearLogic.getPrefixFromServiceId('649');
+    expect(serviceIdPrefix).toBe('6');
   });
 });
 
@@ -81,6 +83,21 @@ describe('get operator from serviceId', function() {
   });
 });
 
+describe('get kiwirail line id from serviceId', function() {
+  it('for service ID, work out kiwirail line id', function() {
+    let kiwirailLine = linearLogic.getKiwirailLineFromServiceId('201');
+    expect(kiwirailLine).toBe('NIMT');
+    kiwirailLine = linearLogic.getKiwirailLineFromServiceId('WK06');
+    expect(kiwirailLine).toBe('NIMT');
+    kiwirailLine = linearLogic.getKiwirailLineFromServiceId('211H');
+    expect(kiwirailLine).toBe('NIMT');
+    kiwirailLine = linearLogic.getKiwirailLineFromServiceId('649');
+    expect(kiwirailLine).toBe('WRAPA');
+    kiwirailLine = linearLogic.getKiwirailLineFromServiceId('WT01');
+    expect(kiwirailLine).toBe('');
+  });
+});
+
 describe('get metlink line Id from serviceId', function() {
   it('for service ID, work out metlink line Id', function() {
     let metlinkLineId = linearLogic.getMetlinkLineFromId('2601');
@@ -110,6 +127,32 @@ describe('check correct line', function() {
       kiwirailLineId: 'JVILL',
     };
     expect(linearLogic.checkCorrectLine(thislocation)).toBe(true);
+  });
+});
+
+describe('get last station based on location', function() {
+  it('should correctly identify the last station based on the current location including direction', function() {
+    let thislocation = {
+      lat: -41.200228,
+      long: 174.820332,
+      kiwirailLineId: 'NIMT',
+      direction: 'DOWN',
+      meterage: '9948',
+    };
+    let stationDetails = linearLogic.getlaststationDetails(thislocation);
+    expect(stationDetails.stationId).toBe('TAKA');
+    expect(stationDetails.stationCurrent).toBe(false);
+
+    thislocation = {
+      lat: -40.876433,
+      long: 175.066357,
+      kiwirailLineId: 'NIMT',
+      direction: 'UP',
+      meterage: '55311',
+    };
+    stationDetails = linearLogic.getlaststationDetails(thislocation);
+    expect(stationDetails.stationId).toBe('WAIK');
+    expect(stationDetails.stationCurrent).toBe(true);
   });
 });
 

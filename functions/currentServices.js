@@ -30,7 +30,7 @@ module.exports = function(geVisVehicles, current) {
           vehicle,
           secondVehicle,
           current);
-      currentServices.push(service.web());
+      currentServices.push(service);
     };
   }
   //  get all timetabled services
@@ -71,7 +71,7 @@ module.exports = function(geVisVehicles, current) {
             service.statusMessage = 'Previous Service Delayed';
           }
         };
-        currentServices.push(service.web());
+        currentServices.push(service);
       }
     };
   };

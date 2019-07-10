@@ -1,6 +1,8 @@
 const nzRailConventions = require('../Data/nzRailConventions');
 const serviceIdlineAssociations = nzRailConventions.serviceIdlineAssociations;
 const lineNamesMetlinkKiwirail = nzRailConventions.lineNamesMetlinkKiwirail;
+const stationGeoboundaries = require('../data/stationGeoboundaries');
+const stationMeterage = require('../data/stationMeterage');
 const lineshapes = require('../Data/lineshapes');
 
 module.exports = {
@@ -48,6 +50,21 @@ module.exports = {
     return operator;
   },
   /**
+   * Takes a serviceId and works out the operator
+   * @param {string} serviceId
+   * @return {string} - operator
+   */
+  getKiwirailLineFromServiceId: function(serviceId) {
+    let kiwirailLine = '';
+    let serviceIdPrefix = module.exports.getPrefixFromServiceId(serviceId);
+    serviceIdPrefix = serviceIdPrefix.padStart(2, '0');
+
+    if (serviceIdlineAssociations.has(serviceIdPrefix)) {
+      kiwirailLine = serviceIdlineAssociations.get(serviceIdPrefix).kiwirailLineId;
+    }
+    return kiwirailLine;
+  },
+  /**
  * Takes a serviceId and works out the applicable prefix
  * @param {string} serviceId
  * @return {string} - serviceIdPrefix
@@ -63,6 +80,7 @@ module.exports = {
     switch (numcharId) {
       case 'CNN':
       case 'NNNC':
+      case 'NNN':
         serviceIdPrefix = serviceId.substring(0, 1);
         break;
       case 'NNNN':
@@ -143,6 +161,9 @@ module.exports = {
  * @return {boolean} - false if seems to be wrong line
  */
   checkCorrectLine: function(location) {
+    if (location.kiwirailLineId == '') {
+      return true;
+    };
     const distanceBetween2Points = module.exports.distanceBetween2Points;
     let correctLine = true;
     const thislocation = {
@@ -155,19 +176,18 @@ module.exports = {
     const otherLine = lineshapes.filter((lineshapes) => lineshapes.lineId !== kiwirailLineId);
     let closestPointThisLine = thisline[0];
     let closestPointOtherLine = otherLine[0];
-    for (i = 0; i < lineshapes.length; i++) {
-      if (lineshapes[i].lineId == kiwirailLineId) {
-        const distanceClosest = distanceBetween2Points(closestPointThisLine, thislocation);
-        const distanceThis = distanceBetween2Points(lineshapes[i], thislocation);
-        if (distanceThis < distanceClosest) {
-          closestPointThisLine = lineshapes[i];
-        }
-      } else if (lineshapes[i].lineId !== kiwirailLineId) {
-        const distanceClosest = distanceBetween2Points(closestPointOtherLine, thislocation);
-        const distanceThis = distanceBetween2Points(lineshapes[i], thislocation);
-        if (distanceThis < distanceClosest) {
-          closestPointOtherLine = lineshapes[i];
-        }
+    for (i = 0; i < thisline.length; i++) {
+      const distanceClosest = distanceBetween2Points(closestPointThisLine, thislocation);
+      const distanceThis = distanceBetween2Points(thisline[i], thislocation);
+      if (distanceThis < distanceClosest) {
+        closestPointThisLine = thisline[i];
+      }
+    }
+    for (i = 0; i < otherLine.length; i++) {
+      const distanceClosest = distanceBetween2Points(closestPointOtherLine, thislocation);
+      const distanceThis = distanceBetween2Points(otherLine[i], thislocation);
+      if (distanceThis < distanceClosest) {
+        closestPointOtherLine = otherLine[i];
       }
     }
     const distanceThisLine = distanceBetween2Points(closestPointThisLine, thislocation);
@@ -195,5 +215,61 @@ module.exports = {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const d = R * c;
     return d;
+  },
+  /** looks at location on line and works out
+   *  given the direction,
+   *  what the previous station would be
+   *  and if location is current Station
+   * @param {Object} location - location object
+   * @return {object} - last Station Details
+   */
+  getlaststationDetails: function(location) {
+    // default blank response
+    const lastStation = {
+      stationId: '',
+      stationCurrent: false,
+    };
+    // abort sequence for invalid meterages
+    if (location.meterage === -1) {
+      return lastStation;
+    }
+    // checks lat long for current stations first
+    for (let j = 0; j < stationGeoboundaries.length; j++) {
+      const withinBoundary = (
+        location.long > stationGeoboundaries[j].west
+        && location.long < stationGeoboundaries[j].east
+        && location.lat < stationGeoboundaries[j].north
+        && location.lat > stationGeoboundaries[j].south);
+      if (withinBoundary) {
+        lastStation.stationId = stationGeoboundaries[j].station_id;
+        lastStation.stationCurrent = true;
+        break;
+      }
+    };
+    // works out last station based on line, direction and meterage
+    if (!lastStation.stationCurrent) {
+      // eslint-disable-next-line max-len
+      let filteredStationMeterage = stationMeterage.filter((stationMeterage) => stationMeterage.kiwirailLineId == location.kiwirailLineId);
+      if (location.direction == 'DOWN') {
+        filteredStationMeterage = filteredStationMeterage.reverse();
+      };
+      for (let m = 0; m < filteredStationMeterage.length; m++) {
+        const prevStn = filteredStationMeterage[m];
+        const station = filteredStationMeterage[m+1];
+        // loop until past meterage then use last station
+        if (location.direction == 'DOWN') {
+          if (station.meterage <= location.meterage) {
+            lastStation.stationId = prevStn.stationId;
+            break;
+          }
+        } else {
+          if (station.meterage >= location.meterage) {
+            lastStation.stationId = prevStn.stationId;
+            break;
+          }
+        }
+      }
+    };
+    return lastStation;
   },
 };

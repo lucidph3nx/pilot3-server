@@ -45,7 +45,7 @@ describe('Get Schedule Variance', function() {
     currentTime.set('second', 35);
     currentTime.set('miliseconds', 0);
     let value = delayCalculation.getScheduleVariance(kiwirailBoolean, currentTime, direction, timetableDetails, location, locationAge);
-    expect(value.delay).toBe('1');
+    expect(value.delay).toBe(1);
     expect(value.delayFriendly).toBe('01:25');
 
     locationAge = 15;
@@ -54,7 +54,7 @@ describe('Get Schedule Variance', function() {
     currentTime.set('second', 55);
     currentTime.set('miliseconds', 0);
     value = delayCalculation.getScheduleVariance(kiwirailBoolean, currentTime, direction, timetableDetails, location, locationAge);
-    expect(value.delay).toBe('2');
+    expect(value.delay).toBe(2);
     expect(value.delayFriendly).toBe('01:47');
 
     /**

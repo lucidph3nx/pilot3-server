@@ -3,7 +3,7 @@ const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 
 // ======functions flags=======
-const pilotSQLLogging = false; // log to local MSSQL DB
+const pilotSQLLogging = true; // log to local MSSQL DB
 
 // ======supporting functions=======
 const getCurrentServices = require('./functions/currentServices');
@@ -20,6 +20,7 @@ const app = express();
 const current = {
   debug: false,
   services: [],
+  servicesWeb: [],
   unitList: [],
   carList: [],
   timetable: [],
@@ -30,7 +31,7 @@ const current = {
 };
 // let geVisToken = [undefined, moment('1970-01-01')];
 //  for live debugging, put the key here and update time to less than an hour
-let geVisToken = ['0vcrmTW9UekTdaJ6EoSrd4pJKekmRDn-OiMMTLibYhM.', moment('2019-07-08 16:00:00')];
+let geVisToken = ['slHGyJ8HV6872ciPNkhQDXlp6QrJ8XLJHZdpnPWK4vU.', moment('2019-07-10 15:00:00')];
 let geVisTokenRetrievalInProgress = false;
 
 // =======API=======
@@ -81,6 +82,9 @@ function refreshData() {
         if (!current.debug && current.rosterDuties !== [] && current.timetable !== []
           && current.tripSheet !== [] && geVisVehicles.features !== undefined) {
           current.services = getCurrentServices(geVisVehicles, current);
+          current.services.forEach((service) =>
+            current.servicesWeb.push(service.webLegacy())
+          );
         }
         if (current.debug) {
           current.services = dummyCurrentServices;
@@ -90,8 +94,14 @@ function refreshData() {
         current.carList = unitsAndCars[1];
         if (!current.debug && current.rosterDuties !== [] && current.timetable !== []
           && current.tripSheet !== [] && geVisVehicles.features !== undefined) {
-          if (pilotSQLLogging) {
-            PilotSQLLog.pilotSQLLog(current);
+          if (pilotSQLLogging && !current.debug) {
+            current.carList.forEach(function(vehicle) {
+              PilotSQLLog.logSQL.vehicle(vehicle);
+            });
+            current.services.forEach(function(service) {
+              PilotSQLLog.logSQL.service(service);
+            });
+            // PilotSQLLog.pilotSQLLog(current);
           }
         }
 

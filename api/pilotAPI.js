@@ -48,8 +48,8 @@ module.exports = function(app, current) {
   });
   // get list of all train servics that are active now
   app.get('/api/currentServices', (request, response, next) => {
-    const currentServices = current.services;
-    const apiResponse = {'Time': moment(), currentServices};
+    const currentServicesWeb = current.servicesWeb;
+    const apiResponse = {'Time': moment(), currentServicesWeb};
     response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
     response.write(JSON.stringify(apiResponse));
     response.end();

@@ -2,8 +2,8 @@
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 // supporting functions
-const stationGeoboundaries = require('../Data/StationGeoboundaries');
-const stationMeterage = require('../Data/stationMeterage');
+const stationGeoboundaries = require('../data/stationGeoboundaries');
+const stationMeterage = require('../data/stationMeterage');
 const meterageCalculation = require('./meterageCalculation');
 /**
  * represents a 'rail location'
@@ -159,20 +159,20 @@ module.exports = class Vehicle {
     this.serviceId = geVisVehicle.TRNID;
     this.serviceDescription = geVisVehicle.TRNDESCRP;
     this.varianceKiwirail = gevisvariancefix(geVisVehicle.DELAYTIME);
-    this.linked = function() {
-      if (this.serviceId) {
-        return true;
-      } else {
-        return false;
-      }
-    };
+    let templinked;
+    if (this.serviceId !== null) {
+      templinked = true;
+    } else {
+      templinked = false;
+    }
+    this.linked = templinked;
     this.secondVehicleId = function() {
       //  if EMU, work out what the second half of the train unit is
       let secondCar = '';
       if (this.equipmentDescription == 'Matangi Power Car') {
-        secondCar = 'FT' + this.VehicleId.substring(2, 6);
+        secondCar = 'FT' + this.vehicleId.substring(2, 6);
       } else if (this.equipmentDescription == 'Matangi Trailer Car') {
-        secondCar = 'FP' + this.VehicleId.substring(2, 6);
+        secondCar = 'FP' + this.vehicleId.substring(2, 6);
       }
       return secondCar;
     };

@@ -17,11 +17,10 @@
     "lodash": "^4.17.11",
     "moment-timezone": "^0.5.26",
     "mssql": "^4.1.0",
-    "npm": "^6.4.1",
+    "npm": "^6.10.0",
     "promise": "^8.0.1",
-    "puppeteer": "^1.10.0",
+    "puppeteer": "^1.18.1",
     "query-string": "^4.3.4",
-    "sequelize": "^4.41.0",
     "tedious": "^2.0.0"
   },
   "devDependencies": {
