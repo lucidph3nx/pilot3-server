@@ -31,7 +31,7 @@ const current = {
 };
 // let geVisToken = [undefined, moment('1970-01-01')];
 //  for live debugging, put the key here and update time to less than an hour
-let geVisToken = ['slHGyJ8HV6872ciPNkhQDXlp6QrJ8XLJHZdpnPWK4vU.', moment('2019-07-10 15:00:00')];
+let geVisToken = ['slHGyJ8HV6872ciPNkhQDXlp6QrJ8XLJHZdpnPWK4vU.', moment('2019-07-10 16:00:00')];
 let geVisTokenRetrievalInProgress = false;
 
 // =======API=======

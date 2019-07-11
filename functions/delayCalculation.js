@@ -86,11 +86,10 @@ module.exports = {
           }
         }
         // if station has still not been matched because train is beyond, use first station
-        if (stationDetails.stationId == '' &&
-        getMeterageOfStation(serviceTimetable[0].station) < trainMeterage) {
-          stationDetails.stationId = serviceTimetable[st].station;
-          stationDetails.time = moment(serviceTimetable[st].departs);
-          stationDetails.meterage = thisStationMeterage;
+        if (stationDetails.stationId == '' && getMeterageOfStation(serviceTimetable[0].station) < trainMeterage) {
+          stationDetails.stationId = serviceTimetable[0].station;
+          stationDetails.time = moment(serviceTimetable[0].departs);
+          stationDetails.meterage = getMeterageOfStation(serviceTimetable[0].station);
         }
       }
       if ((direction == 'DOWN' && nextOrPrev == 'next') || (direction == 'UP' && nextOrPrev == 'prev')) {

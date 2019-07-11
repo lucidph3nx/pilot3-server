@@ -6,6 +6,7 @@ const meterageCalculation = require('./meterageCalculation');
 const delayCalculation = require('./delayCalculation');
 const linearLogic = require('./linearLogic');
 const rosteringLogic = require('./rosteringLogic');
+const nzRailConventions = require('../data/nzRailConventions');
 
 /**
  * represents a train service
@@ -124,10 +125,12 @@ module.exports = class Service {
     // check next service exists
     if (nextServiceId == '') {
       this.hasNextService = false;
+      this.nextTurnaround = '';
+      this.nextService = '';
     } else {
       this.hasNextService = true;
-      this.nextTurnaround = rosteringLogic.getTurnaround(this.arrives, this.nextService.departs);
-      this.nextService = getTimetableDetails(this.lastServiceId, current.timetable, false, '');
+      this.nextTurnaround = rosteringLogic.common.getTurnaround(this.arrives, this.nextService.departs);
+      this.nextService = getTimetableDetails(this.nextServiceId, current.timetable, false, '');
     }
 
     // generate Status Messages
@@ -229,14 +232,14 @@ module.exports = class Service {
       stopProcessing = true;
     };
     // look at linking issues
-    if (this.locationAgeSeconds >= 180 && this.thirdParty == false) {
+    if (this.locationAge >= 180 && this.thirdParty == false) {
       // TempStatus = '';
-      const tunnelExceptionsList = nzRailConventions.tunnelExceptionsList;
+      const tunnelExceptionsList = nzRailConventions.tunnelTrackingExceptions;
       // identify tunnel tracking issues
       if (this.direction == 'UP') {
         for (const tunnel of tunnelExceptionsList) {
           if (tunnel.southStation == this.lastStation
-            && tunnel.secondsTheshold > this.locationAgeSeconds
+            && tunnel.secondsTheshold > this.locationAge
             && tunnel.line == this.line) {
             TempStatus = tunnel.statusMessage;
             statusArray[1] = TempStatus;
@@ -245,7 +248,7 @@ module.exports = class Service {
       } else if (this.direction == 'DOWN') {
         for (const tunnel of tunnelExceptionsList) {
           if (tunnel.northStation == this.lastStation
-            && tunnel.secondsTheshold > this.locationAgeSeconds
+            && tunnel.secondsTheshold > this.locationAge
             && tunnel.line == this.line) {
             TempStatus = tunnel.statusMessage;
             statusArray[1] = TempStatus;
@@ -344,9 +347,9 @@ module.exports = class Service {
         timetableDetails.blockId = timingPoints[0].blockId;
         timetableDetails.line = timingPoints[0].line;
         timetableDetails.direction = timingPoints[0].direction;
-        timetableDetails.origin = timingPoints[0].origin;
+        timetableDetails.origin = timingPoints[0].station;
         timetableDetails.departs = timingPoints[0].departs;
-        timetableDetails.destination = timingPoints[timingPoints.length - 1].destination;
+        timetableDetails.destination = timingPoints[timingPoints.length - 1].station;
         timetableDetails.arrives = timingPoints[timingPoints.length - 1].arrives;
       };
       if (kiwirailBoolean) {
@@ -513,31 +516,27 @@ module.exports = class Service {
   webLegacy() {
     const serviceLite = {
       serviceId: this.serviceId,
-      location: this.location,
-      timetable: this.timetable,
-      blockId: this.blockId,
+      blockId: this.timetable.blockId || '',
       line: this.line,
-      kiwirailLineId: this.kiwirailLineId,
       kiwirail: this.thirdParty,
       direction: this.direction,
-      linkedUnit: this.linkedVehicle,
-      cars: this.cars,
-      speed: this.speed,
-      locationAge: this.locationAge,
-      locationAgeSeconds: this.locationAgeSeconds,
+      linkedUnit: this.linkedVehicleId,
+      cars: this.timetable.consist || '',
+      speed: this.location.speed,
+      locationAge: this.linkedVehicle ? this.linkedVehicle.locationAge : '',
+      locationAgeSeconds: this.locationAge,
       varianceFriendly: this.varianceFriendly,
-      scheduleVariance: this.scheduleVariance,
+      scheduleVariance: this.scheduleVariance ? this.scheduleVariance.delayFriendly : '',
       varianceKiwirail: this.varianceKiwirail,
-      departs: this.departsString,
-      origin: this.origin,
-      arrives: this.arrivesString,
-      destination: this.destination,
+      departs: this.timetable.departs ? this.timetable.departs.format('HH:mm') : '',
+      origin: this.timetable.origin || '',
+      arrives: this.timetable.arrives ? this.timetable.arrives.format('HH:mm') : '',
+      destination: this.timetable.destination || '',
       lastStation: this.lastStation,
       lastStationCurrent: this.lastStationCurrent,
-      LastService: this.LastService,
       hasNextService: this.hasNextService,
-      nextService: this.nextService,
-      nextTime: this.NextTimeString,
+      nextService: this.nextService.serviceId || '',
+      nextTime: this.nextService.departs || '',
       LE: this.crew.LE.staffName,
       LEExists: this.crew.LEExists,
       LEShift: this.crew.LE.shiftId,
@@ -552,9 +551,9 @@ module.exports = class Service {
       POExists: this.crew.POExists,
       statusMessage: this.statusMessage,
       statusArray: this.statusArray,
-      lat: this.lat,
-      long: this.lon,
-      meterage: this.meterage,
+      lat: this.location.lat,
+      long: this.location.long,
+      meterage: this.location.meterage,
     };
     return serviceLite;
   };
