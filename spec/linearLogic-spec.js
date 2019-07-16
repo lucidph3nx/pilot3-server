@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const linearLogic = require('../functions/linearLogic');
 
 describe('convert metlink line ids to kiwirail line ids', function() {

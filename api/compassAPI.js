@@ -33,7 +33,7 @@ module.exports = {
           .orderBy('serviceId')
           .orderBy('stationSequence')
           .then(function(response) {
-            for (tp = 0; tp < response.length; tp++) {
+            for (let tp = 0; tp < response.length; tp++) {
               timingPoint = {};
               if (response[tp].serviceId !== null) {
                 timingPoint = {
@@ -49,8 +49,8 @@ module.exports = {
                   dayType: response[tp].dayType,
                 };
                 currentTimetable.push(timingPoint);
-              };
-            };
+              }
+            }
             resolve(currentTimetable);
           }
           );
@@ -68,7 +68,7 @@ module.exports = {
       thisMoment.set('second', compasstime.substring(4, 6));
       thisMoment.set('miliseconds', 0);
       return thisMoment;
-    };
+    }
   },
   busReplacements: function() {
     return new Promise((resolve, reject) => {
@@ -77,7 +77,7 @@ module.exports = {
       knex.select()
           .table('dbo.todaysBusReplacements')
           .then(function(response) {
-            for (tp = 0; tp < response.length; tp++) {
+            for (let tp = 0; tp < response.length; tp++) {
               replacementOccurance = {};
               if (response[tp].serviceId !== null) {
                 replacementOccurance = {
@@ -85,8 +85,8 @@ module.exports = {
                   replacementType: response[tp].busReplaced,
                 };
                 currentBusReplacedList.push(replacementOccurance);
-              };
-            };
+              }
+            }
             resolve(currentBusReplacedList);
           }
           );
@@ -100,7 +100,7 @@ module.exports = {
       knex.select()
           .table('dbo.currentPeakOverall')
           .then(function(response) {
-            for (lp = 0; lp < response[0].length; lp++) {
+            for (let lp = 0; lp < response[0].length; lp++) {
               linePerformance = {};
               linePerformance = {
                 date: response[0][lp].date,
@@ -113,7 +113,7 @@ module.exports = {
                 percentReliabilityFailure: parseFloat(response[0][lp].percentReliabilityFailure.toFixed(1)),
               };
               currentPeakPerformance.push(linePerformance);
-            };
+            }
             resolve(currentPeakPerformance);
           }
           );

@@ -17,7 +17,7 @@ module.exports = {
       }
       if (serviceId == undefined || shiftId == '') {
         return '';
-      };
+      }
       let nextServiceId = '';
       const rosterItems = roster.filter((roster) =>
         roster.shiftId == shiftId);
@@ -28,13 +28,13 @@ module.exports = {
         if (rosterItems[s].dutyType.substring(0, 4) == 'TRIP') {
           nextServiceId = rosterItems[s].dutyName;
           break;
-        };
+        }
         // if sign off, next service is Sign-off
         if (rosterItems[s].dutyType == 'SOF') {
           nextServiceId = rosterItems[s].dutyName;
           break;
         }
-      };
+      }
       return nextServiceId;
     },
     /**
@@ -50,19 +50,19 @@ module.exports = {
       }
       if (serviceId == undefined || shiftId == '') {
         return '';
-      };
+      }
       let prevServiceId = '';
       const rosterItems = roster.filter((roster) =>
         roster.shiftId == shiftId);
       // find current service
       const serviceIdIndex = rosterItems.findIndex((i) => i.dutyName == serviceId);
       // find previous service
-      for (let s = serviceIdIndex - 1; s < rosterItems.length; s--) {
+      for (let s = serviceIdIndex - 1; s >= 0; s--) {
         if (rosterItems[s].dutyType.substring(0, 4) == 'TRIP') {
           prevServiceId = rosterItems[s].dutyName;
           break;
-        };
-      };
+        }
+      }
       return prevServiceId;
     },
   },
@@ -79,7 +79,7 @@ module.exports = {
       }
       if (serviceId == undefined) {
         return '';
-      };
+      }
       let nextServiceId = '';
       // find current service
       const serviceIdIndex = tripSheet.findIndex((i) => i.serviceId == serviceId);
@@ -88,8 +88,8 @@ module.exports = {
         if (tripSheet[serviceIdIndex + 1] !== undefined
           && tripSheet[serviceIdIndex + 1].blockId == blockId) {
           nextServiceId = tripSheet[serviceIdIndex + 1].serviceId;
-        };
-      };
+        }
+      }
       return nextServiceId;
     },
     /**
@@ -104,7 +104,7 @@ module.exports = {
       }
       if (serviceId == undefined) {
         return '';
-      };
+      }
       let prevServiceId = '';
       // find current service
       const serviceIdIndex = tripSheet.findIndex((i) => i.serviceId == serviceId);
@@ -113,8 +113,8 @@ module.exports = {
         if (tripSheet[serviceIdIndex - 1] !== undefined
           && tripSheet[serviceIdIndex - 1].blockId == blockId) {
           prevServiceId = tripSheet[serviceIdIndex - 1].serviceId;
-        };
-      };
+        }
+      }
       return prevServiceId;
     },
   },
@@ -128,17 +128,17 @@ module.exports = {
     getTurnaround: function(EndTime, StartTime) {
       if (EndTime == undefined || StartTime == undefined) {
         return '';
-      };
+      }
       if (EndTime == '' || StartTime == '') {
         return '';
-      };
+      }
       let Turnaround = moment.duration(StartTime.diff(EndTime)) / 1000 / 60;
       if (Turnaround < 0) {
         throw new Error('Negative Turnaround time: ' + Turnaround);
-      };
-      if (Turnaround == NaN) {
+      }
+      if (isNaN(Turnaround)) {
         Turnaround = '';
-      };
+      }
       return Math.floor(Turnaround);
     },
   },

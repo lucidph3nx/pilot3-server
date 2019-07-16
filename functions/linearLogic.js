@@ -30,8 +30,8 @@ module.exports = {
     for (const [key, value] of lineNamesMetlinkKiwirail.entries()) {
       if (value == kiwirailLineId) {
         metlinkLineId = key;
-      };
-    };
+      }
+    }
     return metlinkLineId;
   },
   /**
@@ -87,7 +87,7 @@ module.exports = {
       case 'CCNN':
       case 'CCN':
         serviceIdPrefix = serviceId.substring(0, 2);
-    };
+    }
     return serviceIdPrefix;
   },
   /**
@@ -119,7 +119,7 @@ module.exports = {
       direction = 'UP';
     } else {
       direction = 'DOWN';
-    };
+    }
     return direction;
   },
   /**
@@ -150,8 +150,8 @@ module.exports = {
         numchar = numchar + 'C';
       } else {
         numchar = numchar + 'N';
-      };
-    };
+      }
+    }
     return numchar;
   },
   /**
@@ -163,7 +163,7 @@ module.exports = {
   checkCorrectLine: function(location) {
     if (location.kiwirailLineId == '') {
       return true;
-    };
+    }
     const distanceBetween2Points = module.exports.distanceBetween2Points;
     let correctLine = true;
     const thislocation = {
@@ -176,14 +176,14 @@ module.exports = {
     const otherLine = lineshapes.filter((lineshapes) => lineshapes.lineId !== kiwirailLineId);
     let closestPointThisLine = thisline[0];
     let closestPointOtherLine = otherLine[0];
-    for (i = 0; i < thisline.length; i++) {
+    for (let i = 0; i < thisline.length; i++) {
       const distanceClosest = distanceBetween2Points(closestPointThisLine, thislocation);
       const distanceThis = distanceBetween2Points(thisline[i], thislocation);
       if (distanceThis < distanceClosest) {
         closestPointThisLine = thisline[i];
       }
     }
-    for (i = 0; i < otherLine.length; i++) {
+    for (let i = 0; i < otherLine.length; i++) {
       const distanceClosest = distanceBetween2Points(closestPointOtherLine, thislocation);
       const distanceThis = distanceBetween2Points(otherLine[i], thislocation);
       if (distanceThis < distanceClosest) {
@@ -245,14 +245,14 @@ module.exports = {
         lastStation.stationCurrent = true;
         break;
       }
-    };
+    }
     // works out last station based on line, direction and meterage
     if (!lastStation.stationCurrent) {
       // eslint-disable-next-line max-len
       let filteredStationMeterage = stationMeterage.filter((stationMeterage) => stationMeterage.kiwirailLineId == location.kiwirailLineId);
       if (location.direction == 'DOWN') {
         filteredStationMeterage = filteredStationMeterage.reverse();
-      };
+      }
       for (let m = 0; m < filteredStationMeterage.length; m++) {
         const prevStn = filteredStationMeterage[m];
         const station = filteredStationMeterage[m+1];
@@ -269,7 +269,7 @@ module.exports = {
           }
         }
       }
-    };
+    }
     return lastStation;
   },
 };

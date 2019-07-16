@@ -93,14 +93,14 @@ class Location {
             if (stationMeterage[st].station_id == nearestStationId) {
               line = stationMeterage[st].KRLine;
               meterage = stationMeterage[st].meterage;
-            };
-          };
+            }
+          }
         } else {
           line = '';
           meterage = 0;
-        };
+        }
         return [line, meterage];
-      };
+      }
       /**
     * gets distance in meters between 2 points
     * @param {object} position1 lat long pair
@@ -123,7 +123,7 @@ class Location {
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         const d = R * c;
         return d;
-      };
+      }
     }
   }
 }
@@ -185,14 +185,14 @@ module.exports = class Vehicle {
       let fixedvariance;
       if (scheduleVariance < 0) {
         fixedvariance = Math.abs(scheduleVariance);
-      };
+      }
       if (scheduleVariance == 0) {
         fixedvariance = 0;
-      };
+      }
       if (scheduleVariance > 0) {
         fixedvariance = 0 - scheduleVariance;
-      };
+      }
       return fixedvariance;
-    };
+    }
   }
 };

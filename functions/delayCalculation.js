@@ -56,7 +56,7 @@ module.exports = {
       const min = Math.floor(Math.abs(minutes));
       const sec = Math.floor((Math.abs(minutes) * 60) % 60);
       return sign + (min < 10 ? '0' : '') + min + ':' + (sec < 10 ? '0' : '') + sec;
-    };
+    }
     /**
      * finds the next or previous station details for a service
      * @param {number} trainMeterage meterage of currently running train
@@ -116,7 +116,7 @@ module.exports = {
             return stationMeterage[sm].meterage;
           }
         }
-      };
-    };
+      }
+    }
   },
 };

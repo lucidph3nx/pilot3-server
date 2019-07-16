@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* eslint-disable max-len */
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
@@ -120,6 +121,6 @@ describe('Get Schedule Variance', function() {
       thisMoment.set('second', compasstime.substring(4, 6));
       thisMoment.set('miliseconds', 0);
       return thisMoment;
-    };
+    }
   });
 });

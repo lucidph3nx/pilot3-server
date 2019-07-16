@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const meterageCalculation = require('../functions/meterageCalculation');
 
 describe('Get Meterage of GPS Coordinate', function() {

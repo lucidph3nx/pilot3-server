@@ -9,10 +9,10 @@ module.exports = function(shiftId, rosterDuties) {
   const dayRoster = [];
   if (rosterDuties == undefined || rosterDuties.length == 0) {
     return dayRoster;
-  };
-  for (s = 0; s < rosterDuties.length; s++) {
+  }
+  for (let s = 0; s < rosterDuties.length; s++) {
     if (rosterDuties[s].shiftId == shiftId) {
-      serviceRoster = {
+      const serviceRoster = {
         shiftId: rosterDuties[s].shiftId,
         shiftType: rosterDuties[s].shiftType,
         staffId: rosterDuties[s].staffId,
@@ -23,7 +23,7 @@ module.exports = function(shiftId, rosterDuties) {
         dutyEndTime: rosterDuties[s].dutyEndTime.format('HH:mm'),
       };
       dayRoster.push(serviceRoster);
-    };
-  };
+    }
+  }
   return dayRoster;
 };

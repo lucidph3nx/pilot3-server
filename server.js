@@ -148,7 +148,7 @@ function refreshData() {
       current.tripSheet = getCurrentTripSheet(result);
       timetableLastUpdated = moment();
       pilotLog('Compass timetable loaded ok');
-      // write to file
+      // write to file, used to create test sources
       // const fs = require('fs');
       // const jsonContent = JSON.stringify(current.timetable);
       // fs.writeFile('./timetable.json', jsonContent, 'utf8', function(err) {
