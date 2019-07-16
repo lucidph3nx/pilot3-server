@@ -2,7 +2,7 @@
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 module.exports = {
-// to serve all roster related functions
+  // to serve all roster related functions
   crewRoster: {
     /**
      * returns the next service for that shift
@@ -24,7 +24,7 @@ module.exports = {
       // find current service
       const serviceIdIndex = rosterItems.findIndex((i) => i.dutyName == serviceId);
       // find next service
-      for (let s = serviceIdIndex+1; s < rosterItems.length; s++) {
+      for (let s = serviceIdIndex + 1; s < rosterItems.length; s++) {
         if (rosterItems[s].dutyType.substring(0, 4) == 'TRIP') {
           nextServiceId = rosterItems[s].dutyName;
           break;
@@ -57,7 +57,7 @@ module.exports = {
       // find current service
       const serviceIdIndex = rosterItems.findIndex((i) => i.dutyName == serviceId);
       // find previous service
-      for (let s = serviceIdIndex-1; s < rosterItems.length; s--) {
+      for (let s = serviceIdIndex - 1; s < rosterItems.length; s--) {
         if (rosterItems[s].dutyType.substring(0, 4) == 'TRIP') {
           prevServiceId = rosterItems[s].dutyName;
           break;
@@ -83,10 +83,12 @@ module.exports = {
       let nextServiceId = '';
       // find current service
       const serviceIdIndex = tripSheet.findIndex((i) => i.serviceId == serviceId);
-      const blockId = tripSheet[serviceIdIndex].blockId;
-      if (tripSheet[serviceIdIndex + 1] !== undefined
-        && tripSheet[serviceIdIndex + 1].blockId == blockId) {
-        nextServiceId = tripSheet[serviceIdIndex + 1].serviceId;
+      if (serviceIdIndex !== -1) {
+        const blockId = tripSheet[serviceIdIndex].blockId;
+        if (tripSheet[serviceIdIndex + 1] !== undefined
+          && tripSheet[serviceIdIndex + 1].blockId == blockId) {
+          nextServiceId = tripSheet[serviceIdIndex + 1].serviceId;
+        };
       };
       return nextServiceId;
     },
@@ -106,10 +108,12 @@ module.exports = {
       let prevServiceId = '';
       // find current service
       const serviceIdIndex = tripSheet.findIndex((i) => i.serviceId == serviceId);
-      const blockId = tripSheet[serviceIdIndex].blockId;
-      if (tripSheet[serviceIdIndex - 1] !== undefined
-        && tripSheet[serviceIdIndex - 1].blockId == blockId) {
-        prevServiceId = tripSheet[serviceIdIndex - 1].serviceId;
+      if (serviceIdIndex !== -1) {
+        const blockId = tripSheet[serviceIdIndex].blockId;
+        if (tripSheet[serviceIdIndex - 1] !== undefined
+          && tripSheet[serviceIdIndex - 1].blockId == blockId) {
+          prevServiceId = tripSheet[serviceIdIndex - 1].serviceId;
+        };
       };
       return prevServiceId;
     },
@@ -130,7 +134,7 @@ module.exports = {
       };
       let Turnaround = moment.duration(StartTime.diff(EndTime)) / 1000 / 60;
       if (Turnaround < 0) {
-        throw new Error('Negative Turnaround time: '+Turnaround);
+        throw new Error('Negative Turnaround time: ' + Turnaround);
       };
       if (Turnaround == NaN) {
         Turnaround = '';

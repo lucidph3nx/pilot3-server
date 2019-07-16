@@ -5,7 +5,6 @@ const credentials = require('../credentials');
 const knex = require('knex')({
   client: 'mssql',
   connection: {
-    // driver: 'msnodesqlv8',
     user: credentials.PilotSQL.username,
     password: credentials.PilotSQL.password,
     server: credentials.PilotSQL.host,
@@ -26,7 +25,7 @@ const knex = require('knex')({
 module.exports = {
   logSQL: {
     vehicle: function(vehicle) {
-      knex.insert({
+      const temp = {
         timeStamp: vehicle.loadTime.format('YYYY-MM-DD HH:mm:ss'),
         vehicleId: vehicle.vehicleId,
         secondVehicleId: vehicle.secondVehicleId(),
@@ -38,7 +37,8 @@ module.exports = {
         locationAgeSeconds: vehicle.locationAgeSeconds,
         linked: vehicle.linked,
         serviceId: vehicle.serviceId,
-      }).into('pilot.vehicleLog').then(function(result) {
+      };
+      knex.insert(temp).into('pilot.vehicleLog').then(function(result) {
         // console.log(result);
       }).catch((error) => {
         console.log(temp);

@@ -28,7 +28,10 @@ module.exports = {
       let timingPoint = {};
       knex.select()
           .table('dbo.todaysTimetable')
-          .orderBy('blockId', 'serviceDeparts', 'serviceId', 'stationSequence')
+          .orderBy('blockId')
+          .orderBy('serviceDeparts')
+          .orderBy('serviceId')
+          .orderBy('stationSequence')
           .then(function(response) {
             for (tp = 0; tp < response.length; tp++) {
               timingPoint = {};

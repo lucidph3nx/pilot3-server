@@ -32,7 +32,9 @@ module.exports = {
       knex.select()
           .table('WEBSN.actualDuties')
           .where('date', today)
-          .orderBy('date', 'staffId', 'minutesFrom')
+          .orderBy('date')
+          .orderBy('staffId')
+          .orderBy('minutesFrom')
           .then(function(response) {
             for (trp = 0; trp < response.length; trp++) {
               serviceRoster = {};
@@ -158,7 +160,9 @@ module.exports = {
       let entry = {};
       knex.select()
           .table('WEBSN.visBoardHeadcount')
-          .orderBy('begining', 'position', 'location')
+          .orderBy('begining')
+          .orderBy('position')
+          .orderBy('location')
           .then(function(response) {
             for (st = 0; st < response.length; st++) {
               entry = {};
@@ -183,7 +187,9 @@ module.exports = {
       let entry = {};
       knex.select()
           .table('WEBSN.visBoardAnnualLeave')
-          .orderBy('begining', 'position', 'location')
+          .orderBy('begining')
+          .orderBy('position')
+          .orderBy('location')
           .then(function(response) {
             for (st = 0; st < response.length; st++) {
               entry = {};
@@ -208,7 +214,9 @@ module.exports = {
       let entry = {};
       knex.select()
           .table('WEBSN.visBoardSickness')
-          .orderBy('begining', 'position', 'location')
+          .orderBy('begining')
+          .orderBy('position')
+          .orderBy('location')
           .then(function(response) {
             for (st = 0; st < response.length; st++) {
               entry = {};
@@ -233,7 +241,9 @@ module.exports = {
       let entry = {};
       knex.select()
           .table('WEBSN.visBoardAltDuties')
-          .orderBy('begining', 'position', 'location')
+          .orderBy('begining')
+          .orderBy('position')
+          .orderBy('location')
           .then(function(response) {
             for (st = 0; st < response.length; st++) {
               entry = {};

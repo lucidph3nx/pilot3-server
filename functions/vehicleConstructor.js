@@ -1,6 +1,6 @@
 
 const moment = require('moment-timezone');
-moment().tz('Pacific/Auckland').format();
+moment().utc();
 // supporting functions
 const stationGeoboundaries = require('../data/stationGeoboundaries');
 const stationMeterage = require('../data/stationMeterage');
@@ -151,8 +151,8 @@ module.exports = class Vehicle {
         '',
     );
 
-    this.loadTime = moment(geVisVehicle.TIMESTMPGIS);
-    this.positionTime = moment(geVisVehicle.TIMESTMPNZ);
+    this.loadTime = moment.utc(geVisVehicle.TIMESTMPGIS);
+    this.positionTime = moment.utc(geVisVehicle.TIMESTMPNZ);
     const locationAgeRAW = this.loadTime.diff(this.positionTime);
     this.locationAge = moment.utc(locationAgeRAW).format('mm:ss');
     this.locationAgeSeconds = Number(moment.utc(locationAgeRAW).valueOf() / 1000);

@@ -110,8 +110,8 @@ module.exports = class Service {
       };
     }
     this.crew = getCrewDetails(this.serviceId, current.rosterDuties);
-    const lastServiceId = rosteringLogic.trainRoster.getPrevServiceTrainRoster(this.serviceId, current.tripsheet);
-    const nextServiceId = rosteringLogic.trainRoster.getPrevServiceTrainRoster(this.serviceId, current.tripsheet);
+    const lastServiceId = rosteringLogic.trainRoster.getPrevServiceTrainRoster(this.serviceId, current.tripSheet);
+    const nextServiceId = rosteringLogic.trainRoster.getNextServiceTrainRoster(this.serviceId, current.tripSheet);
     // check last service exists
     if (lastServiceId == '') {
       this.hasLastService = false;
@@ -125,12 +125,12 @@ module.exports = class Service {
     // check next service exists
     if (nextServiceId == '') {
       this.hasNextService = false;
-      this.nextTurnaround = '';
       this.nextService = '';
+      this.nextTurnaround = '';
     } else {
       this.hasNextService = true;
+      this.nextService = getTimetableDetails(nextServiceId, current.timetable, false, '');
       this.nextTurnaround = rosteringLogic.common.getTurnaround(this.arrives, this.nextService.departs);
-      this.nextService = getTimetableDetails(this.nextServiceId, current.timetable, false, '');
     }
 
     // generate Status Messages
@@ -451,8 +451,13 @@ module.exports = class Service {
             if (thisServiceArrives !== '' || nextServiceDeparts !== '') {
               this.nextService.serviceId = nextServiceId;
               this.nextService.serviceDeparts = nextServiceDeparts;
-              this.nextService.serviceDepartsString = moment(nextServiceDeparts).format('HH:mm');
-              this.nextService.turnaround = getTurnaround(thisServiceArrives, nextServiceDeparts);
+              if (this.nextService.serviceDeparts !== '' && this.nextService.serviceDeparts.isValid()) {
+                this.nextService.serviceDepartsString = moment(nextServiceDeparts).format('HH:mm');
+                this.nextService.turnaround = getTurnaround(thisServiceArrives, nextServiceDeparts);
+              } else {
+                this.nextService.serviceDepartsString = '';
+                this.nextService.turnaround = '';
+              };
             }
           };
         }
@@ -536,7 +541,7 @@ module.exports = class Service {
       lastStationCurrent: this.lastStationCurrent,
       hasNextService: this.hasNextService,
       nextService: this.nextService.serviceId || '',
-      nextTime: this.nextService.departs || '',
+      nextTime: this.nextService ? this.nextService.departs.format('HH:mm') : '',
       LE: this.crew.LE.staffName,
       LEExists: this.crew.LEExists,
       LEShift: this.crew.LE.shiftId,

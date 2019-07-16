@@ -20,7 +20,6 @@ const app = express();
 const current = {
   debug: false,
   services: [],
-  servicesWeb: [],
   unitList: [],
   carList: [],
   timetable: [],
@@ -31,7 +30,7 @@ const current = {
 };
 // let geVisToken = [undefined, moment('1970-01-01')];
 //  for live debugging, put the key here and update time to less than an hour
-let geVisToken = ['slHGyJ8HV6872ciPNkhQDXlp6QrJ8XLJHZdpnPWK4vU.', moment('2019-07-10 16:00:00')];
+let geVisToken = ['SWKXtmf_cEpMSk702GBBC1LFR17J1do2JKzTgaB4NH8.', moment('2019-07-16 12:00:00')];
 let geVisTokenRetrievalInProgress = false;
 
 // =======API=======
@@ -73,9 +72,6 @@ function refreshData() {
         if (!current.debug && current.rosterDuties !== [] && current.timetable !== []
           && current.tripSheet !== [] && geVisVehicles.features !== undefined) {
           current.services = getCurrentServices(geVisVehicles, current);
-          current.services.forEach((service) =>
-            current.servicesWeb.push(service.webLegacy())
-          );
         }
         if (current.debug) {
           current.services = dummyCurrentServices;
