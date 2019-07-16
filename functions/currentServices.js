@@ -9,14 +9,14 @@ module.exports = function(geVisVehicles, current) {
   const currentServices = [];
   const currentMoment = moment();
   // itterate through all items in geVisVehicles and use all relevant ones
-  for (gj = 0; gj < trains.length; gj++) {
+  for (let gj = 0; gj < trains.length; gj++) {
     const train = trains[gj].attributes;
     if (checkTrainMeetsSelectionCriteria(train)) {
       const vehicle = new Vehicle(train);
       // work in progress, this new 'Vehicle' object will replace a lot of the below code
       let secondVehicle;
       if (vehicle.secondVehicleId !== '') {
-        for (su = 0; su < trains.length; su++) {
+        for (let su = 0; su < trains.length; su++) {
           if (trains[su].attributes.VEHID == vehicle.secondVehicleId) {
             secondVehicle = new Vehicle(trains[su].attributes);
             break;
@@ -31,7 +31,7 @@ module.exports = function(geVisVehicles, current) {
           secondVehicle,
           current);
       currentServices.push(service);
-    };
+    }
   }
   //  get all timetabled services
   let alreadyTracking = false;
@@ -56,7 +56,7 @@ module.exports = function(geVisVehicles, current) {
         if (!alreadyTracking && currentServices[cs].serviceId == timetabledService.serviceId) {
           alreadyTracking = true;
         }
-      };
+      }
       if (alreadyTracking == false) {
         const service = new Service(currentMoment,
             timetabledService.serviceId,
@@ -65,16 +65,16 @@ module.exports = function(geVisVehicles, current) {
             null,
             current);
         // look for previous service and mark if still running
-        for (csa = 0; csa < currentServices.length; csa++) {
+        for (let csa = 0; csa < currentServices.length; csa++) {
           if (service.statusMessage !== 'Previous Service Delayed'
                   && currentServices[csa].serviceId == service.lastService) {
             service.statusMessage = 'Previous Service Delayed';
           }
-        };
+        }
         currentServices.push(service);
       }
-    };
-  };
+    }
+  }
   return currentServices;
   /**
    * decides if train meets selection criteria
@@ -94,5 +94,5 @@ module.exports = function(geVisVehicles, current) {
     } else {
       return false;
     }
-  };
+  }
 };

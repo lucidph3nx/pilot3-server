@@ -76,7 +76,7 @@ module.exports = class Service {
     } else {
       this.lastStation = '';
       this.lastStationCurrent = false;
-    };
+    }
     // several functions downstream depend on -1 meterage
     // as universal invalid meterage
     if (this.location.meterage == ''
@@ -105,9 +105,6 @@ module.exports = class Service {
       this.varianceFriendly = this.varianceKiwirail;
     } else {
       this.varianceFriendly = parseInt(this.scheduleVarianceMin);
-      if (this.varianceFriendly == -0) {
-        this.varianceFriendly = 0;
-      };
     }
     this.crew = getCrewDetails(this.serviceId, current.rosterDuties);
     const lastServiceId = rosteringLogic.trainRoster.getPrevServiceTrainRoster(this.serviceId, current.tripSheet);
@@ -150,9 +147,9 @@ module.exports = class Service {
       statusArray[1] = TempStatus;
       if (StatusMessage == '' && stopProcessing == false) {
         StatusMessage = TempStatus;
-      };
+      }
       stopProcessing = true;
-    };
+    }
     // filter out things found from timetable
     if (this.linkedVehicle == undefined) {
       let busReplaced = false;
@@ -168,15 +165,15 @@ module.exports = class Service {
       }
       if (StatusMessage == '' && stopProcessing == false) {
         StatusMessage = TempStatus;
-      };
+      }
       stopProcessing = true;
-    };
+    }
     // filter already arrived trains
     if (this.lastStation == this.destination) {
       TempStatus = 'Arriving';
       if (StatusMessage == '' && stopProcessing == false) {
         StatusMessage = TempStatus;
-      };
+      }
       stopProcessing = true;
     }
     // check for duplicate shiftnames error
@@ -184,7 +181,7 @@ module.exports = class Service {
       TempStatus = 'VDS Error';
       StatusMessage = TempStatus;
       stopProcessing = true;
-    };
+    }
     // the early/late status generation
     if (this.varianceFriendly < -1.5 && this.thirdParty == false) {
       TempStatus = 'Running Early';
@@ -198,10 +195,10 @@ module.exports = class Service {
     } else if (this.varianceFriendly >= 15 && this.thirdParty == false) {
       TempStatus = 'Running Very Late';
       statusArray[0] = TempStatus;
-    };
+    }
     if (StatusMessage == '' && !stopProcessing) {
       StatusMessage = TempStatus;
-    };
+    }
     // compare turnarounds to lateness to look for issues
     if (!stopProcessing && ((this.NextTurnaround != '')
       && (this.NextTurnaround < this.schedule_variance_min))
@@ -213,24 +210,24 @@ module.exports = class Service {
 
       if ((this.NextTurnaround < this.schedule_variance_min)) {
         TempStatus = TempStatus + ' Train';
-      };
+      }
       if ((this.crew.LE.nextService.turnaround < this.schedule_variance_min)) {
         TempStatus = TempStatus + ' LE';
-      };
+      }
       if ((this.crew.TM.nextService.turnaround < this.schedule_variance_min)) {
         TempStatus = TempStatus + ' TM';
-      };
+      }
       // check for negative turnarounds and just give an error status
       if ((this.NextTurnaround < 0)
         || (this.crew.LE.nextService.turnaround < 0)
         || (this.crew.TM.nextService.turnaround < 0)) {
         TempStatus = 'Timetravel Error';
-      };
+      }
       if (stopProcessing == false) {
         StatusMessage = TempStatus;
-      };
+      }
       stopProcessing = true;
-    };
+    }
     // look at linking issues
     if (this.locationAge >= 180 && this.thirdParty == false) {
       // TempStatus = '';
@@ -243,8 +240,8 @@ module.exports = class Service {
             && tunnel.line == this.line) {
             TempStatus = tunnel.statusMessage;
             statusArray[1] = TempStatus;
-          };
-        };
+          }
+        }
       } else if (this.direction == 'DOWN') {
         for (const tunnel of tunnelExceptionsList) {
           if (tunnel.northStation == this.lastStation
@@ -252,9 +249,9 @@ module.exports = class Service {
             && tunnel.line == this.line) {
             TempStatus = tunnel.statusMessage;
             statusArray[1] = TempStatus;
-          };
-        };
-      };
+          }
+        }
+      }
       if (this.hasDeparted == false && TempStatus == '') {
         TempStatus = 'Awaiting Departure';
         statusArray[0] = TempStatus;
@@ -268,29 +265,29 @@ module.exports = class Service {
           latitude: this.secondVehicle.location.lat,
           longitude: this.secondVehicle.location.long,
         };
-        if (distance(firstCarLocation, secondCarLocation) > 2000) {
+        if (linearLogic.distanceBetween2Points(firstCarLocation, secondCarLocation) > 2000) {
           console.log('distance between units exceeds 2km');
           TempStatus = 'GPS Fault';
           statusArray[1] = TempStatus;
         } else {
           TempStatus = 'Check OMS Linking';
           statusArray[1] = TempStatus;
-        };
+        }
       } else if (TempStatus == '') {
         TempStatus = 'Check OMS Linking';
         statusArray[1] = TempStatus;
-      };
+      }
       if (stopProcessing == false) {
         StatusMessage = TempStatus;
-      };
-    };
+      }
+    }
     if (this.hasDeparted == false && this.thirdParty == false) {
       TempStatus = 'Awaiting Departure';
       statusArray[0] = TempStatus;
       statusArray[1] = TempStatus;
       StatusMessage = TempStatus;
       stopProcessing = true;
-    };
+    }
     if (this.speed == 0 && this.lastStationCurrent == false) {
       if (this.lastStation == 'POMA' && this.origin == 'TAIT') {
         this.lastStation = 'TAIT';
@@ -303,15 +300,15 @@ module.exports = class Service {
       } else {
         TempStatus = 'Stopped between stations';
         statusArray[2] = TempStatus;
-      };
+      }
       if (StatusMessage == '' && !stopProcessing) {
         StatusMessage = TempStatus;
-      };
+      }
       stopProcessing = true;
-    };
+    }
     if (StatusMessage == 0 || StatusMessage == false || typeof StatusMessage == 'undefined') {
       StatusMessage = '';
-    };
+    }
     this.statusMessage = StatusMessage;
     this.statusArray = statusArray;
     /**
@@ -351,7 +348,7 @@ module.exports = class Service {
         timetableDetails.departs = timingPoints[0].departs;
         timetableDetails.destination = timingPoints[timingPoints.length - 1].station;
         timetableDetails.arrives = timingPoints[timingPoints.length - 1].arrives;
-      };
+      }
       if (kiwirailBoolean) {
         const KiwiRailDetails = guessKiwiRailTimetableDetails(serviceDescription);
         timetableDetails.origin = KiwiRailDetails[0];
@@ -385,15 +382,15 @@ module.exports = class Service {
           for (const location of locationMap.keys()) {
             if (description[0].includes(location)) {
               origin = locationMap.get(location);
-            };
+            }
             if (description[1].includes(location)) {
               destination = locationMap.get(location);
-            };
-          };
+            }
+          }
           return [origin, destination];
-        };
-      };
-    };
+        }
+      }
+    }
     /**
  * Takes a service Id and the currentRosterDuties
  * gives back a crew object
@@ -457,9 +454,9 @@ module.exports = class Service {
               } else {
                 this.nextService.serviceDepartsString = '';
                 this.nextService.turnaround = '';
-              };
+              }
             }
-          };
+          }
         }
       }
 
@@ -510,7 +507,7 @@ module.exports = class Service {
         crewDetails.TM = new CrewMember();
       }
       return crewDetails;
-    };
+    }
   }
 
   /**
@@ -561,5 +558,5 @@ module.exports = class Service {
       meterage: this.location.meterage,
     };
     return serviceLite;
-  };
+  }
 };

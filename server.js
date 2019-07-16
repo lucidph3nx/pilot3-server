@@ -16,6 +16,7 @@ const dummyCurrentServices = require('./data/dummyCurrentServices');
 // =======express=======
 const express = require('express');
 const app = express();
+
 // =======global variable=======
 const current = {
   debug: false,
@@ -76,7 +77,7 @@ function refreshData() {
         if (current.debug) {
           current.services = dummyCurrentServices;
         }
-        unitsAndCars = getCurrentUnitList(geVisVehicles);
+        const unitsAndCars = getCurrentUnitList(geVisVehicles);
         current.unitList = unitsAndCars[0];
         current.carList = unitsAndCars[1];
         if (!current.debug && current.rosterDuties !== [] && current.timetable !== []
@@ -88,30 +89,27 @@ function refreshData() {
             current.services.forEach(function(service) {
               PilotSQLLog.logSQL.service(service);
             });
-            // PilotSQLLog.pilotSQLLog(current);
           }
         }
-
         pilotLog('GeVis Vehicles loaded ok');
+      }).catch((error) => {
+        console.log(error);
+        pilotLog(error);
+        if (error == 'GeVis Token Invalid Or Expired' && !geVisTokenRetrievalInProgress) {
+          geVisTokenRetrievalInProgress = true;
+          pilotLog('GeVis Auth Token Retrival Begun');
+          puppeteerOps.getGeVisToken().then((result) => {
+            geVisTokenRetrievalInProgress = false;
+            geVisToken = result;
+            pilotLog('GeVis Auth Token Retrieved Ok');
+          }).catch((error) => {
+            geVisTokenRetrievalInProgress = false;
+            pilotLog('GeVis token retreval ' + error);
+          });
+        }
       });
-      // .catch((error) => {
-      //   console.log(error);
-      //   pilotLog(error);
-      //   if (error == 'GeVis Token Invalid Or Expired' && !geVisTokenRetrievalInProgress) {
-      //     geVisTokenRetrievalInProgress = true;
-      //     pilotLog('GeVis Auth Token Retrival Begun');
-      //     puppeteerOps.getGeVisToken().then((result) => {
-      //       geVisTokenRetrievalInProgress = false;
-      //       geVisToken = result;
-      //       pilotLog('GeVis Auth Token Retrieved Ok');
-      //     }).catch((error) => {
-      //       geVisTokenRetrievalInProgress = false;
-      //       pilotLog('GeVis token retreval ' + error);
-      //     });
-      //   }
-      // });
     }
-  };
+  }
   // roster duties list, updates every 10 minutes
   if (rosterDutiesLastUpdated == undefined | rosterDutiesLastUpdated < moment().subtract(10, 'minutes')) {
     vdsRosterAPI.rosterDuties().then((result) => {

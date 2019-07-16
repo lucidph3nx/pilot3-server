@@ -39,7 +39,7 @@ describe('Get Schedule Variance', function() {
       estimatedDirection: '',
     };
     let locationAge = 17;
-    const currentTime = moment(); // '2019-07-03T00:41:35.000Z'
+    const currentTime = moment();
     currentTime.set('hour', 12);
     currentTime.set('minute', 41);
     currentTime.set('second', 35);

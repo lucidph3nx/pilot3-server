@@ -9,13 +9,13 @@ module.exports = function(timetable) {
   if (timetable !== undefined && timetable !== []) {
     const currenttripSheet = [];
     let tripLine = {};
-    for (tp = 0; tp < currentTimetable.length; tp++) {
-      if (currentTimetable[tp].serviceId !== tripLine.serviceId) {
+    for (let tp = 0; tp < timetable.length; tp++) {
+      if (timetable[tp].serviceId !== tripLine.serviceId) {
         tripLine = {
-          serviceId: currentTimetable[tp].serviceId,
-          line: currentTimetable[tp].line,
-          direction: currentTimetable[tp].direction,
-          blockId: currentTimetable[tp].blockId,
+          serviceId: timetable[tp].serviceId,
+          line: timetable[tp].line,
+          direction: timetable[tp].direction,
+          blockId: timetable[tp].blockId,
         };
         currenttripSheet.push(tripLine);
       }

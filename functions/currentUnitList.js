@@ -14,7 +14,7 @@ module.exports = function(geVisVehicles) {
   const currentUnitList = [];
 
   // itterate through all items in GeVisJSON and use all relevant ones
-  for (gj = 0; gj < trains.length; gj++) {
+  for (let gj = 0; gj < trains.length; gj++) {
     const car = new Vehicle(trains[gj].attributes);
     const isMatangiPowerCar = (car.equipmentDescription == 'Matangi Power Car');
     const isMatangiTrailerCar = (car.equipmentDescription == 'Matangi Trailer Car');
@@ -26,9 +26,9 @@ module.exports = function(geVisVehicles) {
       }
       currentCarList.push(car);
     }
-  };
+  }
   // itterate through all items in the activeUnits array and build units
-  for (u = 0; u < activeUnits.length; u++) {
+  for (let u = 0; u < activeUnits.length; u++) {
     const FP = currentCarList.find(function(car) {
       return car.vehicleId == 'FP' + activeUnits[u];
     });
