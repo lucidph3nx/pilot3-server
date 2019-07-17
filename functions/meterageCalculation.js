@@ -81,6 +81,8 @@ module.exports = {
       nextclosest = pointA;
     }
     let bearingUp;
+    let meterage;
+    let adjustedTrainBearing;
     // checks the order (direction) of the points selected
     if (closest.order < nextclosest.order) {
       // beyond closest meterage

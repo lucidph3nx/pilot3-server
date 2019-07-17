@@ -99,3 +99,17 @@ describe('Find out previous (last) service for Crew Member', function() {
     expect(prevServiceId).toBe('TA06');
   });
 });
+
+describe('get list of "as required" staff from roster', function() {
+  it('Works out the previous (last) service a Crew Member did from the roster', function() {
+    const getAsRequiredStaff = rosteringLogic.common.getAsRequiredStaff;
+    const asRequiredStaff = getAsRequiredStaff(testRosterDuties);
+
+    // should return 50 results
+    expect(asRequiredStaff.length).toBe(50);
+
+    expect(asRequiredStaff[0].staffId).toBe('038');
+    expect(asRequiredStaff[0].shiftType).toBe('PO');
+    expect(asRequiredStaff[0].startTime).toBe('12:35');
+  });
+});

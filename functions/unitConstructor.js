@@ -26,20 +26,48 @@ module.exports = class Unit {
     } else if (this.FT.linkedServiceId !== '') {
       this.linkedServiceId = this.FT.linkedServiceId;
       this.linkedCar = 'FP';
+<<<<<<< HEAD
+=======
+    } else {
+      this.linkedServiceId = '';
+      this.linkedCar = '';
+>>>>>>> 5ad232f2fd47a16623df554ab40149aa97cefa1d
     }
     // if trailer is linked use it, else just use the power car
     if (this.linkedCar == 'FT' || this.FP == undefined) {
-      this.speed = this.FT.speed;
+      this.speed = this.FT.location.speed;
       this.line = this.FT.location.estimatedLine;
       this.meterage = this.FT.location.estimatedMeterage;
       this.direction = this.FT.location.estimatedDirection;
       this.closestStationId = this.FT.location.closestStation.stationId;
     } else {
-      this.speed = this.FP.speed;
+      this.speed = this.FP.location.speed;
       this.line = this.FP.location.estimatedLine;
       this.meterage = this.FP.location.estimatedMeterage;
       this.direction = this.FP.location.estimatedDirection;
       this.closestStationId = this.FP.location.closestStation.stationId;
     }
+<<<<<<< HEAD
+=======
+  }
+    /**
+   * generates a slim version of service for transmission over web
+   * this is the legacy version to work with the old client
+   * @return {object} service object
+   */
+  webLegacy() {
+    const unitLite = {
+      unitId: this.unitId,
+      linkedServiceId: this.linkedServiceId || '',
+      speed: this.speed || -1,
+      line: this.line || '???',
+      meterage: this.meterage || -1,
+      direction: this.direction  || '?',
+      closestStation: this.closestStationId || '',
+      FP: this.FP != undefined ? this.FP.webLegacy() : '',
+      FT: this.FT != undefined ? this.FT.webLegacy() : '',
+    };
+    return unitLite;
+>>>>>>> 5ad232f2fd47a16623df554ab40149aa97cefa1d
   }
 };

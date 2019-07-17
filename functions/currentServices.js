@@ -2,7 +2,9 @@ const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 const Service = require('./serviceConstructor');
 const Vehicle = require('./vehicleConstructor');
-module.exports = function(geVisVehicles, current) {
+const timetableLogic = require('./timetableLogic');
+
+module.exports = function (geVisVehicles, current) {
   const currentTimetable = current.timetable;
   const currentTripSheet = current.tripSheet;
   const trains = geVisVehicles.features;
@@ -25,11 +27,11 @@ module.exports = function(geVisVehicles, current) {
       }
 
       const service = new Service(currentMoment,
-          vehicle.serviceId,
-          vehicle.serviceDescription,
-          vehicle,
-          secondVehicle,
-          current);
+        vehicle.serviceId,
+        vehicle.serviceDescription,
+        vehicle,
+        secondVehicle,
+        current);
       currentServices.push(service);
     }
   }
@@ -37,44 +39,71 @@ module.exports = function(geVisVehicles, current) {
   let alreadyTracking = false;
   //  cycle through services
   const servicesToday = currentTripSheet;
-  for (let st = 0; st < servicesToday.length; st++) {
-    const timetabledService = servicesToday[st];
+  let validTimetabledServices = timetableLogic.getValidServicesAtTime(currentTimetable, currentMoment);
+  for (let vts = 0; vts < validTimetabledServices.length; vts++) {
     alreadyTracking = false;
-    const serviceTimePoints = currentTimetable.filter(
-        (currentServiceTimetable) => currentServiceTimetable.serviceId == timetabledService.serviceId);
-    const serviceDeparts = serviceTimePoints[0].departs;
-    const serviceArrives = serviceTimePoints[serviceTimePoints.length-1].arrives;
-    // if (timetabledService.serviceId == '3616') {
-    //   console.log('this')
-    // }
-
-    // find if fits within specified timeband
-    if (serviceDeparts < moment(currentMoment).subtract(1, 'minutes') &&
-        serviceArrives > moment(currentMoment).add(5, 'minutes')) {
-      // console.log(timetabledService.serviceId);
-      for (let cs = 0; cs < currentServices.length; cs++) {
-        if (!alreadyTracking && currentServices[cs].serviceId == timetabledService.serviceId) {
-          alreadyTracking = true;
+    // check against currentServices
+    for (let cs = 0; cs < currentServices.length; cs++) {
+      if (!alreadyTracking && currentServices[cs].serviceId == validTimetabledServices[vts]) {
+        alreadyTracking = true;
+      };
+    }
+    if (!alreadyTracking) {
+      const service = new Service(currentMoment,
+        validTimetabledServices[vts],
+        'FROM TIMETABLE',
+        null,
+        null,
+        current);
+      // look for previous service and mark if still running
+      for (let csa = 0; csa < currentServices.length; csa++) {
+        if (service.statusMessage !== 'Previous Service Delayed'
+          && currentServices[csa].serviceId == service.lastService) {
+          service.statusMessage = 'Previous Service Delayed';
         }
       }
-      if (alreadyTracking == false) {
-        const service = new Service(currentMoment,
-            timetabledService.serviceId,
-            'FROM TIMETABLE',
-            null,
-            null,
-            current);
-        // look for previous service and mark if still running
-        for (let csa = 0; csa < currentServices.length; csa++) {
-          if (service.statusMessage !== 'Previous Service Delayed'
-                  && currentServices[csa].serviceId == service.lastService) {
-            service.statusMessage = 'Previous Service Delayed';
-          }
-        }
-        currentServices.push(service);
-      }
+      currentServices.push(service);
     }
   }
+
+  // for (let st = 0; st < servicesToday.length; st++) {
+  //   const timetabledService = servicesToday[st];
+  //   alreadyTracking = false;
+  //   const serviceTimePoints = currentTimetable.filter(
+  //       (currentServiceTimetable) => currentServiceTimetable.serviceId == timetabledService.serviceId);
+  //   const serviceDeparts = serviceTimePoints[0].departs;
+  //   const serviceArrives = serviceTimePoints[serviceTimePoints.length-1].arrives;
+  //   // if (timetabledService.serviceId == '3616') {
+  //   //   console.log('this')
+  //   // }
+
+  //   // find if fits within specified timeband
+  //   if (serviceDeparts < moment(currentMoment).subtract(1, 'minutes') &&
+  //       serviceArrives > moment(currentMoment).add(5, 'minutes')) {
+  //     // console.log(timetabledService.serviceId);
+  //     for (let cs = 0; cs < currentServices.length; cs++) {
+  //       if (!alreadyTracking && currentServices[cs].serviceId == timetabledService.serviceId) {
+  //         alreadyTracking = true;
+  //       }
+  //     }
+  //     if (alreadyTracking == false) {
+  //       const service = new Service(currentMoment,
+  //           timetabledService.serviceId,
+  //           'FROM TIMETABLE',
+  //           null,
+  //           null,
+  //           current);
+  //       // look for previous service and mark if still running
+  //       for (let csa = 0; csa < currentServices.length; csa++) {
+  //         if (service.statusMessage !== 'Previous Service Delayed'
+  //                 && currentServices[csa].serviceId == service.lastService) {
+  //           service.statusMessage = 'Previous Service Delayed';
+  //         }
+  //       }
+  //       currentServices.push(service);
+  //     }
+  //   }
+  // }
   return currentServices;
   /**
    * decides if train meets selection criteria
@@ -88,8 +117,8 @@ module.exports = function(geVisVehicles, current) {
     const meetsLocationCondition = (train.LON > westernBoundary && train.LAT < northernBoundary);
     const excludedEquiptment = ['KAIARAHI', 'ARATERE', 'KAITAKI'].includes(train.EQUIPDESC);
     if (train.TRNID !== null &&
-        meetsLocationCondition &&
-        !excludedEquiptment) {
+      meetsLocationCondition &&
+      !excludedEquiptment) {
       return true;
     } else {
       return false;

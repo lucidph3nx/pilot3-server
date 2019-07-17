@@ -21,6 +21,18 @@ const knex = require('knex')({
   },
 });
 module.exports = {
+  checkCompassDBConnection: function() {
+    return new Promise((resolve, reject) => {
+      knex.raw('select 1 as dbIsUp')
+      .then(function(response) {
+        if (response[0].dbIsUp == 1){
+          resolve('Connection Ok')
+        } else {
+          resolve('Connection Error')
+        }
+      })
+    });
+  },
   // returns current timetable stop times from Compass DB
   currentTimetable: function() {
     return new Promise((resolve, reject) => {

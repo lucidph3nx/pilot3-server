@@ -6,6 +6,7 @@ const meterageCalculation = require('./meterageCalculation');
 const delayCalculation = require('./delayCalculation');
 const linearLogic = require('./linearLogic');
 const rosteringLogic = require('./rosteringLogic');
+const timetableLogic = require('./timetableLogic');
 const nzRailConventions = require('../data/nzRailConventions');
 
 /**
@@ -84,7 +85,7 @@ module.exports = class Service {
       this.location.meterage = -1;
     }
     this.IncorrectLine = !linearLogic.checkCorrectLine(this.location);
-    this.timetable = getTimetableDetails(this.serviceId,
+    this.timetable = timetableLogic.getTimetableDetails(this.serviceId,
         current.timetable,
         this.thirdParty,
         this.serviceDescription);
@@ -114,7 +115,7 @@ module.exports = class Service {
       this.hasLastService = false;
     } else {
       this.hasLastService = true;
-      this.lastService = getTimetableDetails(lastServiceId,
+      this.lastService = timetableLogic.getTimetableDetails(lastServiceId,
           current.timetable,
           false,
           '');
@@ -126,7 +127,7 @@ module.exports = class Service {
       this.nextTurnaround = '';
     } else {
       this.hasNextService = true;
-      this.nextService = getTimetableDetails(nextServiceId, current.timetable, false, '');
+      this.nextService = timetableLogic.getTimetableDetails(nextServiceId, current.timetable, false, '');
       this.nextTurnaround = rosteringLogic.common.getTurnaround(this.arrives, this.nextService.departs);
     }
 
@@ -312,86 +313,6 @@ module.exports = class Service {
     this.statusMessage = StatusMessage;
     this.statusArray = statusArray;
     /**
- * performs a look up of the current timetable
- * returns details about the service Timetable
- * @param {String} serviceId
- * @param {Array} timetable
- * @param {Boolean} kiwirailBoolean
- * @param {String} serviceDescription
- * @return {Object} Timetable details
- */
-    function getTimetableDetails(serviceId, timetable, kiwirailBoolean, serviceDescription) {
-      const timetableDetails = {
-        serviceId: serviceId,
-        consist: '',
-        blockId: '',
-        line: '',
-        direction: '',
-        timingPoints: [],
-        origin: '',
-        departs: '',
-        destination: '',
-        arrives: '',
-      };
-      if (timetable == []) {
-        // exit condition
-        return timetableDetails;
-      }
-      const timingPoints = timetable.filter((timetable) => timetable.serviceId == serviceId);
-      timetableDetails.timingPoints = timingPoints;
-      if (timingPoints.length !== 0) {
-        timetableDetails.consist = timingPoints[0].consist;
-        timetableDetails.blockId = timingPoints[0].blockId;
-        timetableDetails.line = timingPoints[0].line;
-        timetableDetails.direction = timingPoints[0].direction;
-        timetableDetails.origin = timingPoints[0].station;
-        timetableDetails.departs = timingPoints[0].departs;
-        timetableDetails.destination = timingPoints[timingPoints.length - 1].station;
-        timetableDetails.arrives = timingPoints[timingPoints.length - 1].arrives;
-      }
-      if (kiwirailBoolean) {
-        const KiwiRailDetails = guessKiwiRailTimetableDetails(serviceDescription);
-        timetableDetails.origin = KiwiRailDetails[0];
-        timetableDetails.destination = KiwiRailDetails[1];
-      }
-      return timetableDetails;
-      /**
-       * Takes a wild stab at what the Kiwirail origin and destination stations are
-       * @param {*} description
-       * @return {array} with [origin, destination]
-       */
-      function guessKiwiRailTimetableDetails(description) {
-        const locations = [
-          ['AUCKLAND', 'AUCK'],
-          ['WELLINGTON', 'WELL'],
-          ['PALMERSTON NORTH', 'PALM'],
-          ['MT MAUNGANUI', 'TAUR'],
-          ['HAMILTON', 'HAMI'],
-          ['MASTERTON', 'MAST'],
-        ];
-        const locationMap = new Map(locations);
-        description = description.toUpperCase();
-        // check for the '-' if it isnt there then done even try to guess
-        if (description.search('-') == -1) {
-          return ['', ''];
-        } else {
-          // split the description by '-', format is usually 'ORIGIN - DESTINATION'
-          description = description.split('-');
-          let origin = '';
-          let destination = '';
-          for (const location of locationMap.keys()) {
-            if (description[0].includes(location)) {
-              origin = locationMap.get(location);
-            }
-            if (description[1].includes(location)) {
-              destination = locationMap.get(location);
-            }
-          }
-          return [origin, destination];
-        }
-      }
-    }
-    /**
  * Takes a service Id and the currentRosterDuties
  * gives back a crew object
  * @param {string} serviceId
@@ -436,12 +357,12 @@ module.exports = class Service {
               serviceDepartsString: '',
               turnaround: '',
             };
-            const thisServiceArrives = getTimetableDetails(serviceId,
+            const thisServiceArrives = timetableLogic.getTimetableDetails(serviceId,
                 current.timetable,
                 false,
                 '').arrives;
             const nextServiceId = getNextServiceCrewRoster(serviceId, shiftId, currentRosterDuties);
-            const nextServiceDeparts = getTimetableDetails(nextServiceId,
+            const nextServiceDeparts = timetableLogic.getTimetableDetails(nextServiceId,
                 current.timetable,
                 false,
                 '').departs;

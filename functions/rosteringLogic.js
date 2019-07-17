@@ -141,5 +141,27 @@ module.exports = {
       }
       return Math.floor(Turnaround);
     },
+    getAsRequiredStaff: function(roster) {
+      const asReqReport = [];
+      if (roster == []) {
+        return asReqReport;
+      } else {
+        for (let s = 0; s < roster.length; s++) {
+          if (roster[s].dutyType == 'ASREQ'
+          && roster[s].staffId !== '') {
+            const asReqEntry = {
+              staffId: roster[s].staffId,
+              staffName: roster[s].staffName,
+              shiftId: roster[s].shiftId,
+              shiftType: roster[s].shiftType,
+              startTime: roster[s].dutyStartTimeString,
+              endTime: roster[s].dutyEndTimeString,
+            };
+            asReqReport.push(asReqEntry);
+          }
+        }
+        return asReqReport;
+      }
+    },
   },
 };
