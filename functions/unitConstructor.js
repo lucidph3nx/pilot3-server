@@ -26,12 +26,9 @@ module.exports = class Unit {
     } else if (this.FT.linkedServiceId !== '') {
       this.linkedServiceId = this.FT.linkedServiceId;
       this.linkedCar = 'FP';
-<<<<<<< HEAD
-=======
     } else {
       this.linkedServiceId = '';
       this.linkedCar = '';
->>>>>>> 5ad232f2fd47a16623df554ab40149aa97cefa1d
     }
     // if trailer is linked use it, else just use the power car
     if (this.linkedCar == 'FT' || this.FP == undefined) {
@@ -47,8 +44,6 @@ module.exports = class Unit {
       this.direction = this.FP.location.estimatedDirection;
       this.closestStationId = this.FP.location.closestStation.stationId;
     }
-<<<<<<< HEAD
-=======
   }
     /**
    * generates a slim version of service for transmission over web
@@ -68,6 +63,5 @@ module.exports = class Unit {
       FT: this.FT != undefined ? this.FT.webLegacy() : '',
     };
     return unitLite;
->>>>>>> 5ad232f2fd47a16623df554ab40149aa97cefa1d
   }
 };

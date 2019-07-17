@@ -57,23 +57,6 @@ module.exports = {
       const sec = Math.floor((Math.abs(minutes) * 60) % 60);
       return sign + (min < 10 ? '0' : '') + min + ':' + (sec < 10 ? '0' : '') + sec;
     }
-<<<<<<< HEAD
-    /**
-     * finds the next or previous station details for a service
-     * @param {number} trainMeterage meterage of currently running train
-     * @param {string} direction 'UP' or 'DOWN'
-     * @param {object} timetableDetails id representing the service
-     * @param {string} nextOrPrev can be 'next' or 'prev'
-     * @return {object} object including time, meterage, stationId
-     */
-    function getSequenceStnDetails(trainMeterage, direction, timetableDetails, nextOrPrev) {
-      const stationDetails = {
-        time: '',
-        meterage: -1,
-        stationId: '',
-      };
-      const serviceTimetable = timetableDetails.timingPoints;
-=======
 
   },
   /**
@@ -93,7 +76,6 @@ module.exports = {
     };
     const serviceTimetable = timetableDetails.timingPoints;
 
->>>>>>> 5ad232f2fd47a16623df554ab40149aa97cefa1d
 
     if (up) {
       // loop through stations in the timing points
@@ -164,8 +146,6 @@ module.exports = {
           stationDetails.meterage = thisStationMeterage;
         }
       }
-<<<<<<< HEAD
-=======
       // if station has still not been matched because train is before first station meterage, use first station
       if (stationDetails.stationId == '' && module.exports.getMeterageOfStation(serviceTimetable[0].station) < trainMeterage) {
         stationDetails.stationId = serviceTimetable[0].station;
@@ -185,7 +165,6 @@ module.exports = {
       if (stationId == stationMeterage[sm].stationId) {
         return stationMeterage[sm].meterage;
       }
->>>>>>> 5ad232f2fd47a16623df554ab40149aa97cefa1d
     }
   },
 };

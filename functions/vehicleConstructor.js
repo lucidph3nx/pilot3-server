@@ -194,8 +194,6 @@ module.exports = class Vehicle {
       }
       return fixedvariance;
     }
-<<<<<<< HEAD
-=======
   }
     /**
    * generates a slim version of service for transmission over web
@@ -215,6 +213,5 @@ module.exports = class Vehicle {
       linkedServiceId: this.serviceId
     };
     return vehicleLite;
->>>>>>> 5ad232f2fd47a16623df554ab40149aa97cefa1d
   }
 };

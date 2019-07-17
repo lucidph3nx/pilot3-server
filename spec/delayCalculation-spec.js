@@ -109,23 +109,6 @@ describe('Get Schedule Variance', function () {
   });
 });
 
-<<<<<<< HEAD
-    /**
- * Takes a time Compass format
- * Converts it into a moment object
- * @param {string} compasstime
- * @return {object} - Moment object
- */
-    function cps2m(compasstime) {
-      const thisMoment = moment();
-      // ordinary code
-      thisMoment.set('hour', compasstime.substring(0, 2));
-      thisMoment.set('minute', compasstime.substring(2, 4));
-      thisMoment.set('second', compasstime.substring(4, 6));
-      thisMoment.set('miliseconds', 0);
-      return thisMoment;
-    }
-=======
 // describe('Gets the details of the next station for a train', function () {
 //   it('gets the next station correctly - Johnsonville Line Up Example', function () {
 //     let meterage = 3039
@@ -253,7 +236,6 @@ describe('Gets the Meterage of any given station', function () {
     stationId = 'AUCK'
     meterage = delayCalculation.getMeterageOfStation(stationId)
     expect(meterage).toBe(682000)
->>>>>>> 5ad232f2fd47a16623df554ab40149aa97cefa1d
   });
 });
 
