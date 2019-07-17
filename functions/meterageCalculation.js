@@ -31,11 +31,11 @@ module.exports = {
     // let distancePointB = distance(pointB, position.coords);
     // let distancePointC = distance(pointC, position.coords);
     // loop through all line points from lowest to highest meterage
-    for (i = 1; i < locations.length; i++) {
+    for (let i = 1; i < locations.length; i++) {
       // loop component
       if (distance(locations[i], position.coords) < distancePointA) {
         pointB = pointA;
-        distancePointB = distancePointA;
+        // distancePointB = distancePointA;
         pointA = locations[i];
         distancePointA = distance(locations[i], position.coords);
         // stopping component
@@ -48,17 +48,17 @@ module.exports = {
           // if we already have a suspect point, test against this to get the closer of the two
         } else if (distance(pointB, position.coords) < distance(suspectedOutofboundsPoint, position.coords)) {
           suspectedOutofboundsPoint = pointB;
-        };
+        }
         // keep on looping
         pointB = pointA;
-        distancePointB = distancePointA;
+        // distancePointB = distancePointA;
         pointA = locations[i];
         distancePointA = distance(locations[i], position.coords);
-      };
-    };
+      }
+    }
     // test if out of bounds point is closest available point to position
     if (suspectedOutofboundsPoint !== undefined) {
-      for (i = 0; i < locations.length; i++) {
+      for (let i = 0; i < locations.length; i++) {
         if (suspectedOutofboundsPoint !== undefined &&
                     distance(locations[i], position.coords) < distance(suspectedOutofboundsPoint, position.coords)) {
           suspectedOutofboundsPoint = undefined;
@@ -78,8 +78,10 @@ module.exports = {
     } else {
       closest = pointB;
       nextclosest = pointA;
-    };
+    }
     let bearingUp;
+    let meterage;
+    let adjustedTrainBearing;
     // checks the order (direction) of the points selected
     if (closest.order < nextclosest.order) {
       // beyond closest meterage
@@ -105,7 +107,7 @@ module.exports = {
         'longitude': (nextclosest.longitude + YY * ShortestLength),
       };
       meterage = closest.meterage - distance(Vlocation, closest);
-    };
+    }
     // us the bearingUp to see if train seems to be traveling up or down
     let direction;
     if (trainBearing > 180) {
@@ -120,7 +122,7 @@ module.exports = {
       direction = 'UP';
     } else {
       direction = 'DOWN';
-    };
+    }
 
     if (meterage == undefined) {
       console.log('undefined Meterage');
@@ -141,11 +143,11 @@ module.exports = {
       let AC = bearing(position1, position3);
       if (AC < 0) {
         AC = 360 + AC;
-      };
+      }
       let AB = bearing(position1, position2);
       if (AB < 0) {
         AB = 360 + AB;
-      };
+      }
       let CB = bearing(position3, position2);
       if (CB < 0) {
         CB = 360 + CB;
@@ -182,7 +184,7 @@ module.exports = {
       } else {
         return true;
       }
-    };
+    }
     /**
              * Finds bearing (degrees) of position2 from position 1
              * @param {object} position1 lat long pair
@@ -203,7 +205,7 @@ module.exports = {
                     Math.sin(φ1) * Math.cos(φ2) * Math.cos(λ2 - λ1);
       const bearing = Math.atan2(y, x) * 180 / Math.PI;
       return bearing;
-    };
+    }
     /**
         * gets distance in meters between 2 points
         * @param {object} position1 lat long pair
@@ -226,6 +228,6 @@ module.exports = {
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       const d = R * c;
       return d;
-    };
+    }
   },
 };

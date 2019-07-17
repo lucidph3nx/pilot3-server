@@ -1,6 +1,6 @@
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
-const asRequiredStaff = require('./../functions/asRequiredStaff');
+const rosteringLogic = require('./../functions/rosteringLogic');
 const getDayRosterFromShift = require('./../functions/dayRosterFromShift');
 const getStaffPhotoFromId = require('./../functions/staffImage');
 const getRunningSheetForStation = require('./../functions/runningSheetForStation');
@@ -60,7 +60,7 @@ module.exports = function(app, current) {
   });
   // get the status for all Matangi Train Units
   app.get('/api/currentUnitList', (request, response) => {
-    currentUnitList = current.unitList;
+    const currentUnitList = current.unitList;
     const apiResponse = {'Time': moment(), currentUnitList};
     response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
     response.write(JSON.stringify(apiResponse));
@@ -68,7 +68,7 @@ module.exports = function(app, current) {
   });
   // get the status for all Matangi Cars
   app.get('/api/currentCarList', (request, response) => {
-    currentCarList = current.carList;
+    const currentCarList = current.carList;
     const apiResponse = {'Time': moment(), currentCarList};
     response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
     response.write(JSON.stringify(apiResponse));
@@ -77,7 +77,7 @@ module.exports = function(app, current) {
   // get all roster duties today
   app.get('/api/test', (request, response) => {
     vdsRosterAPI.testfunction().then((result) => {
-      currentRosterDuties = response;
+      const currentRosterDuties = response;
       const apiResponse = {'Time': moment(), currentRosterDuties};
       response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
       response.write(JSON.stringify(apiResponse));
@@ -86,7 +86,7 @@ module.exports = function(app, current) {
   });
   // get all roster duties today
   app.get('/api/currentRoster', (request, response) => {
-    currentRosterDuties = current.rosterDuties;
+    const currentRosterDuties = current.rosterDuties;
     const apiResponse = {'Time': moment(), currentRosterDuties};
     response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
     response.write(JSON.stringify(apiResponse));
@@ -94,7 +94,7 @@ module.exports = function(app, current) {
   });
   // get roster Day Status
   app.get('/api/rosterDayStatus', (request, response) => {
-    currentRosterDayStatus = current.rosterDayStatus;
+    let currentRosterDayStatus = current.rosterDayStatus;
     const requestedDay = moment(request.query.date);
     let apiResponse;
     // if today provide prefetched data, else fetch fresh from the vds kitchen
@@ -118,8 +118,8 @@ module.exports = function(app, current) {
   // get headcount data for vis board
   app.get('/api/visboardHeadcount', (request, response) => {
     vdsRosterAPI.visboardHeadcount().then((result) => {
-      headcountData = result;
-      apiResponse = {'Time': moment(), headcountData};
+      const headcountData = result;
+      const apiResponse = {'Time': moment(), headcountData};
       response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
       response.write(JSON.stringify(apiResponse));
       response.end();
@@ -130,8 +130,8 @@ module.exports = function(app, current) {
   // get Annual leave data for vis board
   app.get('/api/visboardAnnualLeave', (request, response) => {
     vdsRosterAPI.visboardAnnualLeave().then((result) => {
-      annualLeaveData = result;
-      apiResponse = {'Time': moment(), annualLeaveData};
+      const annualLeaveData = result;
+      const apiResponse = {'Time': moment(), annualLeaveData};
       response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
       response.write(JSON.stringify(apiResponse));
       response.end();
@@ -142,8 +142,8 @@ module.exports = function(app, current) {
   // get sickness data for vis board
   app.get('/api/visboardSickness', (request, response) => {
     vdsRosterAPI.visboardSickness().then((result) => {
-      sicknessData = result;
-      apiResponse = {'Time': moment(), sicknessData};
+      const sicknessData = result;
+      const apiResponse = {'Time': moment(), sicknessData};
       response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
       response.write(JSON.stringify(apiResponse));
       response.end();
@@ -154,8 +154,8 @@ module.exports = function(app, current) {
   // get sickness data for vis board
   app.get('/api/visboardAltDuties', (request, response) => {
     vdsRosterAPI.visboardAltDuties().then((result) => {
-      altDutiesData = result;
-      apiResponse = {'Time': moment(), altDutiesData};
+      const altDutiesData = result;
+      const apiResponse = {'Time': moment(), altDutiesData};
       response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
       response.write(JSON.stringify(apiResponse));
       response.end();
@@ -165,11 +165,10 @@ module.exports = function(app, current) {
   });
   // get uncovered shifts
   app.get('/api/uncoveredShifts', (request, response) => {
-    currentRosterDayStatus = current.rosterDayStatus;
     const requestedDay = moment(request.query.date);
     let apiResponse;
     vdsRosterAPI.uncoveredShifts(requestedDay).then((result) => {
-      uncoveredShifts = result;
+      const uncoveredShifts = result;
       apiResponse = {'Time': moment(), uncoveredShifts};
       response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
       response.write(JSON.stringify(apiResponse));
@@ -200,8 +199,7 @@ module.exports = function(app, current) {
   });
   // get list of staff who are "as Required" now
   app.get('/api/asRequiredStaff', (request, response) => {
-    currentRosterDuties = current.rosterDuties;
-    const apiResponse = asRequiredStaff(currentRosterDuties);
+    const apiResponse = rosteringLogic.common.getAsRequiredStaff(current.rosterDuties)
     response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
     response.write(JSON.stringify(apiResponse));
     response.end();

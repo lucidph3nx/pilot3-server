@@ -36,7 +36,7 @@ module.exports = {
           .orderBy('staffId')
           .orderBy('minutesFrom')
           .then(function(response) {
-            for (trp = 0; trp < response.length; trp++) {
+            for (let trp = 0; trp < response.length; trp++) {
               serviceRoster = {};
               let staffId;
               let staffName;
@@ -66,8 +66,8 @@ module.exports = {
                   shiftCovered: shiftCovered,
                 };
                 currentRoster.push(serviceRoster);
-              };
-            };
+              }
+            }
             resolve(currentRoster);
           });
     });
@@ -86,7 +86,7 @@ module.exports = {
       thisMoment.set('miliseconds', 0);
       thisMoment.add(minutesPastMidnight, 'minutes');
       return thisMoment;
-    };
+    }
   },
   // returns current counters for each location and position - days roster status
   dayRosterStatus: function dayStatus(date) {
@@ -98,7 +98,7 @@ module.exports = {
           .table('WEBSN.dayStatus')
           .where('date', searchdate)
           .then(function(response) {
-            for (st = 0; st < response.length; st++) {
+            for (let st = 0; st < response.length; st++) {
               rosterStatus = {};
               rosterStatus = {
                 staffType: response[st].staffType.trim(),
@@ -107,7 +107,7 @@ module.exports = {
                 count: response[st].count,
               };
               dayStatus.push(rosterStatus);
-            };
+            }
             resolve(dayStatus);
           }
           );
@@ -123,7 +123,7 @@ module.exports = {
           .table('WEBSN.uncoveredShifts')
           .where('date', searchdate)
           .then(function(response) {
-            for (st = 0; st < response.length; st++) {
+            for (let st = 0; st < response.length; st++) {
               shift = {};
               shift = {
                 shiftName: response[st].shiftName.trim(),
@@ -133,7 +133,7 @@ module.exports = {
                 location: response[st].location.trim(),
               };
               uncoveredShifts.push(shift);
-            };
+            }
             resolve(uncoveredShifts);
           }
           );
@@ -152,7 +152,7 @@ module.exports = {
       thisMoment.set('miliseconds', 0);
       thisMoment.add(minutesPastMidnight, 'minutes');
       return thisMoment;
-    };
+    }
   },
   visboardHeadcount: function visboardHeadcount() {
     return new Promise((resolve, reject) => {
@@ -164,7 +164,7 @@ module.exports = {
           .orderBy('position')
           .orderBy('location')
           .then(function(response) {
-            for (st = 0; st < response.length; st++) {
+            for (let st = 0; st < response.length; st++) {
               entry = {};
               entry = {
                 year: response[st].year,
@@ -175,7 +175,7 @@ module.exports = {
                 location: response[st].location,
               };
               headcounts.push(entry);
-            };
+            }
             resolve(headcounts);
           }
           );
@@ -191,7 +191,7 @@ module.exports = {
           .orderBy('position')
           .orderBy('location')
           .then(function(response) {
-            for (st = 0; st < response.length; st++) {
+            for (let st = 0; st < response.length; st++) {
               entry = {};
               entry = {
                 year: response[st].year,
@@ -202,7 +202,7 @@ module.exports = {
                 location: response[st].location,
               };
               annualLeave.push(entry);
-            };
+            }
             resolve(annualLeave);
           }
           );
@@ -218,7 +218,7 @@ module.exports = {
           .orderBy('position')
           .orderBy('location')
           .then(function(response) {
-            for (st = 0; st < response.length; st++) {
+            for (let st = 0; st < response.length; st++) {
               entry = {};
               entry = {
                 year: response[st].year,
@@ -229,7 +229,7 @@ module.exports = {
                 location: response[st].location,
               };
               sickness.push(entry);
-            };
+            }
             resolve(sickness);
           }
           );
@@ -245,7 +245,7 @@ module.exports = {
           .orderBy('position')
           .orderBy('location')
           .then(function(response) {
-            for (st = 0; st < response.length; st++) {
+            for (let st = 0; st < response.length; st++) {
               entry = {};
               entry = {
                 year: response[st].year,
@@ -256,7 +256,7 @@ module.exports = {
                 location: response[st].location,
               };
               altDuties.push(entry);
-            };
+            }
             resolve(altDuties);
           }
           );

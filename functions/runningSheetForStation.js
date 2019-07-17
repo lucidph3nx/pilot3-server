@@ -7,9 +7,9 @@
  */
 module.exports = function(stationId, current) {
 // Gets a arrivals and departures list for a particular station
-  runningSheet = [];
-  serviceEntry = {};
-  for (s = 0; s < current.timetable.length; s++) {
+  const runningSheet = [];
+  let serviceEntry = {};
+  for (let s = 0; s < current.timetable.length; s++) {
     if (current.timetable[s].station == stationId) {
       // convert direction to human format
       let runningSheetDirection;
@@ -27,7 +27,7 @@ module.exports = function(stationId, current) {
       let TM = '';
       let TMShift = '';
       const PO = [];
-      for (st = 0; st < staff.length; st++) {
+      for (let st = 0; st < staff.length; st++) {
         if (staff[st].dutyType == 'TRIP') {
           LE = staff[st].staffName + ' (' + staff[st].staffId + ')';
           LEShift = staff[st].shiftId;
@@ -53,11 +53,11 @@ module.exports = function(stationId, current) {
             PO.push({name: staff[st].staffName + ' (' + staff[st].staffId + ')', shift: staff[st].shiftId});
           }
         }
-      };
+      }
       // get delay from current.services
       let serviceVariance;
       let serviceStatusArray;
-      for (sv = 0; sv < current.services.length; sv++) {
+      for (let sv = 0; sv < current.services.length; sv++) {
         if (current.timetable[s].serviceId == current.services[sv].serviceId) {
           serviceVariance = current.services[sv].varianceFriendly;
           serviceStatusArray = current.services[sv].statusArray;

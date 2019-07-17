@@ -26,7 +26,7 @@ module.exports = class Unit {
     } else if (this.FT.linkedServiceId !== '') {
       this.linkedServiceId = this.FT.linkedServiceId;
       this.linkedCar = 'FP';
-    };
+    }
     // if trailer is linked use it, else just use the power car
     if (this.linkedCar == 'FT' || this.FP == undefined) {
       this.speed = this.FT.speed;
@@ -40,6 +40,6 @@ module.exports = class Unit {
       this.meterage = this.FP.location.estimatedMeterage;
       this.direction = this.FP.location.estimatedDirection;
       this.closestStationId = this.FP.location.closestStation.stationId;
-    };
+    }
   }
 };
