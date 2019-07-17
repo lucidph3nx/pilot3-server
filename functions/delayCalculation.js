@@ -27,10 +27,10 @@ module.exports = {
     };
     // the ignore criteria
     if (kiwirailBoolean == false && location.meterage !== -1 && timetableDetails.timingPoints.length !== 0) {
-      const previousStationDetails = module.exports.getSequenceStnDetails(location.meterage, direction, timetableDetails, 'prev');
+      const previousStationDetails = module.exports.getPrevStationDetails(location.meterage, direction, timetableDetails);
       const prevStationTime = previousStationDetails.time;
       const prevStationMeterage = previousStationDetails.meterage;
-      const nextStationDetails = module.exports.getSequenceStnDetails(location.meterage, direction, timetableDetails, 'next');
+      const nextStationDetails = module.exports.getNextStationDetails(location.meterage, direction, timetableDetails);
       const nextStationTime = nextStationDetails.time;
       const nextStationMeterage = nextStationDetails.meterage;
       // the time you would expect the service to be in its current position
@@ -60,16 +60,13 @@ module.exports = {
 
   },
   /**
- * finds the next or previous station details for a service
- * @param {number} trainMeterage meterage of currently running train
- * @param {string} direction 'UP' or 'DOWN'
- * @param {object} timetableDetails id representing the service
- * @param {string} nextOrPrev can be 'next' or 'prev'
- * @return {object} object including time, meterage, stationId
- */
-  getSequenceStnDetails: function (trainMeterage, direction, timetableDetails, nextOrPrev) {
-    const next = (nextOrPrev == 'next');
-    const prev = (nextOrPrev == 'prev');
+   * finds the next  station details for a service
+   * @param {number} trainMeterage meterage of currently running train
+   * @param {string} direction 'UP' or 'DOWN'
+   * @param {object} timetableDetails id representing the service
+   * @return {object} object including time, meterage, stationId
+   */
+  getNextStationDetails: function (trainMeterage, direction, timetableDetails) {
     const up = (direction == 'UP');
     const down = (direction == 'DOWN');
     const stationDetails = {
@@ -81,63 +78,79 @@ module.exports = {
 
 
     if (up) {
-      if (next) {
-        // loop through stations in the timing points
-        // once loop finds first match the loop terminates with break
-        for (let st = 0; st < serviceTimetable.length; st++) {
-          const thisStationMeterage = module.exports.getMeterageOfStation(serviceTimetable[st].station);
-          if (thisStationMeterage > trainMeterage) {
-            stationDetails.stationId = serviceTimetable[st].station;
-            stationDetails.time = moment(serviceTimetable[st].departs);
-            stationDetails.meterage = thisStationMeterage;
-            break;
-          }
-        }
-      }
-      if (prev) {
-        // loop through stations in the timing points
-        // once loop passes the expected station it can continue since station is not reassigned
-        for (let st = 0; st < serviceTimetable.length; st++) {
-          const thisStationMeterage = module.exports.getMeterageOfStation(serviceTimetable[st].station);
-          if (thisStationMeterage < trainMeterage) {
-            stationDetails.stationId = serviceTimetable[st].station;
-            stationDetails.time = moment(serviceTimetable[st].departs);
-            stationDetails.meterage = thisStationMeterage;
-          }
+      // loop through stations in the timing points
+      // once loop finds first match the loop terminates with break
+      for (let st = 0; st < serviceTimetable.length; st++) {
+        const thisStationMeterage = module.exports.getMeterageOfStation(serviceTimetable[st].station);
+        if (thisStationMeterage > trainMeterage) {
+          stationDetails.stationId = serviceTimetable[st].station;
+          stationDetails.time = moment(serviceTimetable[st].departs);
+          stationDetails.meterage = thisStationMeterage;
+          break;
         }
       }
     }
     if (down) {
-      if (next) {
-        // loop through stations in the timing points
-        // once loop finds first match the loop terminates with break
-        for (let st = 0; st < serviceTimetable.length; st++) {
-          const thisStationMeterage = module.exports.getMeterageOfStation(serviceTimetable[st].station);
-          if (thisStationMeterage < trainMeterage) {
-            stationDetails.stationId = serviceTimetable[st].station;
-            stationDetails.time = moment(serviceTimetable[st].departs);
-            stationDetails.meterage = thisStationMeterage;
-            break;
-          }
+      // loop through stations in the timing points
+      // once loop finds first match the loop terminates with break
+      for (let st = 0; st < serviceTimetable.length; st++) {
+        const thisStationMeterage = module.exports.getMeterageOfStation(serviceTimetable[st].station);
+        if (thisStationMeterage < trainMeterage) {
+          stationDetails.stationId = serviceTimetable[st].station;
+          stationDetails.time = moment(serviceTimetable[st].departs);
+          stationDetails.meterage = thisStationMeterage;
+          break;
         }
       }
-      if (prev) {
-        // loop through stations in the timing points
-        // once loop passes the expected station it can continue since station is not reassigned
-        for (let st = 0; st < serviceTimetable.length; st++) {
-          const thisStationMeterage = module.exports.getMeterageOfStation(serviceTimetable[st].station);
-          if (thisStationMeterage > trainMeterage) {
-            stationDetails.stationId = serviceTimetable[st].station;
-            stationDetails.time = moment(serviceTimetable[st].departs);
-            stationDetails.meterage = thisStationMeterage;
-          }
+    }
+    return stationDetails;
+  },
+  /**
+   * finds the next  station details for a service
+   * @param {number} trainMeterage meterage of currently running train
+   * @param {string} direction 'UP' or 'DOWN'
+   * @param {object} timetableDetails id representing the service
+   * @return {object} object including time, meterage, stationId
+   */
+  getPrevStationDetails: function (trainMeterage, direction, timetableDetails) {
+    const up = (direction == 'UP');
+    const down = (direction == 'DOWN');
+    const stationDetails = {
+      time: '',
+      meterage: -1,
+      stationId: '',
+    };
+    const serviceTimetable = timetableDetails.timingPoints;
+
+
+    if (up) {
+      // loop through stations in the timing points
+      // once loop passes the expected station it can continue since station is not reassigned
+      for (let st = 0; st < serviceTimetable.length; st++) {
+        const thisStationMeterage = module.exports.getMeterageOfStation(serviceTimetable[st].station);
+        if (thisStationMeterage < trainMeterage) {
+          stationDetails.stationId = serviceTimetable[st].station;
+          stationDetails.time = moment(serviceTimetable[st].departs);
+          stationDetails.meterage = thisStationMeterage;
         }
-        // if station has still not been matched because train is before first station meterage, use first station
-        if (stationDetails.stationId == '' && module.exports.getMeterageOfStation(serviceTimetable[0].station) < trainMeterage) {
-          stationDetails.stationId = serviceTimetable[0].station;
-          stationDetails.time = moment(serviceTimetable[0].departs);
-          stationDetails.meterage = module.exports.getMeterageOfStation(serviceTimetable[0].station);
+      }
+    }
+    if (down) {
+      // loop through stations in the timing points
+      // once loop passes the expected station it can continue since station is not reassigned
+      for (let st = 0; st < serviceTimetable.length; st++) {
+        const thisStationMeterage = module.exports.getMeterageOfStation(serviceTimetable[st].station);
+        if (thisStationMeterage > trainMeterage) {
+          stationDetails.stationId = serviceTimetable[st].station;
+          stationDetails.time = moment(serviceTimetable[st].departs);
+          stationDetails.meterage = thisStationMeterage;
         }
+      }
+      // if station has still not been matched because train is before first station meterage, use first station
+      if (stationDetails.stationId == '' && module.exports.getMeterageOfStation(serviceTimetable[0].station) < trainMeterage) {
+        stationDetails.stationId = serviceTimetable[0].station;
+        stationDetails.time = moment(serviceTimetable[0].departs);
+        stationDetails.meterage = module.exports.getMeterageOfStation(serviceTimetable[0].station);
       }
     }
     return stationDetails;
