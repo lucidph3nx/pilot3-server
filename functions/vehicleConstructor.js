@@ -39,7 +39,7 @@ class Location {
     tempLocation = meterageCalculation.getmeterage(tempLocation);
     this.estimatedDirection = tempLocation.estimatedDirection;
     this.estimatedkiwirailLineId = this.closestStation.estimatedkiwirailLineId;
-    this.estimatedMeterage = tempLocation.estimatedMeterage;
+    this.estimatedMeterage = tempLocation.meterage;
     /**
      * finds the closest station from raw lat and long
      * @param {number} lat
@@ -56,7 +56,7 @@ class Location {
         latitude: 0,
         longitude: 0,
         stationDistance: 99999999999999,
-        estimatedLine: '',
+        estimatedkiwirailLineId: '',
         estimatedMeterage: -1,
       };
 
@@ -66,12 +66,12 @@ class Location {
           latitude: (stationGeoboundaries[st].north + stationGeoboundaries[st].south) / 2,
           longitude: (stationGeoboundaries[st].east + stationGeoboundaries[st].west) / 2,
           stationDistance: 0,
-          estimatedLine: '',
+          estimatedkiwirailLineId: '',
           estimatedMeterage: -1,
         };
         const estimatedLineMeterage = getEstimatedLineMeterage(stationGeoboundaries[st].stationId);
         queryStation.stationDistance = parseInt(distance(thisLocation, queryStation));
-        queryStation.estimatedLine = estimatedLineMeterage[0];
+        queryStation.estimatedkiwirailLineId = estimatedLineMeterage[0];
         queryStation.estimatedMeterage = estimatedLineMeterage[1];
         if (queryStation.stationDistance < closestStation.stationDistance) {
           closestStation = queryStation;
@@ -90,8 +90,8 @@ class Location {
                     && nearestStationId != 'KAIW'
                     && nearestStationId != 'NGAU') {
           for (let st = 0; st < stationMeterage.length; st++) {
-            if (stationMeterage[st].station_id == nearestStationId) {
-              line = stationMeterage[st].KRLine;
+            if (stationMeterage[st].stationId == nearestStationId) {
+              line = stationMeterage[st].kiwirailLineId;
               meterage = stationMeterage[st].meterage;
             }
           }
@@ -194,5 +194,24 @@ module.exports = class Vehicle {
       }
       return fixedvariance;
     }
+  }
+    /**
+   * generates a slim version of service for transmission over web
+   * this is the legacy version to work with the old client
+   * @return {object} service object
+   */
+  webLegacy() {
+    const vehicleLite = {
+      carId: this.vehicleId,
+      lat: this.location.lat,
+      long: this.location.long,
+      positionAgeSeconds: this.locationAgeSeconds,
+      positionAge: this.locationAge,
+      speed: this.location.speed,
+      compass: this.location.compass,
+      linked: this.linked,
+      linkedServiceId: this.serviceId
+    };
+    return vehicleLite;
   }
 };

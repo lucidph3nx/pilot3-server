@@ -6,6 +6,7 @@ const getStaffPhotoFromId = require('./../functions/staffImage');
 const getRunningSheetForStation = require('./../functions/runningSheetForStation');
 const vdsRosterAPI = require('./vdsRosterAPI');
 const compassAPI = require('./compassAPI');
+const kiwirailAPI = require('./kiwirailAPI');
 const path = require('path');
 // const fs = require('fs');
 const express = require('express');
@@ -40,7 +41,7 @@ module.exports = function(app, current) {
 
   app.get('/api/currentStatus', (request, response) => {
     const currentMoment = moment();
-    const currentStatus = '';
+    const currentStatus = current.status;
     const Current = {'time': currentMoment, 'status': currentStatus};
     response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
     response.write(JSON.stringify(Current));
@@ -60,7 +61,10 @@ module.exports = function(app, current) {
   });
   // get the status for all Matangi Train Units
   app.get('/api/currentUnitList', (request, response) => {
-    const currentUnitList = current.unitList;
+    const currentUnitList = [];
+    current.unitList.forEach((unit) =>
+    currentUnitList.push(unit.webLegacy())
+    );
     const apiResponse = {'Time': moment(), currentUnitList};
     response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
     response.write(JSON.stringify(apiResponse));
@@ -68,7 +72,10 @@ module.exports = function(app, current) {
   });
   // get the status for all Matangi Cars
   app.get('/api/currentCarList', (request, response) => {
-    const currentCarList = current.carList;
+    const currentCarList = [];
+    current.carList.forEach((car) =>
+    currentCarList.push(car.webLegacy())
+    );
     const apiResponse = {'Time': moment(), currentCarList};
     response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
     response.write(JSON.stringify(apiResponse));

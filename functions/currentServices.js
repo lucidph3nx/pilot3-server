@@ -4,7 +4,7 @@ const Service = require('./serviceConstructor');
 const Vehicle = require('./vehicleConstructor');
 const timetableLogic = require('./timetableLogic');
 
-module.exports = function(geVisVehicles, current) {
+module.exports = function (geVisVehicles, current) {
   const currentTimetable = current.timetable;
   const currentTripSheet = current.tripSheet;
   const trains = geVisVehicles.features;
@@ -27,11 +27,11 @@ module.exports = function(geVisVehicles, current) {
       }
 
       const service = new Service(currentMoment,
-          vehicle.serviceId,
-          vehicle.serviceDescription,
-          vehicle,
-          secondVehicle,
-          current);
+        vehicle.serviceId,
+        vehicle.serviceDescription,
+        vehicle,
+        secondVehicle,
+        current);
       currentServices.push(service);
     }
   }
@@ -42,22 +42,23 @@ module.exports = function(geVisVehicles, current) {
   let validTimetabledServices = timetableLogic.getValidServicesAtTime(currentTimetable, currentMoment);
   for (let vts = 0; vts < validTimetabledServices.length; vts++) {
     alreadyTracking = false;
+    // check against currentServices
     for (let cs = 0; cs < currentServices.length; cs++) {
       if (!alreadyTracking && currentServices[cs].serviceId == validTimetabledServices[vts]) {
         alreadyTracking = true;
-      }
+      };
     }
     if (!alreadyTracking) {
       const service = new Service(currentMoment,
-          timetabledService.serviceId,
-          'FROM TIMETABLE',
-          null,
-          null,
-          current);
+        validTimetabledServices[vts],
+        'FROM TIMETABLE',
+        null,
+        null,
+        current);
       // look for previous service and mark if still running
       for (let csa = 0; csa < currentServices.length; csa++) {
         if (service.statusMessage !== 'Previous Service Delayed'
-                && currentServices[csa].serviceId == service.lastService) {
+          && currentServices[csa].serviceId == service.lastService) {
           service.statusMessage = 'Previous Service Delayed';
         }
       }
@@ -116,8 +117,8 @@ module.exports = function(geVisVehicles, current) {
     const meetsLocationCondition = (train.LON > westernBoundary && train.LAT < northernBoundary);
     const excludedEquiptment = ['KAIARAHI', 'ARATERE', 'KAITAKI'].includes(train.EQUIPDESC);
     if (train.TRNID !== null &&
-        meetsLocationCondition &&
-        !excludedEquiptment) {
+      meetsLocationCondition &&
+      !excludedEquiptment) {
       return true;
     } else {
       return false;
