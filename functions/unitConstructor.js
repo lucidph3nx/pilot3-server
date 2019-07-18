@@ -45,7 +45,7 @@ module.exports = class Unit {
       this.closestStationId = this.FP.location.closestStation.stationId;
     }
   }
-    /**
+  /**
    * generates a slim version of service for transmission over web
    * this is the legacy version to work with the old client
    * @return {object} service object
@@ -57,7 +57,7 @@ module.exports = class Unit {
       speed: this.speed || -1,
       line: this.line || '???',
       meterage: this.meterage || -1,
-      direction: this.direction  || '?',
+      direction: this.direction || '?',
       closestStation: this.closestStationId || '',
       FP: this.FP != undefined ? this.FP.webLegacy() : '',
       FT: this.FT != undefined ? this.FT.webLegacy() : '',
