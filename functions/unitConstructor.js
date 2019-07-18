@@ -33,13 +33,13 @@ module.exports = class Unit {
     // if trailer is linked use it, else just use the power car
     if (this.linkedCar == 'FT' || this.FP == undefined) {
       this.speed = this.FT.location.speed;
-      this.line = this.FT.location.estimatedLine;
+      this.line = this.FT.location.estimatedkiwirailLineId;
       this.meterage = this.FT.location.estimatedMeterage;
       this.direction = this.FT.location.estimatedDirection;
       this.closestStationId = this.FT.location.closestStation.stationId;
     } else {
       this.speed = this.FP.location.speed;
-      this.line = this.FP.location.estimatedLine;
+      this.line = this.FP.location.estimatedkiwirailLineId;
       this.meterage = this.FP.location.estimatedMeterage;
       this.direction = this.FP.location.estimatedDirection;
       this.closestStationId = this.FP.location.closestStation.stationId;
