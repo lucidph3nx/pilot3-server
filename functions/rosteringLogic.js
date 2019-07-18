@@ -65,6 +65,28 @@ module.exports = {
       }
       return prevServiceId;
     },
+    getDayRosterFromShiftId: function(shiftId, roster) {
+      const dayRoster = [];
+      if (roster == undefined || roster.length == 0) {
+        return dayRoster;
+      }
+      for (let s = 0; s < roster.length; s++) {
+        if (roster[s].shiftId == shiftId) {
+          const serviceRoster = {
+            shiftId: roster[s].shiftId,
+            shiftType: roster[s].shiftType,
+            staffId: roster[s].staffId,
+            staffName: roster[s].staffName,
+            dutyName: roster[s].dutyName,
+            dutyType: roster[s].dutyType,
+            dutyStartTime: moment(roster[s].dutyStartTime).format('HH:mm'),
+            dutyEndTime: moment(roster[s].dutyEndTime).format('HH:mm'),
+          };
+          dayRoster.push(serviceRoster);
+        }
+      }
+      return dayRoster;
+    },
   },
   trainRoster: {
     /**

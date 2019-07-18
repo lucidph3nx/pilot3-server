@@ -196,21 +196,22 @@ module.exports =
         "TRNDESCRP": null
       }
     },
-    {
-      "attributes": {
-        "TRNID": "2637",
-        "VEHID": "FP5079",
-        "EQUIPDESC": "Matangi Power Car",
-        "LAT": -41.148217,
-        "LON": 174.988563,
-        "VEHSPD": 82.8,
-        "VEHDIR": 209.1,
-        "TIMESTMPNZ": 1563363104000,
-        "TIMESTMPGIS": 1563363121000,
-        "DELAYTIME": -1,
-        "TRNDESCRP": "HVL2018MTF 1120 UPHTT 1205 WGTNS ML"
-      }
-    },
+    // simulated non tracking
+    // {
+    //   "attributes": {
+    //     "TRNID": "2637",
+    //     "VEHID": "FP5079",
+    //     "EQUIPDESC": "Matangi Power Car",
+    //     "LAT": -41.148217,
+    //     "LON": 174.988563,
+    //     "VEHSPD": 82.8,
+    //     "VEHDIR": 209.1,
+    //     "TIMESTMPNZ": 1563363104000,
+    //     "TIMESTMPGIS": 1563363121000,
+    //     "DELAYTIME": -1,
+    //     "TRNDESCRP": "HVL2018MTF 1120 UPHTT 1205 WGTNS ML"
+    //   }
+    // },
     {
       "attributes": {
         "TRNID": null,

@@ -195,7 +195,7 @@ module.exports = class Vehicle {
       return fixedvariance;
     }
   }
-    /**
+  /**
    * generates a slim version of service for transmission over web
    * this is the legacy version to work with the old client
    * @return {object} service object
@@ -210,7 +210,7 @@ module.exports = class Vehicle {
       speed: this.location.speed,
       compass: this.location.compass,
       linked: this.linked,
-      linkedServiceId: this.serviceId
+      linkedServiceId: this.serviceId,
     };
     return vehicleLite;
   }

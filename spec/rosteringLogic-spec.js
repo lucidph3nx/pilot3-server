@@ -100,6 +100,26 @@ describe('Find out previous (last) service for Crew Member', function() {
   });
 });
 
+describe('get whole days rostered duties for a crew member from their shiftId', function() {
+  it('filters the roster to only show duties relevant to that shift', function() {
+    const getDayRosterFromShiftId = rosteringLogic.crewRoster.getDayRosterFromShiftId;
+    let shiftId = 'WLE240';
+    let rosterDuties = getDayRosterFromShiftId(shiftId, testRosterDuties);
+    expect(rosterDuties.length).toBe(14);
+    expect(rosterDuties[0].shiftId).toBe('WLE240');
+
+    shiftId = 'WPO202';
+    rosterDuties = getDayRosterFromShiftId(shiftId, testRosterDuties);
+    expect(rosterDuties.length).toBe(8);
+    expect(rosterDuties[0].shiftId).toBe('WPO202');
+
+    shiftId = 'WLE222';
+    rosterDuties = getDayRosterFromShiftId(shiftId, testRosterDuties);
+    expect(rosterDuties.length).toBe(10);
+    expect(rosterDuties[0].shiftId).toBe('WLE222');
+  });
+});
+
 describe('get list of "as required" staff from roster', function() {
   it('Works out the previous (last) service a Crew Member did from the roster', function() {
     const getAsRequiredStaff = rosteringLogic.common.getAsRequiredStaff;

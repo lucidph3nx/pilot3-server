@@ -15,21 +15,21 @@ module.exports = {
 * @param {object} locationAge how old is the data
 * @return {object} Current delay in various formats
 */
-  getScheduleVariance: function (kiwirailBoolean,
-    currentTime,
-    direction,
-    timetableDetails,
-    location,
-    locationAge) {
+  getScheduleVariance: function(kiwirailBoolean,
+      currentTime,
+      direction,
+      timetableDetails,
+      location,
+      locationAge) {
     const scheduleVariance = {
       delay: '',
       delayFriendly: '',
     };
     // the ignore criteria
     if (kiwirailBoolean == false && location.meterage !== -1 && timetableDetails.timingPoints.length !== 0) {
-      const previousStationDetails = module.exports.getPrevStationDetails(location.meterage, direction, timetableDetails);
-      const prevStationTime = previousStationDetails.time;
-      const prevStationMeterage = previousStationDetails.meterage;
+      const prevStationDetails = module.exports.getPrevStationDetails(location.meterage, direction, timetableDetails);
+      const prevStationTime = prevStationDetails.time;
+      const prevStationMeterage = prevStationDetails.meterage;
       const nextStationDetails = module.exports.getNextStationDetails(location.meterage, direction, timetableDetails);
       const nextStationTime = nextStationDetails.time;
       const nextStationMeterage = nextStationDetails.meterage;
@@ -57,7 +57,6 @@ module.exports = {
       const sec = Math.floor((Math.abs(minutes) * 60) % 60);
       return sign + (min < 10 ? '0' : '') + min + ':' + (sec < 10 ? '0' : '') + sec;
     }
-
   },
   /**
    * finds the next  station details for a service
@@ -66,7 +65,7 @@ module.exports = {
    * @param {object} timetableDetails id representing the service
    * @return {object} object including time, meterage, stationId
    */
-  getNextStationDetails: function (trainMeterage, direction, timetableDetails) {
+  getNextStationDetails: function(trainMeterage, direction, timetableDetails) {
     const up = (direction == 'UP');
     const down = (direction == 'DOWN');
     const stationDetails = {
@@ -112,7 +111,7 @@ module.exports = {
    * @param {object} timetableDetails id representing the service
    * @return {object} object including time, meterage, stationId
    */
-  getPrevStationDetails: function (trainMeterage, direction, timetableDetails) {
+  getPrevStationDetails: function(trainMeterage, direction, timetableDetails) {
     const up = (direction == 'UP');
     const down = (direction == 'DOWN');
     const stationDetails = {
@@ -147,7 +146,8 @@ module.exports = {
         }
       }
       // if station has still not been matched because train is before first station meterage, use first station
-      if (stationDetails.stationId == '' && module.exports.getMeterageOfStation(serviceTimetable[0].station) < trainMeterage) {
+      if (stationDetails.stationId == '' &&
+          module.exports.getMeterageOfStation(serviceTimetable[0].station) < trainMeterage) {
         stationDetails.stationId = serviceTimetable[0].station;
         stationDetails.time = moment(serviceTimetable[0].departs);
         stationDetails.meterage = module.exports.getMeterageOfStation(serviceTimetable[0].station);
@@ -160,7 +160,7 @@ module.exports = {
    * @param {string} stationId
    * @return {number} meterage of station
    */
-  getMeterageOfStation: function (stationId) {
+  getMeterageOfStation: function(stationId) {
     for (let sm = 0; sm < stationMeterage.length; sm++) {
       if (stationId == stationMeterage[sm].stationId) {
         return stationMeterage[sm].meterage;

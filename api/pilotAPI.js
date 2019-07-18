@@ -1,7 +1,6 @@
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 const rosteringLogic = require('./../functions/rosteringLogic');
-const getDayRosterFromShift = require('./../functions/dayRosterFromShift');
 const getStaffPhotoFromId = require('./../functions/staffImage');
 const getRunningSheetForStation = require('./../functions/runningSheetForStation');
 // =======API=======
@@ -200,8 +199,9 @@ module.exports = function(app, current) {
   });
   // get all roster duties for a particular shift today
   app.get('/api/dayRoster', (request, response) => {
+    const getDayRosterFromShiftId = rosteringLogic.crewRoster.getDayRosterFromShiftId;
     const requestedShift = request.query.shiftId;
-    const apiResponse = getDayRosterFromShift(requestedShift, current.rosterDuties);
+    const apiResponse = getDayRosterFromShiftId(requestedShift, current.rosterDuties);
     response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
     response.write(JSON.stringify(apiResponse));
     response.end();
