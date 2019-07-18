@@ -11,7 +11,7 @@ const app = express();
 // ======functions flags=======
 const functionFlags = {
   pilotSQLLogging: false, // log to Pilot DB
-  fullDebugMode: true, // full test data run
+  fullDebugMode: false, // full test data run
   workingOffsiteMode: false, // run with GeVis but no Compass or VDS -- DOES NOT WORK YET
 };
 const applicationSettings = {

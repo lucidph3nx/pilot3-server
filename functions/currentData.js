@@ -137,8 +137,8 @@ module.exports = class CurrentData {
       this.pilotLog('GeVis Auth Token Retrival Begun');
       puppeteerOps.getGeVisToken().then((result) => {
         this.geVisToken.pending = false;
-        this.geVisToken.token = result;
-        this.geVisToken.updateTime = moment();
+        this.geVisToken.token = result[0];
+        this.geVisToken.updateTime = result[1];
         this.pilotLog('GeVis Auth Token Retrieved Ok');
       }).catch((error) => {
         this.geVisToken.pending = false;
