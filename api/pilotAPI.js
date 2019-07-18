@@ -4,11 +4,17 @@ const rosteringLogic = require('./../functions/rosteringLogic');
 const getDayRosterFromShift = require('./../functions/dayRosterFromShift');
 const getStaffPhotoFromId = require('./../functions/staffImage');
 const getRunningSheetForStation = require('./../functions/runningSheetForStation');
-const vdsRosterAPI = require('./vdsRosterAPI');
-const compassAPI = require('./compassAPI');
-const kiwirailAPI = require('./kiwirailAPI');
+// =======API=======
+let vdsRosterAPI;
+let compassAPI;
+// only define the API modules if credentials file exists
+const fs = require('fs');
 const path = require('path');
-// const fs = require('fs');
+const credentialPath = path.join(__dirname, '..', 'credentials.js');
+if (fs.existsSync(credentialPath)) {
+  vdsRosterAPI = require('./vdsRosterAPI');
+  compassAPI = require('./compassAPI');
+}
 const express = require('express');
 
 module.exports = function(app, current) {
@@ -50,10 +56,18 @@ module.exports = function(app, current) {
   // get list of all train servics that are active now
   app.get('/api/currentServices', (request, response, next) => {
     const servicesWeb = [];
-    current.services.forEach((service) =>
+    current.runningServices.forEach((service) =>
       servicesWeb.push(service.webLegacy())
     );
     const currentServices = servicesWeb;
+    const apiResponse = {'Time': moment(), currentServices};
+    response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+    response.write(JSON.stringify(apiResponse));
+    response.end();
+  });
+  // get list of all train servics that are active now
+  app.get('/api/currentServicesDEBUG', (request, response, next) => {
+    const currentServices = current.runningServices;
     const apiResponse = {'Time': moment(), currentServices};
     response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
     response.write(JSON.stringify(apiResponse));
@@ -63,7 +77,7 @@ module.exports = function(app, current) {
   app.get('/api/currentUnitList', (request, response) => {
     const currentUnitList = [];
     current.unitList.forEach((unit) =>
-    currentUnitList.push(unit.webLegacy())
+      currentUnitList.push(unit.webLegacy())
     );
     const apiResponse = {'Time': moment(), currentUnitList};
     response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
@@ -74,7 +88,7 @@ module.exports = function(app, current) {
   app.get('/api/currentCarList', (request, response) => {
     const currentCarList = [];
     current.carList.forEach((car) =>
-    currentCarList.push(car.webLegacy())
+      currentCarList.push(car.webLegacy())
     );
     const apiResponse = {'Time': moment(), currentCarList};
     response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
@@ -206,7 +220,7 @@ module.exports = function(app, current) {
   });
   // get list of staff who are "as Required" now
   app.get('/api/asRequiredStaff', (request, response) => {
-    const apiResponse = rosteringLogic.common.getAsRequiredStaff(current.rosterDuties)
+    const apiResponse = rosteringLogic.common.getAsRequiredStaff(current.rosterDuties);
     response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
     response.write(JSON.stringify(apiResponse));
     response.end();

@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+/* eslint max-len: 0 */
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 const rosteringLogic = require('../functions/rosteringLogic');

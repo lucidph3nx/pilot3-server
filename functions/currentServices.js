@@ -4,12 +4,11 @@ const Service = require('./serviceConstructor');
 const Vehicle = require('./vehicleConstructor');
 const timetableLogic = require('./timetableLogic');
 
-module.exports = function (geVisVehicles, current) {
+module.exports = function(geVisVehicles, current, time) {
   const currentTimetable = current.timetable;
-  const currentTripSheet = current.tripSheet;
-  const trains = geVisVehicles.features;
+  const trains = geVisVehicles;
   const currentServices = [];
-  const currentMoment = moment();
+  const currentMoment = time;
   // itterate through all items in geVisVehicles and use all relevant ones
   for (let gj = 0; gj < trains.length; gj++) {
     const train = trains[gj].attributes;
@@ -27,34 +26,33 @@ module.exports = function (geVisVehicles, current) {
       }
 
       const service = new Service(currentMoment,
-        vehicle.serviceId,
-        vehicle.serviceDescription,
-        vehicle,
-        secondVehicle,
-        current);
+          vehicle.serviceId,
+          vehicle.serviceDescription,
+          vehicle,
+          secondVehicle,
+          current);
       currentServices.push(service);
     }
   }
   //  get all timetabled services
   let alreadyTracking = false;
   //  cycle through services
-  const servicesToday = currentTripSheet;
-  let validTimetabledServices = timetableLogic.getValidServicesAtTime(currentTimetable, currentMoment);
+  const validTimetabledServices = timetableLogic.getValidServicesAtTime(currentTimetable, currentMoment);
   for (let vts = 0; vts < validTimetabledServices.length; vts++) {
     alreadyTracking = false;
     // check against currentServices
     for (let cs = 0; cs < currentServices.length; cs++) {
       if (!alreadyTracking && currentServices[cs].serviceId == validTimetabledServices[vts]) {
         alreadyTracking = true;
-      };
+      }
     }
     if (!alreadyTracking) {
       const service = new Service(currentMoment,
-        validTimetabledServices[vts],
-        'FROM TIMETABLE',
-        null,
-        null,
-        current);
+          validTimetabledServices[vts],
+          'FROM TIMETABLE',
+          null,
+          null,
+          current);
       // look for previous service and mark if still running
       for (let csa = 0; csa < currentServices.length; csa++) {
         if (service.statusMessage !== 'Previous Service Delayed'
@@ -65,45 +63,6 @@ module.exports = function (geVisVehicles, current) {
       currentServices.push(service);
     }
   }
-
-  // for (let st = 0; st < servicesToday.length; st++) {
-  //   const timetabledService = servicesToday[st];
-  //   alreadyTracking = false;
-  //   const serviceTimePoints = currentTimetable.filter(
-  //       (currentServiceTimetable) => currentServiceTimetable.serviceId == timetabledService.serviceId);
-  //   const serviceDeparts = serviceTimePoints[0].departs;
-  //   const serviceArrives = serviceTimePoints[serviceTimePoints.length-1].arrives;
-  //   // if (timetabledService.serviceId == '3616') {
-  //   //   console.log('this')
-  //   // }
-
-  //   // find if fits within specified timeband
-  //   if (serviceDeparts < moment(currentMoment).subtract(1, 'minutes') &&
-  //       serviceArrives > moment(currentMoment).add(5, 'minutes')) {
-  //     // console.log(timetabledService.serviceId);
-  //     for (let cs = 0; cs < currentServices.length; cs++) {
-  //       if (!alreadyTracking && currentServices[cs].serviceId == timetabledService.serviceId) {
-  //         alreadyTracking = true;
-  //       }
-  //     }
-  //     if (alreadyTracking == false) {
-  //       const service = new Service(currentMoment,
-  //           timetabledService.serviceId,
-  //           'FROM TIMETABLE',
-  //           null,
-  //           null,
-  //           current);
-  //       // look for previous service and mark if still running
-  //       for (let csa = 0; csa < currentServices.length; csa++) {
-  //         if (service.statusMessage !== 'Previous Service Delayed'
-  //                 && currentServices[csa].serviceId == service.lastService) {
-  //           service.statusMessage = 'Previous Service Delayed';
-  //         }
-  //       }
-  //       currentServices.push(service);
-  //     }
-  //   }
-  // }
   return currentServices;
   /**
    * decides if train meets selection criteria

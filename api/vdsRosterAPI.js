@@ -26,13 +26,13 @@ module.exports = {
   checkVDSDBConnection: function() {
     return new Promise((resolve, reject) => {
       knex.raw('select 1 as dbIsUp')
-      .then(function(response) {
-        if (response[0].dbIsUp == 1){
-          resolve('Connection Ok')
-        } else {
-          resolve('Connection Error')
-        }
-      })
+          .then(function(response) {
+            if (response[0].dbIsUp == 1) {
+              resolve('Connection Ok');
+            } else {
+              resolve('Connection Error');
+            }
+          });
     });
   },
   // returns current datetime and object with todays VDS roster per trip

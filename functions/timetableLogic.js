@@ -1,9 +1,18 @@
-const compassAPI = require('../api/compassAPI');
+// =======API=======
+let compassAPI;
+// only define the API modules if credentials file exists
+const fs = require('fs');
+const path = require('path');
+const credentialPath = path.join(__dirname, '..', 'credentials.js');
+if (fs.existsSync(credentialPath)) {
+  compassAPI = require('../api/compassAPI');
+}
+
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 
 module.exports = {
-  getCurrentTimetable: function () {
+  getCurrentTimetable: function() {
     return new Promise((resolve, reject) => {
       compassAPI.currentTimetable().then((response) => {
         let currentTimetable;
@@ -20,7 +29,7 @@ module.exports = {
    * @param {Array} timetable a timetable array
    * @return {Array} currenttripSheet
    */
-  getTripSheet: function (timetable) {
+  getTripSheet: function(timetable) {
     if (timetable !== undefined && timetable !== []) {
       const currenttripSheet = [];
       let tripLine = {};
@@ -47,7 +56,7 @@ module.exports = {
 * @param {String} serviceDescription
 * @return {Object} Timetable details
 */
-  getTimetableDetails: function (serviceId, timetable, kiwirailBoolean, serviceDescription) {
+  getTimetableDetails: function(serviceId, timetable, kiwirailBoolean, serviceDescription) {
     const timetableDetails = {
       serviceId: serviceId,
       consist: '',
@@ -72,9 +81,9 @@ module.exports = {
       timetableDetails.line = timingPoints[0].line;
       timetableDetails.direction = timingPoints[0].direction;
       timetableDetails.origin = timingPoints[0].station;
-      timetableDetails.departs = timingPoints[0].departs;
+      timetableDetails.departs = moment(timingPoints[0].departs);
       timetableDetails.destination = timingPoints[timingPoints.length - 1].station;
-      timetableDetails.arrives = timingPoints[timingPoints.length - 1].arrives;
+      timetableDetails.arrives = moment(timingPoints[timingPoints.length - 1].arrives);
     }
     if (kiwirailBoolean) {
       const KiwiRailDetails = module.exports.guessKiwiRailTimetableDetails(serviceDescription);
@@ -88,7 +97,7 @@ module.exports = {
    * @param {string} description
    * @return {array} with [origin, destination]
    */
-  guessKiwiRailTimetableDetails: function (description) {
+  guessKiwiRailTimetableDetails: function(description) {
     const locationMap = new Map([
       ['AUCKLAND', 'AUCK'],
       ['WELLINGTON', 'WELL'],
@@ -120,7 +129,7 @@ module.exports = {
   getValidServicesAtTime: function(timetable, queryTime) {
     const tripSheet = module.exports.getTripSheet(timetable);
 
-    let validServices = [];
+    const validServices = [];
     for (let s = 0; s < tripSheet.length; s++) {
       const timetabledService = module.exports.getTimetableDetails(tripSheet[s].serviceId, timetable, false, '');
 
@@ -131,4 +140,4 @@ module.exports = {
     }
     return validServices;
   },
-}
+};

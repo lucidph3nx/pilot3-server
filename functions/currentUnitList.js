@@ -8,7 +8,7 @@ const Unit = require('./unitConstructor');
  * @return {array} an Array with 2 sub-Arrays [currentUnitList, currentCarList]
  */
 module.exports = function(geVisVehicles) {
-  const trains = geVisVehicles.features;
+  const trains = geVisVehicles;
   const activeUnits = [];
   const currentCarList = [];
   const currentUnitList = [];

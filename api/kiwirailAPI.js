@@ -32,14 +32,14 @@ module.exports = {
             if (geVisVehicles.error !== undefined && geVisVehicles.error.code == 498) {
               reject(new Error('GeVis Token Invalid Or Expired'));
             }
-              // // write to file
-              // const fs = require('fs');
-              // const jsonContent = JSON.stringify(geVisVehicles);
-              // fs.writeFile('./geVisVehicles.json', jsonContent, 'utf8', function(err) {
-              //   if (err) {
-              //     return console.log(err);
-              //   }
-              // });
+            // // write to file
+            // const fs = require('fs');
+            // const jsonContent = JSON.stringify(geVisVehicles);
+            // fs.writeFile('./geVisVehicles.json', jsonContent, 'utf8', function(err) {
+            //   if (err) {
+            //     return console.log(err);
+            //   }
+            // });
             resolve(geVisVehicles);
           }
         });
@@ -49,7 +49,7 @@ module.exports = {
     });
   },
   checkAPI: function(token) {
-    let status = 'Connection OK'
+    let status = 'Connection OK';
     return new Promise(function(resolve, reject) {
       const options = {
         hostname: 'gis.kiwirail.co.nz',
@@ -66,7 +66,7 @@ module.exports = {
         });
         response.on('end', function() {
           if (body.substring(0, 1) == '<') {
-            status = 'NEW GeVis returned service unavailable'
+            status = 'NEW GeVis returned service unavailable';
           } else {
             const geVisVehicles = JSON.parse(body);
             if (geVisVehicles.features == []) {
@@ -79,7 +79,7 @@ module.exports = {
             resolve(status);
           }
         });
-      })
+      });
     });
   },
 };

@@ -36,7 +36,7 @@ module.exports = {
       // the time you would expect the service to be in its current position
       const percentProgress = ((location.meterage - prevStationMeterage) / (nextStationMeterage - prevStationMeterage));
       const timeDifference = nextStationTime.diff(prevStationTime);
-      const ExpectedTime = moment(Math.floor(prevStationTime + timeDifference * percentProgress));
+      const ExpectedTime = moment(Math.floor(prevStationTime + timeDifference * percentProgress)).utc();
       // the difference between actual and expected tells you how late the service is
       let CurrentDelay = moment.duration(currentTime.diff(ExpectedTime));
       CurrentDelay.subtract(locationAge, 'seconds');

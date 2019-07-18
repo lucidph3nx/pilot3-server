@@ -126,6 +126,8 @@ module.exports = {
      * @return {number} turnaround time
      */
     getTurnaround: function(EndTime, StartTime) {
+      EndTime = moment(EndTime);
+      StartTime = moment(StartTime);
       if (EndTime == undefined || StartTime == undefined) {
         return '';
       }

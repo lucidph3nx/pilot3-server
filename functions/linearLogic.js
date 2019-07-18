@@ -241,7 +241,7 @@ module.exports = {
         && location.lat < stationGeoboundaries[j].north
         && location.lat > stationGeoboundaries[j].south);
       if (withinBoundary) {
-        lastStation.stationId = stationGeoboundaries[j].station_id;
+        lastStation.stationId = stationGeoboundaries[j].stationId;
         lastStation.stationCurrent = true;
         break;
       }

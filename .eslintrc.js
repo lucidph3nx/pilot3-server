@@ -3,11 +3,12 @@ module.exports = {
     'browser': true,
     'node': true,
     'es6': true,
+    'jasmine': true
   },
   'extends': [
     'eslint:recommended',
     'google',
-    'plugin:jasmine/recommended',
+    //'plugin:jasmine/recommended',
   ],
   'globals': {
     'Atomics': 'readonly',
@@ -21,7 +22,4 @@ module.exports = {
     "linebreak-style": ["error", process.env.NODE_ENV === 'prod' ? "unix" : "windows"],
     "max-len": ["error", { "code": 120 }],
   },
-  'env': {
-    'jasmine': true
-  }
 };

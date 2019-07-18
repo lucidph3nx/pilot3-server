@@ -4,8 +4,8 @@ const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 const delayCalculation = require('../functions/delayCalculation');
 
-describe('Get Schedule Variance', function () {
-  it('the function takes location, time and timetable information and works out current minutes late/early', function () {
+describe('Get Schedule Variance', function() {
+  it('the function takes location, time and timetable information and works out current minutes late/early', function() {
     const kiwirailBoolean = false;
     const direction = 'DOWN';
     let timetableDetails = {
@@ -15,15 +15,15 @@ describe('Get Schedule Variance', function () {
       line: 'JVL',
       direction: 'DOWN',
       timingPoints: [
-        { serviceId: '9237', line: 'JVL', direction: 'D', blockId: '4', consist: 'D', arrives: cps2m('123000'), departs: cps2m('123000'), station: 'JOHN', stationSequence: 0 },
-        { serviceId: '9237', line: 'JVL', direction: 'D', blockId: '4', consist: 'D', arrives: cps2m('123200'), departs: cps2m('123200'), station: 'RARO', stationSequence: 1 },
-        { serviceId: '9237', line: 'JVL', direction: 'D', blockId: '4', consist: 'D', arrives: cps2m('123500'), departs: cps2m('123500'), station: 'KHAN', stationSequence: 2 },
-        { serviceId: '9237', line: 'JVL', direction: 'D', blockId: '4', consist: 'D', arrives: cps2m('123700'), departs: cps2m('123700'), station: 'BOXH', stationSequence: 3 },
-        { serviceId: '9237', line: 'JVL', direction: 'D', blockId: '4', consist: 'D', arrives: cps2m('123800'), departs: cps2m('123800'), station: 'SIML', stationSequence: 4 },
-        { serviceId: '9237', line: 'JVL', direction: 'D', blockId: '4', consist: 'D', arrives: cps2m('124000'), departs: cps2m('124000'), station: 'AWAR', stationSequence: 5 },
-        { serviceId: '9237', line: 'JVL', direction: 'D', blockId: '4', consist: 'D', arrives: cps2m('124200'), departs: cps2m('124200'), station: 'NGAI', stationSequence: 6 },
-        { serviceId: '9237', line: 'JVL', direction: 'D', blockId: '4', consist: 'D', arrives: cps2m('124400'), departs: cps2m('124400'), station: 'CROF', stationSequence: 7 },
-        { serviceId: '9237', line: 'JVL', direction: 'D', blockId: '4', consist: 'D', arrives: cps2m('125300'), departs: cps2m('125300'), station: 'WELL', stationSequence: 8 },
+        {serviceId: '9237', line: 'JVL', direction: 'D', blockId: '4', consist: 'D', arrives: cps2m('123000'), departs: cps2m('123000'), station: 'JOHN', stationSequence: 0},
+        {serviceId: '9237', line: 'JVL', direction: 'D', blockId: '4', consist: 'D', arrives: cps2m('123200'), departs: cps2m('123200'), station: 'RARO', stationSequence: 1},
+        {serviceId: '9237', line: 'JVL', direction: 'D', blockId: '4', consist: 'D', arrives: cps2m('123500'), departs: cps2m('123500'), station: 'KHAN', stationSequence: 2},
+        {serviceId: '9237', line: 'JVL', direction: 'D', blockId: '4', consist: 'D', arrives: cps2m('123700'), departs: cps2m('123700'), station: 'BOXH', stationSequence: 3},
+        {serviceId: '9237', line: 'JVL', direction: 'D', blockId: '4', consist: 'D', arrives: cps2m('123800'), departs: cps2m('123800'), station: 'SIML', stationSequence: 4},
+        {serviceId: '9237', line: 'JVL', direction: 'D', blockId: '4', consist: 'D', arrives: cps2m('124000'), departs: cps2m('124000'), station: 'AWAR', stationSequence: 5},
+        {serviceId: '9237', line: 'JVL', direction: 'D', blockId: '4', consist: 'D', arrives: cps2m('124200'), departs: cps2m('124200'), station: 'NGAI', stationSequence: 6},
+        {serviceId: '9237', line: 'JVL', direction: 'D', blockId: '4', consist: 'D', arrives: cps2m('124400'), departs: cps2m('124400'), station: 'CROF', stationSequence: 7},
+        {serviceId: '9237', line: 'JVL', direction: 'D', blockId: '4', consist: 'D', arrives: cps2m('125300'), departs: cps2m('125300'), station: 'WELL', stationSequence: 8},
       ],
       origin: 'JOHN',
       departs: '12:30',
@@ -66,23 +66,23 @@ describe('Get Schedule Variance', function () {
       line: 'HVL',
       direction: 'DOWN',
       timingPoints: [
-        { 'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('102000'), 'departs': cps2m('102000'), 'station': 'UPPE', 'stationSequence': 0, 'dayType': 5 },
-        { 'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('102200'), 'departs': cps2m('102200'), 'station': 'WALL', 'stationSequence': 1, 'dayType': 5 },
-        { 'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('102500'), 'departs': cps2m('102500'), 'station': 'TREN', 'stationSequence': 2, 'dayType': 5 },
-        { 'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('102700'), 'departs': cps2m('102700'), 'station': 'HERE', 'stationSequence': 3, 'dayType': 5 },
-        { 'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('102900'), 'departs': cps2m('102900'), 'station': 'SILV', 'stationSequence': 4, 'dayType': 5 },
-        { 'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('103200'), 'departs': cps2m('103200'), 'station': 'MANO', 'stationSequence': 5, 'dayType': 5 },
-        { 'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('103400'), 'departs': cps2m('103400'), 'station': 'POMA', 'stationSequence': 6, 'dayType': 5 },
-        { 'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('103600'), 'departs': cps2m('103600'), 'station': 'TAIT', 'stationSequence': 7, 'dayType': 5 },
-        { 'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('103900'), 'departs': cps2m('103900'), 'station': 'WING', 'stationSequence': 8, 'dayType': 5 },
-        { 'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('104100'), 'departs': cps2m('104100'), 'station': 'NAEN', 'stationSequence': 9, 'dayType': 5 },
-        { 'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('104300'), 'departs': cps2m('104300'), 'station': 'EPUN', 'stationSequence': 10, 'dayType': 5 },
-        { 'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('104500'), 'departs': cps2m('104500'), 'station': 'WATE', 'stationSequence': 11, 'dayType': 5 },
-        { 'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('104800'), 'departs': cps2m('104800'), 'station': 'WOBU', 'stationSequence': 12, 'dayType': 5 },
-        { 'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('105100'), 'departs': cps2m('105100'), 'station': 'AVA', 'stationSequence': 13, 'dayType': 5 },
-        { 'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('105300'), 'departs': cps2m('105300'), 'station': 'PETO', 'stationSequence': 14, 'dayType': 5 },
-        { 'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('105900'), 'departs': cps2m('105900'), 'station': 'NGAU', 'stationSequence': 15, 'dayType': 5 },
-        { 'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('110500'), 'departs': cps2m('110500'), 'station': 'WELL', 'stationSequence': 16, 'dayType': 5 },
+        {'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('102000'), 'departs': cps2m('102000'), 'station': 'UPPE', 'stationSequence': 0, 'dayType': 5},
+        {'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('102200'), 'departs': cps2m('102200'), 'station': 'WALL', 'stationSequence': 1, 'dayType': 5},
+        {'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('102500'), 'departs': cps2m('102500'), 'station': 'TREN', 'stationSequence': 2, 'dayType': 5},
+        {'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('102700'), 'departs': cps2m('102700'), 'station': 'HERE', 'stationSequence': 3, 'dayType': 5},
+        {'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('102900'), 'departs': cps2m('102900'), 'station': 'SILV', 'stationSequence': 4, 'dayType': 5},
+        {'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('103200'), 'departs': cps2m('103200'), 'station': 'MANO', 'stationSequence': 5, 'dayType': 5},
+        {'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('103400'), 'departs': cps2m('103400'), 'station': 'POMA', 'stationSequence': 6, 'dayType': 5},
+        {'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('103600'), 'departs': cps2m('103600'), 'station': 'TAIT', 'stationSequence': 7, 'dayType': 5},
+        {'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('103900'), 'departs': cps2m('103900'), 'station': 'WING', 'stationSequence': 8, 'dayType': 5},
+        {'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('104100'), 'departs': cps2m('104100'), 'station': 'NAEN', 'stationSequence': 9, 'dayType': 5},
+        {'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('104300'), 'departs': cps2m('104300'), 'station': 'EPUN', 'stationSequence': 10, 'dayType': 5},
+        {'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('104500'), 'departs': cps2m('104500'), 'station': 'WATE', 'stationSequence': 11, 'dayType': 5},
+        {'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('104800'), 'departs': cps2m('104800'), 'station': 'WOBU', 'stationSequence': 12, 'dayType': 5},
+        {'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('105100'), 'departs': cps2m('105100'), 'station': 'AVA', 'stationSequence': 13, 'dayType': 5},
+        {'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('105300'), 'departs': cps2m('105300'), 'station': 'PETO', 'stationSequence': 14, 'dayType': 5},
+        {'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('105900'), 'departs': cps2m('105900'), 'station': 'NGAU', 'stationSequence': 15, 'dayType': 5},
+        {'serviceId': '2631', 'line': 'HVL', 'direction': 'D', 'blockId': 80, 'consist': 'EMU6', 'arrives': cps2m('110500'), 'departs': cps2m('110500'), 'station': 'WELL', 'stationSequence': 16, 'dayType': 5},
       ],
       origin: 'UPPE',
       departs: '10:20',
@@ -109,133 +109,126 @@ describe('Get Schedule Variance', function () {
   });
 });
 
-// describe('Gets the details of the next station for a train', function () {
-//   it('gets the next station correctly - Johnsonville Line Up Example', function () {
-//     let meterage = 3039
-//     let direction = 'UP'
-//     let timetableDetails = {
-//       timingPoints: [
-//         { 'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('100200'), 'departs': cps2m('100200'), 'station': 'WELL', 'stationSequence': 0, 'dayType': 5 },
-//         { 'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('101000'), 'departs': cps2m('101000'), 'station': 'CROF', 'stationSequence': 1, 'dayType': 5 },
-//         { 'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('101200'), 'departs': cps2m('101200'), 'station': 'NGAI', 'stationSequence': 2, 'dayType': 5 },
-//         { 'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('101400'), 'departs': cps2m('101400'), 'station': 'AWAR', 'stationSequence': 3, 'dayType': 5 },
-//         { 'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('101600'), 'departs': cps2m('101600'), 'station': 'SIML', 'stationSequence': 4, 'dayType': 5 },
-//         { 'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('101700'), 'departs': cps2m('101700'), 'station': 'BOXH', 'stationSequence': 5, 'dayType': 5 },
-//         { 'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('102000'), 'departs': cps2m('102000'), 'station': 'KHAN', 'stationSequence': 6, 'dayType': 5 },
-//         { 'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('102300'), 'departs': cps2m('102300'), 'station': 'RARO', 'stationSequence': 7, 'dayType': 5 },
-//         { 'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('102500'), 'departs': cps2m('102500'), 'station': 'JOHN', 'stationSequence': 8, 'dayType': 5 },],
-//     }
-//     let stationDetails = delayCalculation.getNextStationDetails(meterage, direction, timetableDetails)
-//     expect(stationDetails.stationId).toBe('CROF')
-//     expect(stationDetails.meterage).toBe(4770)
-//     expect(stationDetails.time.format('HH:mm')).toBe('10:10')
-//   })
-//   it('gets the next station correctly - Hutt Valley Line Down Example', function () {
-//     let meterage = 14327
-//     let direction = 'DOWN'
-//     let timetableDetails = {
-//       timingPoints: [
-//         { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('100000'), 'departs': cps2m('100000'), 'station': 'UPPE', 'stationSequence': 0, 'dayType': 5 },
-//         { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('100200'), 'departs': cps2m('100200'), 'station': 'WALL', 'stationSequence': 1, 'dayType': 5 },
-//         { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('100500'), 'departs': cps2m('100500'), 'station': 'TREN', 'stationSequence': 2, 'dayType': 5 },
-//         { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('100700'), 'departs': cps2m('100700'), 'station': 'HERE', 'stationSequence': 3, 'dayType': 5 },
-//         { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('100900'), 'departs': cps2m('100900'), 'station': 'SILV', 'stationSequence': 4, 'dayType': 5 },
-//         { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('101200'), 'departs': cps2m('101200'), 'station': 'MANO', 'stationSequence': 5, 'dayType': 5 },
-//         { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('101400'), 'departs': cps2m('101400'), 'station': 'POMA', 'stationSequence': 6, 'dayType': 5 },
-//         { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('101600'), 'departs': cps2m('101600'), 'station': 'TAIT', 'stationSequence': 7, 'dayType': 5 },
-//         { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('101900'), 'departs': cps2m('101900'), 'station': 'WING', 'stationSequence': 8, 'dayType': 5 },
-//         { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('102100'), 'departs': cps2m('102100'), 'station': 'NAEN', 'stationSequence': 9, 'dayType': 5 },
-//         { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('102300'), 'departs': cps2m('102300'), 'station': 'EPUN', 'stationSequence': 10, 'dayType': 5 },
-//         { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('102500'), 'departs': cps2m('102500'), 'station': 'WATE', 'stationSequence': 11, 'dayType': 5 },
-//         { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('102800'), 'departs': cps2m('102800'), 'station': 'WOBU', 'stationSequence': 12, 'dayType': 5 },
-//         { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('103100'), 'departs': cps2m('103100'), 'station': 'AVA', 'stationSequence': 13, 'dayType': 5 },
-//         { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('103300'), 'departs': cps2m('103300'), 'station': 'PETO', 'stationSequence': 14, 'dayType': 5 },
-//         { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('103900'), 'departs': cps2m('103900'), 'station': 'NGAU', 'stationSequence': 15, 'dayType': 5 },
-//         { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('104500'), 'departs': cps2m('104500'), 'station': 'WELL', 'stationSequence': 16, 'dayType': 5 },
-//       ]
-//     }
-//   })
-// })
+describe('Gets the details of the next station for a train', function() {
+  it('gets the next station correctly - Johnsonville Line Up Example', function() {
+    const meterage = 3039;
+    const direction = 'UP';
+    const timetableDetails = {
+      timingPoints: [
+        {'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('100200'), 'departs': cps2m('100200'), 'station': 'WELL', 'stationSequence': 0, 'dayType': 5},
+        {'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('101000'), 'departs': cps2m('101000'), 'station': 'CROF', 'stationSequence': 1, 'dayType': 5},
+        {'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('101200'), 'departs': cps2m('101200'), 'station': 'NGAI', 'stationSequence': 2, 'dayType': 5},
+        {'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('101400'), 'departs': cps2m('101400'), 'station': 'AWAR', 'stationSequence': 3, 'dayType': 5},
+        {'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('101600'), 'departs': cps2m('101600'), 'station': 'SIML', 'stationSequence': 4, 'dayType': 5},
+        {'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('101700'), 'departs': cps2m('101700'), 'station': 'BOXH', 'stationSequence': 5, 'dayType': 5},
+        {'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('102000'), 'departs': cps2m('102000'), 'station': 'KHAN', 'stationSequence': 6, 'dayType': 5},
+        {'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('102300'), 'departs': cps2m('102300'), 'station': 'RARO', 'stationSequence': 7, 'dayType': 5},
+        {'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('102500'), 'departs': cps2m('102500'), 'station': 'JOHN', 'stationSequence': 8, 'dayType': 5},
+      ],
+    };
+    const stationDetails = delayCalculation.getNextStationDetails(meterage, direction, timetableDetails);
+    expect(stationDetails.stationId).toBe('CROF');
+    expect(stationDetails.meterage).toBe(4770);
+    expect(stationDetails.time.format('HH:mm')).toBe('10:10');
+  });
+  it('gets the next station correctly - Hutt Valley Line Down Example', function() {
+    const meterage = 14327;
+    const direction = 'DOWN';
+    const timetableDetails = {
+      timingPoints: [
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('100000'), 'departs': cps2m('100000'), 'station': 'UPPE', 'stationSequence': 0, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('100200'), 'departs': cps2m('100200'), 'station': 'WALL', 'stationSequence': 1, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('100500'), 'departs': cps2m('100500'), 'station': 'TREN', 'stationSequence': 2, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('100700'), 'departs': cps2m('100700'), 'station': 'HERE', 'stationSequence': 3, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('100900'), 'departs': cps2m('100900'), 'station': 'SILV', 'stationSequence': 4, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('101200'), 'departs': cps2m('101200'), 'station': 'MANO', 'stationSequence': 5, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('101400'), 'departs': cps2m('101400'), 'station': 'POMA', 'stationSequence': 6, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('101600'), 'departs': cps2m('101600'), 'station': 'TAIT', 'stationSequence': 7, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('101900'), 'departs': cps2m('101900'), 'station': 'WING', 'stationSequence': 8, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('102100'), 'departs': cps2m('102100'), 'station': 'NAEN', 'stationSequence': 9, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('102300'), 'departs': cps2m('102300'), 'station': 'EPUN', 'stationSequence': 10, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('102500'), 'departs': cps2m('102500'), 'station': 'WATE', 'stationSequence': 11, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('102800'), 'departs': cps2m('102800'), 'station': 'WOBU', 'stationSequence': 12, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('103100'), 'departs': cps2m('103100'), 'station': 'AVA', 'stationSequence': 13, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('103300'), 'departs': cps2m('103300'), 'station': 'PETO', 'stationSequence': 14, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('103900'), 'departs': cps2m('103900'), 'station': 'NGAU', 'stationSequence': 15, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('104500'), 'departs': cps2m('104500'), 'station': 'WELL', 'stationSequence': 16, 'dayType': 5},
+      ],
+    };
+    stationDetails = delayCalculation.getNextStationDetails(meterage, direction, timetableDetails);
+    expect(stationDetails.stationId).toBe('AVA');
+    expect(stationDetails.meterage).toBe(12520);
+    expect(stationDetails.time.format('HH:mm')).toBe('10:31');
+  });
+});
 
+describe('Gets the details of the previous station for a train', function() {
+  it('gets the previous station correctly - Johnsonville Line Up Example', function() {
+    const meterage = 3039;
+    const direction = 'UP';
+    const timetableDetails = {
+      timingPoints: [
+        {'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('100200'), 'departs': cps2m('100200'), 'station': 'WELL', 'stationSequence': 0, 'dayType': 5},
+        {'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('101000'), 'departs': cps2m('101000'), 'station': 'CROF', 'stationSequence': 1, 'dayType': 5},
+        {'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('101200'), 'departs': cps2m('101200'), 'station': 'NGAI', 'stationSequence': 2, 'dayType': 5},
+        {'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('101400'), 'departs': cps2m('101400'), 'station': 'AWAR', 'stationSequence': 3, 'dayType': 5},
+        {'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('101600'), 'departs': cps2m('101600'), 'station': 'SIML', 'stationSequence': 4, 'dayType': 5},
+        {'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('101700'), 'departs': cps2m('101700'), 'station': 'BOXH', 'stationSequence': 5, 'dayType': 5},
+        {'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('102000'), 'departs': cps2m('102000'), 'station': 'KHAN', 'stationSequence': 6, 'dayType': 5},
+        {'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('102300'), 'departs': cps2m('102300'), 'station': 'RARO', 'stationSequence': 7, 'dayType': 5},
+        {'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('102500'), 'departs': cps2m('102500'), 'station': 'JOHN', 'stationSequence': 8, 'dayType': 5},
+      ],
+    };
+    const stationDetails = delayCalculation.getPrevStationDetails(meterage, direction, timetableDetails);
+    expect(stationDetails.stationId).toBe('WELL');
+    expect(stationDetails.meterage).toBe(0);
+    expect(stationDetails.time.format('HH:mm')).toBe('10:02');
+  });
+  it('gets the previous station correctly - Hutt Valley Line Down Example', function() {
+    const meterage = 14327;
+    const direction = 'DOWN';
+    const timetableDetails = {
+      timingPoints: [
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('100000'), 'departs': cps2m('100000'), 'station': 'UPPE', 'stationSequence': 0, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('100200'), 'departs': cps2m('100200'), 'station': 'WALL', 'stationSequence': 1, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('100500'), 'departs': cps2m('100500'), 'station': 'TREN', 'stationSequence': 2, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('100700'), 'departs': cps2m('100700'), 'station': 'HERE', 'stationSequence': 3, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('100900'), 'departs': cps2m('100900'), 'station': 'SILV', 'stationSequence': 4, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('101200'), 'departs': cps2m('101200'), 'station': 'MANO', 'stationSequence': 5, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('101400'), 'departs': cps2m('101400'), 'station': 'POMA', 'stationSequence': 6, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('101600'), 'departs': cps2m('101600'), 'station': 'TAIT', 'stationSequence': 7, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('101900'), 'departs': cps2m('101900'), 'station': 'WING', 'stationSequence': 8, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('102100'), 'departs': cps2m('102100'), 'station': 'NAEN', 'stationSequence': 9, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('102300'), 'departs': cps2m('102300'), 'station': 'EPUN', 'stationSequence': 10, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('102500'), 'departs': cps2m('102500'), 'station': 'WATE', 'stationSequence': 11, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('102800'), 'departs': cps2m('102800'), 'station': 'WOBU', 'stationSequence': 12, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('103100'), 'departs': cps2m('103100'), 'station': 'AVA', 'stationSequence': 13, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('103300'), 'departs': cps2m('103300'), 'station': 'PETO', 'stationSequence': 14, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('103900'), 'departs': cps2m('103900'), 'station': 'NGAU', 'stationSequence': 15, 'dayType': 5},
+        {'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('104500'), 'departs': cps2m('104500'), 'station': 'WELL', 'stationSequence': 16, 'dayType': 5},
+      ],
+    };
+    stationDetails = delayCalculation.getPrevStationDetails(meterage, direction, timetableDetails);
+    expect(stationDetails.stationId).toBe('WOBU');
+    expect(stationDetails.meterage).toBe(14370);
+    expect(stationDetails.time.format('HH:mm')).toBe('10:28');
+  });
+});
 
-// describe('Gets the details of the next or previous station for a train', function () {
-//   it('gets the next station correctly', function () {
-//     let meterage = 3039
-//     let direction = 'UP'
-//     let timetableDetails = {
-//       timingPoints: [
-//         { 'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('100200'), 'departs': cps2m('100200'), 'station': 'WELL', 'stationSequence': 0, 'dayType': 5 },
-//         { 'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('101000'), 'departs': cps2m('101000'), 'station': 'CROF', 'stationSequence': 1, 'dayType': 5 },
-//         { 'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('101200'), 'departs': cps2m('101200'), 'station': 'NGAI', 'stationSequence': 2, 'dayType': 5 },
-//         { 'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('101400'), 'departs': cps2m('101400'), 'station': 'AWAR', 'stationSequence': 3, 'dayType': 5 },
-//         { 'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('101600'), 'departs': cps2m('101600'), 'station': 'SIML', 'stationSequence': 4, 'dayType': 5 },
-//         { 'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('101700'), 'departs': cps2m('101700'), 'station': 'BOXH', 'stationSequence': 5, 'dayType': 5 },
-//         { 'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('102000'), 'departs': cps2m('102000'), 'station': 'KHAN', 'stationSequence': 6, 'dayType': 5 },
-//         { 'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('102300'), 'departs': cps2m('102300'), 'station': 'RARO', 'stationSequence': 7, 'dayType': 5 },
-//         { 'serviceId': '9228', 'line': 'JVL', 'direction': 'U', 'blockId': 4, 'consist': 'EMU2', 'arrives': cps2m('102500'), 'departs': cps2m('102500'), 'station': 'JOHN', 'stationSequence': 8, 'dayType': 5 },],
-//     }
-//     let nextOrPrev = 'next'
-//     let stationDetails = delayCalculation.getSequenceStnDetails(meterage, direction, timetableDetails, nextOrPrev)
-//     expect(stationDetails.stationId).toBe('CROF')
-//     expect(stationDetails.meterage).toBe(4770)
-//     expect(stationDetails.time.format('HH:mm')).toBe('10:10')
-//     // then prev
-//     nextOrPrev = 'prev'
-//     stationDetails = delayCalculation.getSequenceStnDetails(meterage, direction, timetableDetails, nextOrPrev)
-//     expect(stationDetails.stationId).toBe('WELL')
-//     expect(stationDetails.meterage).toBe(0)
-//     expect(stationDetails.time.format('HH:mm')).toBe('10:02')
-
-//     timetableDetails.timingPoints = [
-//       { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('100000'), 'departs': cps2m('100000'), 'station': 'UPPE', 'stationSequence': 0, 'dayType': 5 },
-//       { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('100200'), 'departs': cps2m('100200'), 'station': 'WALL', 'stationSequence': 1, 'dayType': 5 },
-//       { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('100500'), 'departs': cps2m('100500'), 'station': 'TREN', 'stationSequence': 2, 'dayType': 5 },
-//       { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('100700'), 'departs': cps2m('100700'), 'station': 'HERE', 'stationSequence': 3, 'dayType': 5 },
-//       { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('100900'), 'departs': cps2m('100900'), 'station': 'SILV', 'stationSequence': 4, 'dayType': 5 },
-//       { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('101200'), 'departs': cps2m('101200'), 'station': 'MANO', 'stationSequence': 5, 'dayType': 5 },
-//       { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('101400'), 'departs': cps2m('101400'), 'station': 'POMA', 'stationSequence': 6, 'dayType': 5 },
-//       { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('101600'), 'departs': cps2m('101600'), 'station': 'TAIT', 'stationSequence': 7, 'dayType': 5 },
-//       { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('101900'), 'departs': cps2m('101900'), 'station': 'WING', 'stationSequence': 8, 'dayType': 5 },
-//       { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('102100'), 'departs': cps2m('102100'), 'station': 'NAEN', 'stationSequence': 9, 'dayType': 5 },
-//       { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('102300'), 'departs': cps2m('102300'), 'station': 'EPUN', 'stationSequence': 10, 'dayType': 5 },
-//       { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('102500'), 'departs': cps2m('102500'), 'station': 'WATE', 'stationSequence': 11, 'dayType': 5 },
-//       { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('102800'), 'departs': cps2m('102800'), 'station': 'WOBU', 'stationSequence': 12, 'dayType': 5 },
-//       { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('103100'), 'departs': cps2m('103100'), 'station': 'AVA', 'stationSequence': 13, 'dayType': 5 },
-//       { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('103300'), 'departs': cps2m('103300'), 'station': 'PETO', 'stationSequence': 14, 'dayType': 5 },
-//       { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('103900'), 'departs': cps2m('103900'), 'station': 'NGAU', 'stationSequence': 15, 'dayType': 5 },
-//       { 'serviceId': '2629', 'line': 'HVL', 'direction': 'D', 'blockId': 28, 'consist': 'EMU2', 'arrives': cps2m('104500'), 'departs': cps2m('104500'), 'station': 'WELL', 'stationSequence': 16, 'dayType': 5 },
-//     ]
-//     meterage = 14327
-//     direction = 'DOWN'
-//     nextOrPrev = 'prev'
-
-//     stationDetails = delayCalculation.getSequenceStnDetails(meterage, direction, timetableDetails, nextOrPrev)
-//     expect(stationDetails.stationId).toBe('WOBU')
-//     expect(stationDetails.meterage).toBe(14370)
-//     expect(stationDetails.time.format('HH:mm')).toBe('10:28')
-
-//     nextOrPrev = 'next'
-//     stationDetails = delayCalculation.getSequenceStnDetails(meterage, direction, timetableDetails, nextOrPrev)
-//     expect(stationDetails.stationId).toBe('AVA')
-//     expect(stationDetails.meterage).toBe(12520)
-//     expect(stationDetails.time.format('HH:mm')).toBe('10:31')
-//   });
-// });
-
-describe('Gets the Meterage of any given station', function () {
-  it('takes a 4 character stationId and returns the meterage', function () {
-    let stationId = 'WELL'
-    let meterage = delayCalculation.getMeterageOfStation(stationId)
-    expect(meterage).toBe(0)
-    stationId = 'PETO'
-    meterage = delayCalculation.getMeterageOfStation(stationId)
-    expect(meterage).toBe(10500)
-    stationId = ''
-    meterage = delayCalculation.getMeterageOfStation(stationId)
-    expect(meterage).toBe(undefined)
-    stationId = 'AUCK'
-    meterage = delayCalculation.getMeterageOfStation(stationId)
-    expect(meterage).toBe(682000)
+describe('Gets the Meterage of any given station', function() {
+  it('takes a 4 character stationId and returns the meterage', function() {
+    let stationId = 'WELL';
+    let meterage = delayCalculation.getMeterageOfStation(stationId);
+    expect(meterage).toBe(0);
+    stationId = 'PETO';
+    meterage = delayCalculation.getMeterageOfStation(stationId);
+    expect(meterage).toBe(10500);
+    stationId = '';
+    meterage = delayCalculation.getMeterageOfStation(stationId);
+    expect(meterage).toBe(undefined);
+    stationId = 'AUCK';
+    meterage = delayCalculation.getMeterageOfStation(stationId);
+    expect(meterage).toBe(682000);
   });
 });
 
@@ -254,4 +247,4 @@ function cps2m(compasstime) {
   thisMoment.set('second', compasstime.substring(4, 6));
   thisMoment.set('miliseconds', 0);
   return thisMoment;
-};
+}

@@ -10,7 +10,7 @@
             "name": "Jasmine Individual Test",
             "program": "${workspaceRoot}\\node_modules\\jasmine\\bin\\jasmine.js",
             "args": [
-                "spec\\timetableLogic-spec.js"
+                "spec\\linearLogic-spec.js"
             ],
             "env": {
                 "NODE_PATH": "."

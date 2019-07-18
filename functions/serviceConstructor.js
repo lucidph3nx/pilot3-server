@@ -368,7 +368,7 @@ module.exports = class Service {
                 '').departs;
             if (thisServiceArrives !== '' || nextServiceDeparts !== '') {
               this.nextService.serviceId = nextServiceId;
-              this.nextService.serviceDeparts = nextServiceDeparts;
+              this.nextService.serviceDeparts = moment(nextServiceDeparts);
               if (this.nextService.serviceDeparts !== '' && this.nextService.serviceDeparts.isValid()) {
                 this.nextService.serviceDepartsString = moment(nextServiceDeparts).format('HH:mm');
                 this.nextService.turnaround = getTurnaround(thisServiceArrives, nextServiceDeparts);
