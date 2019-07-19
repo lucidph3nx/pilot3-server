@@ -32,14 +32,6 @@ module.exports = {
             if (geVisVehicles.error !== undefined && geVisVehicles.error.code == 498) {
               reject(new Error('GeVis Token Invalid Or Expired'));
             }
-            // // write to file
-            // const fs = require('fs');
-            // const jsonContent = JSON.stringify(geVisVehicles);
-            // fs.writeFile('./geVisVehicles.json', jsonContent, 'utf8', function(err) {
-            //   if (err) {
-            //     return console.log(err);
-            //   }
-            // });
             resolve(geVisVehicles);
           }
         });

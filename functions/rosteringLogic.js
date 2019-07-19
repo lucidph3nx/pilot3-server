@@ -1,6 +1,8 @@
 'use strict';
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
+const timetableLogic = require('./timetableLogic');
+
 module.exports = {
   // to serve all roster related functions
   crewRoster: {
@@ -87,6 +89,107 @@ module.exports = {
       }
       return dayRoster;
     },
+    /**
+* Takes a service Id and the roster
+* gives back a crew object
+* @param {string} serviceId
+* @param {array} roster
+* @param {array} timetable
+* @return {object} crew details object
+*/
+    getCrewDetailsForService: function(serviceId, roster, timetable) {
+      /**
+       * represents a crew member
+       * @class CrewMember
+       */
+      class CrewMember {
+        /**
+         *Creates an instance of CrewMember.
+         * @param {string} shiftId
+         * @memberof CrewMember
+         */
+        constructor(shiftId) {
+          // functions needed
+          const getNextServiceCrewRoster = module.exports.crewRoster.getNextServiceCrewRoster;
+          const getTurnaround = module.exports.common.getTurnaround;
+          // defaults
+          this.staffId = '';
+          this.staffName = '';
+          this.shiftId = '';
+          this.nextService = {
+            serviceId: '',
+            serviceDeparts: '',
+            serviceDepartsString: '',
+            turnaround: '',
+          };
+          if (shiftId) {
+            // filter rosters for just this shift
+            const staffRosterItems = roster.filter((roster) => roster.shiftId == shiftId);
+            this.staffId = staffRosterItems[0].staffId;
+            this.staffName = staffRosterItems[0].staffName;
+            this.shiftId = shiftId;
+            this.nextService = {
+              serviceId: '',
+              serviceDeparts: '',
+              serviceDepartsString: '',
+              turnaround: '',
+            };
+            const thisServiceArrives = timetableLogic.getTimetableDetails(serviceId,
+                timetable,
+                false,
+                '').arrives;
+            const nextServiceId = getNextServiceCrewRoster(serviceId, shiftId, roster);
+            const nextServiceDeparts = timetableLogic.getTimetableDetails(nextServiceId,
+                timetable,
+                false,
+                '').departs;
+            if (thisServiceArrives !== '' || nextServiceDeparts !== '') {
+              this.nextService.serviceId = nextServiceId;
+              this.nextService.serviceDeparts = moment(nextServiceDeparts);
+              if (this.nextService.serviceDeparts !== '' && this.nextService.serviceDeparts.isValid()) {
+                this.nextService.serviceDepartsString = moment(nextServiceDeparts).format('HH:mm');
+                this.nextService.turnaround = getTurnaround(thisServiceArrives, nextServiceDeparts);
+              } else {
+                this.nextService.serviceDepartsString = '';
+                this.nextService.turnaround = '';
+              }
+            }
+          }
+        }
+      }
+
+      const crewDetails = {
+        LE: '',
+        LEExists: false,
+        TM: '',
+        TMExists: false,
+        PO: [],
+        POExists: false,
+      };
+      const serviceRosterItems = roster.filter((roster) => roster.dutyName == serviceId);
+      for (let c = 0; c < serviceRosterItems.length; c++) {
+        if (serviceRosterItems[c].dutyType == 'TRIP') {
+          crewDetails.LE = new CrewMember(serviceRosterItems[c].shiftId);
+          crewDetails.LEExists = true;
+        }
+        if (serviceRosterItems[c].dutyType == 'TRIPT') {
+          crewDetails.TM = new CrewMember(serviceRosterItems[c].shiftId);
+          crewDetails.TMExists = true;
+        }
+        if (serviceRosterItems[c].dutyType == 'TRIPP') {
+          crewDetails.PO.push(new CrewMember(serviceRosterItems[c].shiftId));
+          crewDetails.POExists = true;
+        }
+      }
+      // fill in blank staff if none exist
+      if (crewDetails.LE.staffName == undefined) {
+        crewDetails.LE = new CrewMember();
+      }
+      if (crewDetails.TM.staffName == undefined) {
+        crewDetails.TM = new CrewMember();
+      }
+      return crewDetails;
+    },
   },
   trainRoster: {
     /**
@@ -172,7 +275,7 @@ module.exports = {
       } else {
         for (let s = 0; s < roster.length; s++) {
           if (roster[s].dutyType == 'ASREQ'
-          && roster[s].staffId !== '') {
+            && roster[s].staffId !== '') {
             const asReqEntry = {
               staffId: roster[s].staffId,
               staffName: roster[s].staffName,

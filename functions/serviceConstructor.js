@@ -107,7 +107,9 @@ module.exports = class Service {
     } else {
       this.varianceFriendly = parseInt(this.scheduleVarianceMin);
     }
-    this.crew = getCrewDetails(this.serviceId, current.rosterDuties);
+    this.crew = rosteringLogic.crewRoster.getCrewDetailsForService(this.serviceId,
+        current.rosterDuties,
+        current.timetable);
     const lastServiceId = rosteringLogic.trainRoster.getPrevServiceTrainRoster(this.serviceId, current.tripSheet);
     const nextServiceId = rosteringLogic.trainRoster.getNextServiceTrainRoster(this.serviceId, current.tripSheet);
     // check last service exists
@@ -313,13 +315,13 @@ module.exports = class Service {
     this.statusMessage = StatusMessage;
     this.statusArray = statusArray;
     /**
- * Takes a service Id and the currentRosterDuties
+ * Takes a service Id and the roster
  * gives back a crew object
  * @param {string} serviceId
- * @param {array} currentRosterDuties
+ * @param {array} roster
  * @return {object} crew details object
  */
-    function getCrewDetails(serviceId, currentRosterDuties) {
+    function getCrewDetails(serviceId, roster) {
       /**
        * represents a crew member
        * @class CrewMember
@@ -346,8 +348,7 @@ module.exports = class Service {
           };
           if (shiftId) {
             // filter rosters for just this shift
-            const staffRosterItems = currentRosterDuties.filter((currentRosterDuties) =>
-              currentRosterDuties.shiftId == shiftId);
+            const staffRosterItems = roster.filter((roster) => roster.shiftId == shiftId);
             this.staffId = staffRosterItems[0].staffId;
             this.staffName = staffRosterItems[0].staffName;
             this.shiftId = shiftId;
@@ -361,7 +362,7 @@ module.exports = class Service {
                 current.timetable,
                 false,
                 '').arrives;
-            const nextServiceId = getNextServiceCrewRoster(serviceId, shiftId, currentRosterDuties);
+            const nextServiceId = getNextServiceCrewRoster(serviceId, shiftId, roster);
             const nextServiceDeparts = timetableLogic.getTimetableDetails(nextServiceId,
                 current.timetable,
                 false,
@@ -389,8 +390,8 @@ module.exports = class Service {
         PO: [],
         POExists: false,
       };
-      const serviceRosterItems = currentRosterDuties.filter(
-          (currentRosterDuties) => currentRosterDuties.dutyName == serviceId);
+      const serviceRosterItems = roster.filter(
+          (roster) => roster.dutyName == serviceId);
       for (let c = 0; c < serviceRosterItems.length; c++) {
         if (serviceRosterItems[c].dutyType == 'TRIP') {
           crewDetails.LE = new CrewMember(serviceRosterItems[c].shiftId);
@@ -401,21 +402,6 @@ module.exports = class Service {
           crewDetails.TMExists = true;
         }
         if (serviceRosterItems[c].dutyType == 'TRIPP') {
-          crewDetails.PO.push(new CrewMember(serviceRosterItems[c].shiftId));
-          crewDetails.POExists = true;
-        }
-      }
-      // extra pass to find things marked as 'OTH' and 'SHUNT'
-      for (let c = 0; c < serviceRosterItems.length; c++) {
-        if (crewDetails.LE.staffName == undefined && serviceRosterItems[c].shiftType == 'LE') {
-          crewDetails.LE = new CrewMember(serviceRosterItems[c].shiftId);
-          crewDetails.LEExists = true;
-        }
-        if (crewDetails.TM.staffName == undefined && serviceRosterItems[c].shiftType == 'TM') {
-          crewDetails.TM = new CrewMember(serviceRosterItems[c].shiftId);
-          crewDetails.TMExists = true;
-        }
-        if (crewDetails.PO == [] && serviceRosterItems[c].shiftType == 'PO') {
           crewDetails.PO.push(new CrewMember(serviceRosterItems[c].shiftId));
           crewDetails.POExists = true;
         }

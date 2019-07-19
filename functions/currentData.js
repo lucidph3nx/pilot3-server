@@ -25,12 +25,8 @@ if (fs.existsSync(credentialPath)) {
 }
 
 // ======dummy data=======
-const dummyData = require('../functions/testDataOrganiser');
-const dummyTime = dummyData.time;
-const dummyGeVisVehicles = dummyData.geVisVehicles;
-const dummyTimetable = dummyData.timetable;
-const dummyRosterDuties = dummyData.rosterDuties;
-const dummyRosterDayStatus = dummyData.rosterDayStatus;
+const testDataOrganiser = require('../data/testData/testDataOrganiser');
+const dummyData = testDataOrganiser();
 
 /**
  * represents all current data for server
@@ -72,6 +68,7 @@ module.exports = class CurrentData {
         pending: false,
       };
     }
+    this.creationTime = moment();
     this.geVisVehicles = [];
     this.runningServices = [];
     this.unitList = [];
@@ -157,7 +154,7 @@ module.exports = class CurrentData {
       if (!fullDebugMode) {
         if (this.tokenValid()) {
           kiwirailAPI.geVisVehicles(this.geVisToken.token).then((result) => {
-            this.geVisVehicles = result.features;
+            this.geVisVehicles = result;
             this.pilotLog('GeVis Vehicles loaded ok');
             resolve();
           }).catch((error) => {
@@ -167,7 +164,7 @@ module.exports = class CurrentData {
         }
       } else {
         // get dummy vehicles
-        this.geVisVehicles = dummyGeVisVehicles.features;
+        this.geVisVehicles = dummyData.geVisVehicles;
         this.pilotLog('TEST GeVis Vehicles loaded ok');
         resolve();
       }
@@ -181,11 +178,11 @@ module.exports = class CurrentData {
     const logging = this.functionFlags.pilotSQLLogging;
     let time;
     if (fullDebugMode) {
-      time = dummyTime;
+      time = dummyData.time;
     } else {
       time = moment();
     }
-    this.runningServices = getCurrentServices(this.geVisVehicles, this, time);
+    this.runningServices = getCurrentServices(this.geVisVehicles.features, this, time);
     if (logging) {
       this.runningServices.forEach(function(service) {
         PilotSQLLog.logSQL.service(service);
@@ -221,7 +218,7 @@ module.exports = class CurrentData {
       });
     } else {
       // get dummy roster duties
-      this.rosterDuties = dummyRosterDuties;
+      this.rosterDuties = dummyData.rosterDuties;
       this.rosterDutiesLastUpdated = moment();
       this.pilotLog('TEST VDS Roster Duties loaded ok');
     }
@@ -256,7 +253,7 @@ module.exports = class CurrentData {
       });
     } else {
       // get dummy roster day status
-      this.rosterDayStatus = dummyRosterDayStatus;
+      this.rosterDayStatus = dummyData.rosterDayStatus;
       this.rosterStatusLastUpdated = moment();
       this.pilotLog('TEST VDS Roster Day Status loaded ok');
     }
@@ -292,7 +289,7 @@ module.exports = class CurrentData {
       });
     } else {
       // get dummy bus replacement list
-      this.busReplacementList = [];
+      this.busReplacementList = dummyData.busReplacementList;
       this.busReplacementsLastUpdated = moment();
       this.pilotLog('TEST Compass bus replacement list loaded ok');
     }
@@ -322,7 +319,7 @@ module.exports = class CurrentData {
       const time = moment();
 
       // get dummy timetable, change all dates to today.
-      const tempTimetable = dummyTimetable;
+      const tempTimetable = dummyData.timetable;
       tempTimetable.forEach(function(timePoint) {
         const dayDifference = time.diff(moment(timePoint.arrives), 'days');
         timePoint.arrives = moment(timePoint.arrives).add(dayDifference, 'days');
@@ -342,7 +339,7 @@ module.exports = class CurrentData {
       });
     } else {
       // get dummy timetable
-      this.timetable = dummyTimetable;
+      this.timetable = dummyData.timetable;
       this.timetableLastUpdated = moment();
       this.pilotLog('TEST Compass timetable loaded ok');
     }

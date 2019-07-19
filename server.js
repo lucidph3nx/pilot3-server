@@ -11,7 +11,7 @@ const app = express();
 // ======functions flags=======
 const functionFlags = {
   pilotSQLLogging: false, // log to Pilot DB
-  fullDebugMode: false, // full test data run
+  fullDebugMode: true, // full test data run
   workingOffsiteMode: false, // run with GeVis but no Compass or VDS -- DOES NOT WORK YET
 };
 const applicationSettings = {
@@ -24,8 +24,8 @@ const applicationSettings = {
   timetableUpdateHour: 3,
 };
 const alternativeToken = {
-  token: 'TL4uNrnK7b2QIj_VL_ARvtSX1Q2WFywKwPMCkL-JzXw.',
-  updateTime: moment('2019-07-17 14:00:00'),
+  token: '-_TX3YqdJ5VwCpcttvWPSf6HGKiovgh-oJ2CNV6JOzk.',
+  updateTime: moment('2019-07-19 14:00:00'),
   pending: false,
 };
 
@@ -39,6 +39,42 @@ refreshData();
  * Function to maintain current data for all dependancies
  */
 function refreshData() {
+  // Take test data snapshot
+  if (false) {
+    if (data.tokenValid()
+    && data.timetableValid()
+    && data.busReplacementsListValid()
+    && data.rosterDutiesValid()
+    && data.rosterDayStatusValid()) {
+      data.updateVehicles().then(() => {
+        data.updateRunningServices();
+        data.updateUnitLists();
+        // take snapshot
+        const snapshotStamp = moment().format('YYYYMMDDHHmmss');
+        writeTestFile('geVisVehicles', data.geVisVehicles, snapshotStamp);
+        writeTestFile('rosterDuties', data.rosterDuties, snapshotStamp);
+        writeTestFile('timetable', data.timetable, snapshotStamp);
+        writeTestFile('busReplacementList', data.busReplacementList, snapshotStamp);
+        writeTestFile('rosterDayStatus', data.rosterDayStatus, snapshotStamp);
+        // eslint-disable-next-line require-jsdoc
+        function writeTestFile(dataName, data, timestamp) {
+          const fs = require('fs');
+          const jsonContent = JSON.stringify(data);
+          const dir = './data/testData/' + timestamp;
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir);
+          }
+          fs.writeFile(dir + '/' + dataName + '.json', jsonContent, 'utf8', function(err) {
+            if (err) {
+              return console.log(err);
+            }
+          });
+        }
+      });
+    }
+  }
+
+
   // check the status of all services
   data.checkResourceStatus();
   // update geVis based data
@@ -62,9 +98,9 @@ function refreshData() {
   if (!data.rosterDutiesValid()) {
     data.updateRosterDuties();
   }
-  // if (!data.rosterDayStatusValid()) {
-  //   data.updateRosterDayStatus();
-  // }
+  if (!data.rosterDayStatusValid()) {
+    data.updateRosterDayStatus();
+  }
   setTimeout(refreshData, 10 * 1000);
 }
 
