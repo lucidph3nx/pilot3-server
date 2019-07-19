@@ -128,7 +128,7 @@ module.exports = class Service {
     } else {
       this.hasNextService = true;
       this.nextService = timetableLogic.getTimetableDetails(nextServiceId, current.timetable, false, '');
-      this.nextTurnaround = rosteringLogic.common.getTurnaround(this.arrives, this.nextService.departs);
+      this.nextTurnaround = rosteringLogic.common.getTurnaround(this.timetable.arrives, this.nextService.departs);
     }
 
     // generate Status Messages
