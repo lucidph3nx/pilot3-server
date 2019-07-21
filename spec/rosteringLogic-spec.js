@@ -72,7 +72,7 @@ describe('Find out previous (last) service for Train', function() {
 describe('Find out next service for Crew Member', function() {
   it('Works out the next service a Crew Member will do from the roster', function() {
     const dummyData = testDataOrganiser('STOCK');
-    const testRosterDuties = dummyData.testRosterDuties;
+    const testRosterDuties = dummyData.rosterDuties;
 
     const getNextServiceCrewRoster = rosteringLogic.crewRoster.getNextServiceCrewRoster;
     let serviceId = '6226';
@@ -88,19 +88,19 @@ describe('Find out next service for Crew Member', function() {
     serviceId = '5634';
     shiftId = 'ULE610';
     nextServiceId = getNextServiceCrewRoster(serviceId, shiftId, testRosterDuties);
-    expect(nextServiceId).toBe('5635');
+    expect(nextServiceId).toBe('4624');
   });
 });
 
 describe('Find out previous (last) service for Crew Member', function() {
   it('Works out the previous (last) service a Crew Member did from the roster', function() {
     const dummyData = testDataOrganiser('STOCK');
-    const testRosterDuties = dummyData.testRosterDuties;
+    const testRosterDuties = dummyData.rosterDuties;
     const getPrevServiceCrewRoster = rosteringLogic.crewRoster.getPrevServiceCrewRoster;
-    let serviceId = '9257';
+    let serviceId = '3630';
     let shiftId = 'WLE640';
     let prevServiceId = getPrevServiceCrewRoster(serviceId, shiftId, testRosterDuties);
-    expect(prevServiceId).toBe('9256');
+    expect(prevServiceId).toBe('6313');
 
     serviceId = '6207';
     shiftId = 'WPO602';
@@ -117,37 +117,37 @@ describe('Find out previous (last) service for Crew Member', function() {
 describe('get whole days rostered duties for a crew member from their shiftId', function() {
   it('filters the roster to only show duties relevant to that shift', function() {
     const dummyData = testDataOrganiser('STOCK');
-    const testRosterDuties = dummyData.testRosterDuties;
+    const testRosterDuties = dummyData.rosterDuties;
     const getDayRosterFromShiftId = rosteringLogic.crewRoster.getDayRosterFromShiftId;
-    let shiftId = 'WLE240';
+    let shiftId = 'WLE640';
     let rosterDuties = getDayRosterFromShiftId(shiftId, testRosterDuties);
-    expect(rosterDuties.length).toBe(14);
-    expect(rosterDuties[0].shiftId).toBe('WLE240');
+    expect(rosterDuties.length).toBe(11);
+    expect(rosterDuties[0].shiftId).toBe('WLE640');
 
-    shiftId = 'WPO202';
+    shiftId = 'WPO602';
     rosterDuties = getDayRosterFromShiftId(shiftId, testRosterDuties);
     expect(rosterDuties.length).toBe(8);
-    expect(rosterDuties[0].shiftId).toBe('WPO202');
+    expect(rosterDuties[0].shiftId).toBe('WPO602');
 
-    shiftId = 'WLE222';
+    shiftId = 'WLE622';
     rosterDuties = getDayRosterFromShiftId(shiftId, testRosterDuties);
     expect(rosterDuties.length).toBe(10);
-    expect(rosterDuties[0].shiftId).toBe('WLE222');
+    expect(rosterDuties[0].shiftId).toBe('WLE622');
   });
 });
 
 describe('get list of "as required" staff from roster', function() {
   it('Works out the previous (last) service a Crew Member did from the roster', function() {
     const dummyData = testDataOrganiser('STOCK');
-    const testRosterDuties = dummyData.testRosterDuties;
+    const testRosterDuties = dummyData.rosterDuties;
     const getAsRequiredStaff = rosteringLogic.common.getAsRequiredStaff;
     const asRequiredStaff = getAsRequiredStaff(testRosterDuties);
 
     // should return 50 results
-    expect(asRequiredStaff.length).toBe(50);
+    expect(asRequiredStaff.length).toBe(59);
 
     expect(asRequiredStaff[0].staffId).toBe('038');
     expect(asRequiredStaff[0].shiftType).toBe('PO');
-    expect(asRequiredStaff[0].startTime).toBe('12:35');
+    expect(asRequiredStaff[0].startTime).toBe('12:45');
   });
 });

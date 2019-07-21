@@ -2,18 +2,20 @@
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 const timetableLogic = require('../functions/timetableLogic');
-const testTimetable = require('../data/testData/timetable');
-const testTripSheet = require('../data/testData/tripSheet');
+const testDataOrganiser = require('../data/testData/testDataOrganiser');
 
 describe('generate trip sheet', function() {
   it('Takes a timetable array and generates a trip sheet from it', function() {
-    const tripsheet = timetableLogic.getTripSheet(testTimetable);
-    expect(tripsheet).toEqual(testTripSheet);
+    const dummyData = testDataOrganiser('STOCK');
+    const testTripSheet = timetableLogic.getTripSheet(dummyData.timetable);
+    expect(testTripSheet.length).toBe(430);
   });
 });
 
 describe('get timetable details', function() {
   it('gets the timetable meta details for a service', function() {
+    const dummyData = testDataOrganiser('STOCK');
+    const testTimetable = dummyData.timetable;
     let serviceId = '2633';
     let kiwirailBoolean = false;
     let serviceDescription = 'HVL2018MTF 1040 UPHTT 1125 WGTNS ML';
@@ -52,9 +54,11 @@ describe('guess origin and destination based on service description', function()
 
 describe('get a list of services valid at a given time from a timetable', function() {
   it('gets an array of serviceId valid at a given time from a given timetable', function() {
-    const time = '2019-07-17T23:55:00.000Z';
+    const dummyData = testDataOrganiser('STOCK');
+    const testTimetable = dummyData.timetable;
+    const time = dummyData.time;
     const serviceArray = timetableLogic.getValidServicesAtTime(testTimetable, time);
-    expect(serviceArray.length).toBe(11);
+    expect(serviceArray.length).toBe(13);
     expect(typeof serviceArray[0]).toBe('string');
   });
 });

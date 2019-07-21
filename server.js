@@ -11,8 +11,10 @@ const app = express();
 // ======functions flags=======
 const functionFlags = {
   pilotSQLLogging: false, // log to Pilot DB
-  fullDebugMode: true, // full test data run
+  fullDebugMode: false, // full test data run
+  debugDataToUse: 'STOCK',
   workingOffsiteMode: false, // run with GeVis but no Compass or VDS -- DOES NOT WORK YET
+  snapshotMode: false,
 };
 const applicationSettings = {
   // lifespans for data in minutes
@@ -24,8 +26,8 @@ const applicationSettings = {
   timetableUpdateHour: 3,
 };
 const alternativeToken = {
-  token: '-_TX3YqdJ5VwCpcttvWPSf6HGKiovgh-oJ2CNV6JOzk.',
-  updateTime: moment('2019-07-19 14:00:00'),
+  token: 'Mx_cnxjqhLHzSX3Vo3rWfzU0BULOkcFOEM6_HO-W3Ps.',
+  updateTime: moment('2019-07-22 10:00:00'),
   pending: false,
 };
 
@@ -40,7 +42,7 @@ refreshData();
  */
 function refreshData() {
   // Take test data snapshot
-  if (false) {
+  if (functionFlags.snapshotMode) {
     if (data.tokenValid()
     && data.timetableValid()
     && data.busReplacementsListValid()
@@ -73,8 +75,6 @@ function refreshData() {
       });
     }
   }
-
-
   // check the status of all services
   data.checkResourceStatus();
   // update geVis based data

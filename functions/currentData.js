@@ -26,7 +26,6 @@ if (fs.existsSync(credentialPath)) {
 
 // ======dummy data=======
 const testDataOrganiser = require('../data/testData/testDataOrganiser');
-const dummyData = testDataOrganiser();
 
 /**
  * represents all current data for server
@@ -150,6 +149,7 @@ module.exports = class CurrentData {
    */
   updateVehicles() {
     const fullDebugMode = this.functionFlags.fullDebugMode;
+    const dummyData = testDataOrganiser(this.functionFlags.testdata);
     return new Promise((resolve, reject) => {
       if (!fullDebugMode) {
         if (this.tokenValid()) {
@@ -175,6 +175,7 @@ module.exports = class CurrentData {
    */
   updateRunningServices() {
     const fullDebugMode = this.functionFlags.fullDebugMode;
+    const dummyData = testDataOrganiser(this.functionFlags.testdata);
     const logging = this.functionFlags.pilotSQLLogging;
     let time;
     if (fullDebugMode) {
@@ -208,6 +209,7 @@ module.exports = class CurrentData {
    */
   updateRosterDuties() {
     const fullDebugMode = this.functionFlags.fullDebugMode;
+    const dummyData = testDataOrganiser(this.functionFlags.testdata);
     if (!fullDebugMode) {
       vdsRosterAPI.rosterDuties().then((result) => {
         this.rosterDuties = result;
@@ -243,6 +245,7 @@ module.exports = class CurrentData {
    */
   updateRosterDayStatus() {
     const fullDebugMode = this.functionFlags.fullDebugMode;
+    const dummyData = testDataOrganiser(this.functionFlags.testdata);
     if (!fullDebugMode) {
       vdsRosterAPI.dayRosterStatus(moment()).then((result) => {
         this.rosterDayStatus = result;
@@ -279,6 +282,7 @@ module.exports = class CurrentData {
    */
   updateBusReplacementsList() {
     const fullDebugMode = this.functionFlags.fullDebugMode;
+    const dummyData = testDataOrganiser(this.functionFlags.testdata);
     if (!fullDebugMode) {
       compassAPI.busReplacements().then((result) => {
         this.busReplacementList = result;
@@ -314,6 +318,7 @@ module.exports = class CurrentData {
    */
   updateTimetable() {
     const fullDebugMode = this.functionFlags.fullDebugMode;
+    const dummyData = testDataOrganiser(this.functionFlags.testdata);
     const workingOffsiteMode = this.functionFlags.workingOffsiteMode;
     if (workingOffsiteMode) {
       const time = moment();
