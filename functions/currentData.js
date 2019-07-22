@@ -149,7 +149,7 @@ module.exports = class CurrentData {
    */
   updateVehicles() {
     const fullDebugMode = this.functionFlags.fullDebugMode;
-    const dummyData = testDataOrganiser(this.functionFlags.testdata);
+    const dummyData = testDataOrganiser(this.functionFlags.debugDataToUse);
     return new Promise((resolve, reject) => {
       if (!fullDebugMode) {
         if (this.tokenValid()) {
@@ -175,7 +175,7 @@ module.exports = class CurrentData {
    */
   updateRunningServices() {
     const fullDebugMode = this.functionFlags.fullDebugMode;
-    const dummyData = testDataOrganiser(this.functionFlags.testdata);
+    const dummyData = testDataOrganiser(this.functionFlags.debugDataToUse);
     const logging = this.functionFlags.pilotSQLLogging;
     let time;
     if (fullDebugMode) {
@@ -209,7 +209,7 @@ module.exports = class CurrentData {
    */
   updateRosterDuties() {
     const fullDebugMode = this.functionFlags.fullDebugMode;
-    const dummyData = testDataOrganiser(this.functionFlags.testdata);
+    const dummyData = testDataOrganiser(this.functionFlags.debugDataToUse);
     if (!fullDebugMode) {
       vdsRosterAPI.rosterDuties().then((result) => {
         this.rosterDuties = result;
@@ -245,7 +245,7 @@ module.exports = class CurrentData {
    */
   updateRosterDayStatus() {
     const fullDebugMode = this.functionFlags.fullDebugMode;
-    const dummyData = testDataOrganiser(this.functionFlags.testdata);
+    const dummyData = testDataOrganiser(this.functionFlags.debugDataToUse);
     if (!fullDebugMode) {
       vdsRosterAPI.dayRosterStatus(moment()).then((result) => {
         this.rosterDayStatus = result;
@@ -282,7 +282,7 @@ module.exports = class CurrentData {
    */
   updateBusReplacementsList() {
     const fullDebugMode = this.functionFlags.fullDebugMode;
-    const dummyData = testDataOrganiser(this.functionFlags.testdata);
+    const dummyData = testDataOrganiser(this.functionFlags.debugDataToUse);
     if (!fullDebugMode) {
       compassAPI.busReplacements().then((result) => {
         this.busReplacementList = result;
@@ -318,7 +318,7 @@ module.exports = class CurrentData {
    */
   updateTimetable() {
     const fullDebugMode = this.functionFlags.fullDebugMode;
-    const dummyData = testDataOrganiser(this.functionFlags.testdata);
+    const dummyData = testDataOrganiser(this.functionFlags.debugDataToUse);
     const workingOffsiteMode = this.functionFlags.workingOffsiteMode;
     if (workingOffsiteMode) {
       const time = moment();

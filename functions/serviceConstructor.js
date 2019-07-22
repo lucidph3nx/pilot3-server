@@ -291,12 +291,14 @@ module.exports = class Service {
       StatusMessage = TempStatus;
       stopProcessing = true;
     }
-    if (this.speed == 0 && this.lastStationCurrent == false) {
-      if (this.lastStation == 'POMA' && this.origin == 'TAIT') {
+    if (this.linkedVehicle !== null
+      && this.linkedVehicle.location.speed == 0
+      && this.lastStationCurrent == false) {
+      if (this.lastStation == 'POMA' && this.timetable.origin == 'TAIT') {
         this.lastStation = 'TAIT';
         TempStatus = 'In Storage Road';
         statusArray[2] = TempStatus;
-      } else if (this.lastStation == 'TEHO' && this.origin == 'WAIK') {
+      } else if (this.lastStation == 'TEHO' && this.timetable.origin == 'WAIK') {
         this.lastStation = 'WAIK';
         TempStatus = 'In Turn Back Road';
         statusArray[2] = TempStatus;
@@ -304,9 +306,7 @@ module.exports = class Service {
         TempStatus = 'Stopped between stations';
         statusArray[2] = TempStatus;
       }
-      if (StatusMessage == '' && !stopProcessing) {
-        StatusMessage = TempStatus;
-      }
+      StatusMessage = TempStatus;
       stopProcessing = true;
     }
     if (StatusMessage == 0 || StatusMessage == false || typeof StatusMessage == 'undefined') {
