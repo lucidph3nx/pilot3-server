@@ -164,7 +164,6 @@ module.exports = function(app, current, functionFlags) {
     }).catch((error) => {
       console.log(error);
     });
-
   });
   // get headcount data for vis board
   app.get('/api/visboardHeadcount', (request, response) => {
