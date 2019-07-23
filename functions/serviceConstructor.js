@@ -30,10 +30,11 @@ module.exports = class Service {
       vehicle,
       secondVehicle,
       current) {
-    let fromTimetable = false;
+    this.fromTimetable = false;
     if (vehicle === null) {
-      fromTimetable = true;
+      this.fromTimetable = true;
     }
+    this.busReplaced = checkIfBusReplaced(serviceId);
     this.currenttime = moment(currentMoment);
     this.serviceId = serviceId;
     this.serviceDescription = serviceDescription;
@@ -48,7 +49,7 @@ module.exports = class Service {
     this.linkedVehicle = vehicle;
     this.linkedVehicleId = this.linkedVehicle ? this.linkedVehicle.vehicleId : '';
     this.secondVehicle = secondVehicle;
-    if (fromTimetable) {
+    if (this.fromTimetable) {
       this.locationAge = 0;
       this.location = {
         lat: 0,
@@ -90,6 +91,7 @@ module.exports = class Service {
         this.thirdParty,
         this.serviceDescription);
     this.hasDeparted = (this.currenttime > this.timetable.departs);
+    this.arrived = (this.lastStation == this.timetable.destination);
     if (!this.IncorrectLine) {
       this.scheduleVariance = delayCalculation.getScheduleVariance(this.thirdParty,
           this.currenttime,
@@ -115,12 +117,14 @@ module.exports = class Service {
     // check last service exists
     if (lastServiceId == '') {
       this.hasLastService = false;
+      this.lastServiceStillTracking = false;
     } else {
       this.hasLastService = true;
       this.lastService = timetableLogic.getTimetableDetails(lastServiceId,
           current.timetable,
           false,
           '');
+      this.lastServiceStillTracking = checkPreviousServiceStillTracking(this.lastService.serviceId);
     }
     // check next service exists
     if (nextServiceId == '') {
@@ -143,56 +147,24 @@ module.exports = class Service {
     //                               [2] = stopped
     const statusArray = ['', '', ''];
 
-    // filter out the non metlinks
     if (this.thirdParty) {
-      tempStatus = 'Non-Metlink Service';
-      statusArray[0] = tempStatus;
-      statusArray[1] = tempStatus;
-      if (statusMessage == '' && stopProcessing == false) {
-        statusMessage = tempStatus;
-      }
+      statusMessage = 'Non-Metlink Service';
+      statusArray[0] = statusMessage;
+      statusArray[1] = statusMessage;
       stopProcessing = true;
-    }
-    // filter out things found from timetable
-    if (this.linkedVehicle == undefined) {
-      let busReplaced = false;
-      for (let svc = 0; svc < current.busReplacementList.length; svc++) {
-        if (current.busReplacementList[svc].serviceId == this.serviceId) {
-          busReplaced = true;
-        }
-      }
-      if (busReplaced) {
-        tempStatus = 'Bus Replaced';
-      } else {
-        tempStatus = 'No Linked Unit';
-        // look for previous service and mark if still running
-        const geVisVehicles = current.geVisVehicles.features;
-        for (let gv = 0; gv < geVisVehicles.length; gv++) {
-          if (statusMessage !== 'Previous Service Delayed'
-          && this.hasLastService
-          && geVisVehicles[gv].attributes.TRNID == this.lastService.serviceId) {
-            tempStatus = 'Previous Service Delayed';
-          }
-        }
+    } else if (this.fromTimetable) {
+      statusMessage = 'No Linked Unit';
+
+      if (this.busReplaced) {
+        statusMessage = 'Bus Replaced';
       }
 
-      if (statusMessage == '' && stopProcessing == false) {
-        statusMessage = tempStatus;
+      if (this.lastServiceStillTracking) {
+        statusMessage = 'Previous Service Delayed';
       }
       stopProcessing = true;
-    }
-    // filter already arrived trains
-    if (this.lastStation == this.timetable.destination) {
-      tempStatus = 'Arriving';
-      if (statusMessage == '' && stopProcessing == false) {
-        statusMessage = tempStatus;
-      }
-      stopProcessing = true;
-    }
-    // check for duplicate shiftnames error
-    if (this.crew.TM.shiftId !== '' && this.crew.LE.shiftId == this.crew.TM.shiftId) {
-      tempStatus = 'VDS Error';
-      statusMessage = tempStatus;
+    } else if (this.arrived) {
+      statusMessage = 'Arriving';
       stopProcessing = true;
     }
     // the early/late status generation
@@ -210,7 +182,7 @@ module.exports = class Service {
         tempStatus = 'Running Very Late';
         statusArray[0] = tempStatus;
       }
-      if (statusMessage == '' && !stopProcessing) {
+      if (statusMessage == '') {
         statusMessage = tempStatus;
       }
     }
@@ -223,9 +195,7 @@ module.exports = class Service {
       && (this.crew.TM.nextService.turnaround + 5 < this.scheduleVariance.delay));
 
     if (!stopProcessing
-      && (trainTurnaroundExceeded
-      || leTurnaroundExceeded
-      || tmTurnaroundExceeded)) {
+      && (trainTurnaroundExceeded || leTurnaroundExceeded || tmTurnaroundExceeded)) {
       tempStatus = 'Delay Risk:';
 
       if (trainTurnaroundExceeded) {
@@ -249,7 +219,7 @@ module.exports = class Service {
       stopProcessing = true;
     }
     // look at linking issues
-    if (this.locationAge >= 180 && this.thirdParty == false) {
+    if (!this.thirdParty && this.locationAge >= 180) {
       let inTunnel = false;
       // TempStatus = '';
       const tunnelExceptionsList = nzRailConventions.tunnelTrackingExceptions;
@@ -307,7 +277,7 @@ module.exports = class Service {
         stopProcessing = true;
       }
     }
-    if (this.hasDeparted == false && this.thirdParty == false) {
+    if (!this.thirdParty && !this.hasDeparted) {
       tempStatus = 'Awaiting Departure';
       statusArray[0] = tempStatus;
       statusArray[1] = tempStatus;
@@ -337,6 +307,36 @@ module.exports = class Service {
     }
     this.statusMessage = statusMessage;
     this.statusArray = statusArray;
+
+    /**
+     * checks if a service is included in a bus replacement list
+     * @param {string} serviceId
+     * @return {boolean}
+     */
+    function checkIfBusReplaced(serviceId) {
+      let busReplaced = false;
+      for (let svc = 0; svc < current.busReplacementList.length; svc++) {
+        if (current.busReplacementList[svc].serviceId == serviceId) {
+          busReplaced = true;
+        }
+      }
+      return busReplaced;
+    }
+    /**
+     * checks if a service is still running
+     * @param {string} lastServiceId
+     * @return {boolean}
+     */
+    function checkPreviousServiceStillTracking(lastServiceId) {
+      let previousServiceStillTracking = false;
+      const geVisVehicles = current.geVisVehicles.features;
+      for (let gv = 0; gv < geVisVehicles.length; gv++) {
+        if (geVisVehicles[gv].attributes.TRNID == lastServiceId) {
+          previousServiceStillTracking = true;
+        }
+      }
+      return previousServiceStillTracking;
+    }
   }
 
   /**
