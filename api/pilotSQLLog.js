@@ -26,7 +26,7 @@ module.exports = {
   logSQL: {
     vehicle: function(vehicle) {
       const temp = {
-        timeStamp: vehicle.loadTime.format('YYYY-MM-DD HH:mm:ss'),
+        timeStamp: moment().format('YYYY-MM-DD HH:mm:ss'),
         vehicleId: vehicle.vehicleId,
         secondVehicleId: vehicle.secondVehicleId(),
         lat: vehicle.location.lat,
