@@ -136,8 +136,8 @@ module.exports = class Service {
     // generate Status Messages
     // used to be own function, but needed too many variables
     let stopProcessing = false;
-    let StatusMessage = '';
-    let TempStatus;
+    let statusMessage = '';
+    let tempStatus;
     // this will be in the format of [0] = delays,
     //                               [1] = tracking,
     //                               [2] = stopped
@@ -145,11 +145,11 @@ module.exports = class Service {
 
     // filter out the non metlinks
     if (this.thirdParty) {
-      TempStatus = 'Non-Metlink Service';
-      statusArray[0] = TempStatus;
-      statusArray[1] = TempStatus;
-      if (StatusMessage == '' && stopProcessing == false) {
-        StatusMessage = TempStatus;
+      tempStatus = 'Non-Metlink Service';
+      statusArray[0] = tempStatus;
+      statusArray[1] = tempStatus;
+      if (statusMessage == '' && stopProcessing == false) {
+        statusMessage = tempStatus;
       }
       stopProcessing = true;
     }
@@ -162,77 +162,95 @@ module.exports = class Service {
         }
       }
       if (busReplaced) {
-        TempStatus = 'Bus Replaced';
+        tempStatus = 'Bus Replaced';
       } else {
-        TempStatus = 'No Linked Unit';
+        tempStatus = 'No Linked Unit';
+        // look for previous service and mark if still running
+        const geVisVehicles = current.geVisVehicles.features;
+        for (let gv = 0; gv < geVisVehicles.length; gv++) {
+          if (statusMessage !== 'Previous Service Delayed'
+          && this.hasLastService
+          && geVisVehicles[gv].attributes.TRNID == this.lastService.serviceId) {
+            tempStatus = 'Previous Service Delayed';
+          }
+        }
       }
-      if (StatusMessage == '' && stopProcessing == false) {
-        StatusMessage = TempStatus;
+
+      if (statusMessage == '' && stopProcessing == false) {
+        statusMessage = tempStatus;
       }
       stopProcessing = true;
     }
     // filter already arrived trains
-    if (this.lastStation == this.destination) {
-      TempStatus = 'Arriving';
-      if (StatusMessage == '' && stopProcessing == false) {
-        StatusMessage = TempStatus;
+    if (this.lastStation == this.timetable.destination) {
+      tempStatus = 'Arriving';
+      if (statusMessage == '' && stopProcessing == false) {
+        statusMessage = tempStatus;
       }
       stopProcessing = true;
     }
     // check for duplicate shiftnames error
     if (this.crew.TM.shiftId !== '' && this.crew.LE.shiftId == this.crew.TM.shiftId) {
-      TempStatus = 'VDS Error';
-      StatusMessage = TempStatus;
+      tempStatus = 'VDS Error';
+      statusMessage = tempStatus;
       stopProcessing = true;
     }
     // the early/late status generation
-    if (this.varianceFriendly < -1.5 && this.thirdParty == false) {
-      TempStatus = 'Running Early';
-      statusArray[0] = TempStatus;
-    } else if (this.varianceFriendly < 5 && this.thirdParty == false) {
-      TempStatus = 'Running Ok';
-      statusArray[0] = TempStatus;
-    } else if (this.varianceFriendly < 15 && this.thirdParty == false) {
-      TempStatus = 'Running Late';
-      statusArray[0] = TempStatus;
-    } else if (this.varianceFriendly >= 15 && this.thirdParty == false) {
-      TempStatus = 'Running Very Late';
-      statusArray[0] = TempStatus;
-    }
-    if (StatusMessage == '' && !stopProcessing) {
-      StatusMessage = TempStatus;
+    if (!stopProcessing && !this.thirdParty) {
+      if (this.varianceFriendly < -1.5) {
+        tempStatus = 'Running Early';
+        statusArray[0] = tempStatus;
+      } else if (this.varianceFriendly < 5) {
+        tempStatus = 'Running Ok';
+        statusArray[0] = tempStatus;
+      } else if (this.varianceFriendly < 15) {
+        tempStatus = 'Running Late';
+        statusArray[0] = tempStatus;
+      } else if (this.varianceFriendly >= 15) {
+        tempStatus = 'Running Very Late';
+        statusArray[0] = tempStatus;
+      }
+      if (statusMessage == '' && !stopProcessing) {
+        statusMessage = tempStatus;
+      }
     }
     // compare turnarounds to lateness to look for issues
-    if (!stopProcessing && ((this.NextTurnaround != '')
-      && (this.NextTurnaround < this.schedule_variance_min))
-      || ((this.crew.LE.nextService.turnaround != '')
-        && (this.le_turnaround < this.schedule_variance_min))
-      || ((this.crew.TM.nextService.turnaround != '')
-        && (this.crew.TM.nextService.turnaround < this.schedule_variance_min))) {
-      TempStatus = 'Delay Risk:';
+    const trainTurnaroundExceeded = (this.hasNextService
+      && (this.nextTurnaround + 5 < this.scheduleVariance.delay));
+    const leTurnaroundExceeded = (this.crew.LE.nextService.serviceId !== ''
+      && (this.crew.LE.nextService.turnaround + 5 < this.scheduleVariance.delay));
+    const tmTurnaroundExceeded = (this.crew.TM.nextService.serviceId !== ''
+      && (this.crew.TM.nextService.turnaround + 5 < this.scheduleVariance.delay));
 
-      if ((this.NextTurnaround < this.schedule_variance_min)) {
-        TempStatus = TempStatus + ' Train';
+    if (!stopProcessing
+      && (trainTurnaroundExceeded
+      || leTurnaroundExceeded
+      || tmTurnaroundExceeded)) {
+      tempStatus = 'Delay Risk:';
+
+      if (trainTurnaroundExceeded) {
+        tempStatus = tempStatus + ' Train';
       }
-      if ((this.crew.LE.nextService.turnaround < this.schedule_variance_min)) {
-        TempStatus = TempStatus + ' LE';
+      if (leTurnaroundExceeded) {
+        tempStatus = tempStatus + ' LE';
       }
-      if ((this.crew.TM.nextService.turnaround < this.schedule_variance_min)) {
-        TempStatus = TempStatus + ' TM';
+      if (tmTurnaroundExceeded) {
+        tempStatus = tempStatus + ' TM';
       }
       // check for negative turnarounds and just give an error status
-      if ((this.NextTurnaround < 0)
+      if ((this.nextTurnaround < 0)
         || (this.crew.LE.nextService.turnaround < 0)
         || (this.crew.TM.nextService.turnaround < 0)) {
-        TempStatus = 'Timetravel Error';
+        tempStatus = 'Timetravel Error';
       }
       if (stopProcessing == false) {
-        StatusMessage = TempStatus;
+        statusMessage = tempStatus;
       }
       stopProcessing = true;
     }
     // look at linking issues
     if (this.locationAge >= 180 && this.thirdParty == false) {
+      let inTunnel = false;
       // TempStatus = '';
       const tunnelExceptionsList = nzRailConventions.tunnelTrackingExceptions;
       // identify tunnel tracking issues
@@ -241,8 +259,9 @@ module.exports = class Service {
           if (tunnel.southStation == this.lastStation
             && tunnel.secondsTheshold > this.locationAge
             && tunnel.line == this.line) {
-            TempStatus = tunnel.statusMessage;
-            statusArray[1] = TempStatus;
+            inTunnel = true;
+            tempStatus = tunnel.statusMessage;
+            statusArray[1] = tempStatus;
           }
         }
       } else if (this.direction == 'DOWN') {
@@ -250,45 +269,49 @@ module.exports = class Service {
           if (tunnel.northStation == this.lastStation
             && tunnel.secondsTheshold > this.locationAge
             && tunnel.line == this.line) {
-            TempStatus = tunnel.statusMessage;
-            statusArray[1] = TempStatus;
+            inTunnel = true;
+            tempStatus = tunnel.statusMessage;
+            statusArray[1] = tempStatus;
           }
         }
       }
-      if (this.hasDeparted == false && TempStatus == '') {
-        TempStatus = 'Awaiting Departure';
-        statusArray[0] = TempStatus;
-        statusArray[1] = TempStatus;
-      } else if (this.secondVehicle !== null && TempStatus == '') {
-        const firstCarLocation = {
-          latitude: this.vehicle.location.lat,
-          longitude: this.vehicle.location.long,
-        };
-        const secondCarLocation = {
-          latitude: this.secondVehicle.location.lat,
-          longitude: this.secondVehicle.location.long,
-        };
-        if (linearLogic.distanceBetween2Points(firstCarLocation, secondCarLocation) > 2000) {
-          console.log('distance between units exceeds 2km');
-          TempStatus = 'GPS Fault';
-          statusArray[1] = TempStatus;
+      if (!inTunnel) {
+        if (this.hasDeparted == false) {
+          tempStatus = 'Awaiting Departure';
+          statusArray[0] = tempStatus;
+          statusArray[1] = tempStatus;
+        } else if (this.secondVehicle !== undefined) {
+          const firstCarLocation = {
+            latitude: this.linkedVehicle.location.lat,
+            longitude: this.linkedVehicle.location.long,
+          };
+          const secondCarLocation = {
+            latitude: this.secondVehicle.location.lat,
+            longitude: this.secondVehicle.location.long,
+          };
+          if (linearLogic.distanceBetween2Points(firstCarLocation, secondCarLocation) > 2000) {
+            console.log('distance between units exceeds 2km');
+            tempStatus = 'GPS Fault';
+            statusArray[1] = tempStatus;
+          } else {
+            tempStatus = 'Check OMS Linking';
+            statusArray[1] = tempStatus;
+          }
         } else {
-          TempStatus = 'Check OMS Linking';
-          statusArray[1] = TempStatus;
+          tempStatus = 'Check OMS Linking';
+          statusArray[1] = tempStatus;
         }
-      } else if (TempStatus == '') {
-        TempStatus = 'Check OMS Linking';
-        statusArray[1] = TempStatus;
       }
       if (stopProcessing == false) {
-        StatusMessage = TempStatus;
+        statusMessage = tempStatus;
+        stopProcessing = true;
       }
     }
     if (this.hasDeparted == false && this.thirdParty == false) {
-      TempStatus = 'Awaiting Departure';
-      statusArray[0] = TempStatus;
-      statusArray[1] = TempStatus;
-      StatusMessage = TempStatus;
+      tempStatus = 'Awaiting Departure';
+      statusArray[0] = tempStatus;
+      statusArray[1] = tempStatus;
+      statusMessage = tempStatus;
       stopProcessing = true;
     }
     if (this.linkedVehicle !== null
@@ -296,23 +319,23 @@ module.exports = class Service {
       && this.lastStationCurrent == false) {
       if (this.lastStation == 'POMA' && this.timetable.origin == 'TAIT') {
         this.lastStation = 'TAIT';
-        TempStatus = 'In Storage Road';
-        statusArray[2] = TempStatus;
+        tempStatus = 'In Storage Road';
+        statusArray[2] = tempStatus;
       } else if (this.lastStation == 'TEHO' && this.timetable.origin == 'WAIK') {
         this.lastStation = 'WAIK';
-        TempStatus = 'In Turn Back Road';
-        statusArray[2] = TempStatus;
+        tempStatus = 'In Turn Back Road';
+        statusArray[2] = tempStatus;
       } else {
-        TempStatus = 'Stopped between stations';
-        statusArray[2] = TempStatus;
+        tempStatus = 'Stopped between stations';
+        statusArray[2] = tempStatus;
       }
-      StatusMessage = TempStatus;
+      statusMessage = tempStatus;
       stopProcessing = true;
     }
-    if (StatusMessage == 0 || StatusMessage == false || typeof StatusMessage == 'undefined') {
-      StatusMessage = '';
+    if (statusMessage == 0 || statusMessage == false || typeof statusMessage == 'undefined') {
+      statusMessage = '';
     }
-    this.statusMessage = StatusMessage;
+    this.statusMessage = statusMessage;
     this.statusArray = statusArray;
   }
 

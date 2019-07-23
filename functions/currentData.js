@@ -345,6 +345,7 @@ module.exports = class CurrentData {
     } else {
       // get dummy timetable
       this.timetable = dummyData.timetable;
+      this.tripSheet = timetableLogic.getTripSheet(dummyData.timetable);
       this.timetableLastUpdated = moment();
       this.pilotLog('TEST Compass timetable loaded ok');
     }

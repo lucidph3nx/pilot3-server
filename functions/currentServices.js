@@ -15,10 +15,11 @@ module.exports = function(geVisVehicles, current, time) {
     if (checkTrainMeetsSelectionCriteria(train)) {
       const vehicle = new Vehicle(train);
       // work in progress, this new 'Vehicle' object will replace a lot of the below code
+      const secondVehicleId = vehicle.secondVehicleId();
       let secondVehicle;
-      if (vehicle.secondVehicleId !== '') {
+      if (secondVehicleId !== '') {
         for (let su = 0; su < trains.length; su++) {
-          if (trains[su].attributes.VEHID == vehicle.secondVehicleId) {
+          if (trains[su].attributes.VEHID == secondVehicleId) {
             secondVehicle = new Vehicle(trains[su].attributes);
             break;
           }
@@ -53,13 +54,6 @@ module.exports = function(geVisVehicles, current, time) {
           null,
           null,
           current);
-      // look for previous service and mark if still running
-      for (let csa = 0; csa < currentServices.length; csa++) {
-        if (service.statusMessage !== 'Previous Service Delayed'
-          && currentServices[csa].serviceId == service.lastService) {
-          service.statusMessage = 'Previous Service Delayed';
-        }
-      }
       currentServices.push(service);
     }
   }

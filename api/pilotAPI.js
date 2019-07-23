@@ -16,7 +16,7 @@ if (fs.existsSync(credentialPath)) {
 }
 const express = require('express');
 
-module.exports = function(app, current) {
+module.exports = function(app, current, functionFlags) {
   app.use('/staff', express.static(path.resolve('./data/img/staff')));
   // cross origin requests
   app.use(function(req, res, next) {
@@ -44,9 +44,24 @@ module.exports = function(app, current) {
     }
   });
 
-  app.get('/api/currentStatus', (request, response) => {
+  app.get('/api/currentStatusFull', (request, response) => {
     const currentMoment = moment();
     const currentStatus = current.status;
+    const Current = {'time': currentMoment, 'status': currentStatus};
+    response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+    response.write(JSON.stringify(Current));
+    response.end();
+  });
+  app.get('/api/currentStatus', (request, response) => {
+    let currentMoment;
+    let currentStatus;
+    if (functionFlags.fullDebugMode) {
+      currentMoment = moment(functionFlags.debugDataToUse, 'YYYYMMDDHHmmss');
+      currentStatus = 'TEST DATA ONLY';
+    } else {
+      currentMoment = moment();
+      currentStatus = '';
+    }
     const Current = {'time': currentMoment, 'status': currentStatus};
     response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
     response.write(JSON.stringify(Current));

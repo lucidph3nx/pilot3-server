@@ -12,7 +12,7 @@ const app = express();
 const functionFlags = {
   pilotSQLLogging: false, // log to Pilot DB
   fullDebugMode: true, // full test data run
-  debugDataToUse: '20190722091137',
+  debugDataToUse: '20190722091137', // '20190723082606',
   workingOffsiteMode: false, // run with GeVis but no Compass or VDS -- DOES NOT WORK YET
   snapshotMode: false,
 };
@@ -33,7 +33,7 @@ const alternativeToken = {
 
 const data = new CurrentData(functionFlags, applicationSettings, alternativeToken);
 // =======API=======
-require('./api/pilotAPI')(app, data);
+require('./api/pilotAPI')(app, data, functionFlags);
 
 // begin server
 refreshData();
