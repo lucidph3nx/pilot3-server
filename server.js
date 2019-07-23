@@ -10,8 +10,8 @@ const app = express();
 
 // ======functions flags=======
 const functionFlags = {
-  pilotSQLLogging: false, // log to Pilot DB
-  fullDebugMode: true, // full test data run
+  pilotSQLLogging: true, // log to Pilot DB
+  fullDebugMode: false, // full test data run
   debugDataToUse: '20190722091137', // '20190723082606',
   workingOffsiteMode: false, // run with GeVis but no Compass or VDS -- DOES NOT WORK YET
   snapshotMode: false,
@@ -26,8 +26,8 @@ const applicationSettings = {
   timetableUpdateHour: 3,
 };
 const alternativeToken = {
-  token: 'Mx_cnxjqhLHzSX3Vo3rWfzU0BULOkcFOEM6_HO-W3Ps.',
-  updateTime: moment('2019-07-22 10:00:00'),
+  token: 'OJ2da6w2jZTdUS5MJ5i-I-d9KGLwVeCT3e1Ir2G_6lo.',
+  updateTime: moment('2019-07-23 16:00:00'),
   pending: false,
 };
 

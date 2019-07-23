@@ -25,7 +25,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       knex.raw('select 1 as dbIsUp')
           .then(function(response) {
-            if (response[0].dbIsUp == 1) {
+            if (response.dbIsUp == 1) {
               resolve('Connection Ok');
             } else {
               resolve('Connection Error');
@@ -112,17 +112,17 @@ module.exports = {
       knex.select()
           .table('dbo.currentPeakOverall')
           .then(function(response) {
-            for (let lp = 0; lp < response[0].length; lp++) {
+            for (let lp = 0; lp < response.length; lp++) {
               linePerformance = {};
               linePerformance = {
-                date: response[0][lp].date,
-                line: response[0][lp].Line,
-                peak: response[0][lp].peak,
-                reliabilityFailure: response[0][lp].reliabilityFailure,
-                punctualityFailure: response[0][lp].punctualityFailure,
-                totalServices: response[0][lp].totalServices,
-                percentPunctualityFailure: parseFloat(response[0][lp].percentPunctualityFailure.toFixed(1)),
-                percentReliabilityFailure: parseFloat(response[0][lp].percentReliabilityFailure.toFixed(1)),
+                date: response[lp].date,
+                line: response[lp].Line,
+                peak: response[lp].peak,
+                reliabilityFailure: response[lp].reliabilityFailure,
+                punctualityFailure: response[lp].punctualityFailure,
+                totalServices: response[lp].totalServices,
+                percentPunctualityFailure: parseFloat(response[lp].percentPunctualityFailure.toFixed(1)),
+                percentReliabilityFailure: parseFloat(response[lp].percentReliabilityFailure.toFixed(1)),
               };
               currentPeakPerformance.push(linePerformance);
             }

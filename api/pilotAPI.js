@@ -150,6 +150,22 @@ module.exports = function(app, current, functionFlags) {
       });
     }
   });
+  // get roster Day Status
+  app.get('/api/rosteredCrew', (request, response) => {
+    const requestedDay = moment(request.query.date);
+    const requestedServiceId = request.query.serviceId;
+    let apiResponse;
+    vdsRosterAPI.rosteredCrew(requestedDay, requestedServiceId).then((result) => {
+      const rosteredCrew = result;
+      apiResponse = {'Time': moment(), rosteredCrew};
+      response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+      response.write(JSON.stringify(apiResponse));
+      response.end();
+    }).catch((error) => {
+      console.log(error);
+    });
+
+  });
   // get headcount data for vis board
   app.get('/api/visboardHeadcount', (request, response) => {
     vdsRosterAPI.visboardHeadcount().then((result) => {

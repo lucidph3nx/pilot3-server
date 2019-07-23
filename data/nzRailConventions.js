@@ -44,6 +44,7 @@ module.exports = {
     ['99', {kiwirailLineId: 'JVILL', metlinkLineId: 'JVL', operator: 'TDW'}],
     ['JV', {kiwirailLineId: 'JVILL', metlinkLineId: 'JVL', operator: 'TDW'}],
     ['WT', {kiwirailLineId: '', metlinkLineId: '', operator: 'KIWIRAIL'}],
+    ['TT', {kiwirailLineId: '', metlinkLineId: '', operator: 'TDW'}],
   ]),
   lineNamesMetlinkKiwirail: new Map([
     ['KPL', 'NIMT'],

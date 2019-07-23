@@ -27,7 +27,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       knex.raw('select 1 as dbIsUp')
           .then(function(response) {
-            if (response[0].dbIsUp == 1) {
+            if (response.dbIsUp == 1) {
               resolve('Connection Ok');
             } else {
               resolve('Connection Error');
@@ -123,6 +123,48 @@ module.exports = {
             resolve(dayStatus);
           }
           );
+    });
+  },
+  // returns the rostered crew for a service on a date.
+  rosteredCrew: function rosteredCrew(date, serviceId) {
+    return new Promise((resolve, reject) => {
+      const currentRoster = [];
+      const searchdate = moment(date).format('YYYY-MM-DD');
+      let serviceRoster = {};
+      knex.select()
+          .table('WEBSN.actualDuties')
+          .where({'date': searchdate, 'dutyName': serviceId})
+          .orderBy('date')
+          .orderBy('staffId')
+          .orderBy('minutesFrom')
+          .then(function(response) {
+            for (let trp = 0; trp < response.length; trp++) {
+              serviceRoster = {};
+              let staffId;
+              let staffName;
+              let shiftCovered;
+              if (response[trp].uncovered !== 1) {
+                staffId = response[trp].staffId.trim();
+                staffName = response[trp].firstName.trim() + ' ' + response[trp].lastName.trim();
+                shiftCovered = true;
+              } else {
+                staffId = '';
+                staffName = '';
+                shiftCovered = false;
+              }
+              serviceRoster = {
+                shiftId: response[trp].shiftName.trim(),
+                shiftType: response[trp].shiftType.trim(),
+                staffId: staffId,
+                staffName: staffName,
+                dutyName: response[trp].dutyName.trim(),
+                dutyType: response[trp].dutyType.trim(),
+                shiftCovered: shiftCovered,
+              };
+              currentRoster.push(serviceRoster);
+            }
+            resolve(currentRoster);
+          });
     });
   },
   // returns uncovered shifts for day

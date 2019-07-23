@@ -104,7 +104,7 @@ module.exports = class Service {
     // decide correct schedule variance to use
     // fall back to kiwirail variance if no calculation could be done
     this.varianceFriendly = '';
-    if (this.scheduleVarianceMin == '') {
+    if (this.scheduleVarianceMin == '' || this.scheduleVarianceMin == undefined) {
       this.varianceFriendly = this.varianceKiwirail;
     } else {
       this.varianceFriendly = parseInt(this.scheduleVarianceMin);
@@ -188,11 +188,11 @@ module.exports = class Service {
     }
     // compare turnarounds to lateness to look for issues
     const trainTurnaroundExceeded = (this.hasNextService
-      && (this.nextTurnaround + 5 < this.scheduleVariance.delay));
+      && (this.nextTurnaround + 5 < this.varianceFriendly));
     const leTurnaroundExceeded = (this.crew.LE.nextService.serviceId !== ''
-      && (this.crew.LE.nextService.turnaround + 5 < this.scheduleVariance.delay));
+      && (this.crew.LE.nextService.turnaround + 5 < this.varianceFriendly));
     const tmTurnaroundExceeded = (this.crew.TM.nextService.serviceId !== ''
-      && (this.crew.TM.nextService.turnaround + 5 < this.scheduleVariance.delay));
+      && (this.crew.TM.nextService.turnaround + 5 < this.varianceFriendly));
 
     if (!stopProcessing
       && (trainTurnaroundExceeded || leTurnaroundExceeded || tmTurnaroundExceeded)) {
@@ -285,6 +285,7 @@ module.exports = class Service {
       stopProcessing = true;
     }
     if (this.linkedVehicle !== null
+      && statusMessage != 'Non-Metlink Service'
       && this.linkedVehicle.location.speed == 0
       && this.lastStationCurrent == false) {
       if (this.lastStation == 'POMA' && this.timetable.origin == 'TAIT') {

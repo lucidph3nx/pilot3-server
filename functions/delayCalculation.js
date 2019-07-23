@@ -75,7 +75,6 @@ module.exports = {
     };
     const serviceTimetable = timetableDetails.timingPoints;
 
-
     if (up) {
       // loop through stations in the timing points
       // once loop finds first match the loop terminates with break
@@ -101,6 +100,14 @@ module.exports = {
           break;
         }
       }
+    }
+    // if station has still not been matched because train is beyond the last station, use last station
+    if (stationDetails.stationId == '' &&
+          module.exports.getMeterageOfStation(serviceTimetable[serviceTimetable.length-1].station) < trainMeterage) {
+      const lastStation = serviceTimetable[serviceTimetable.length-1];
+      stationDetails.stationId = lastStation.station;
+      stationDetails.time = moment(lastStation.arrives);
+      stationDetails.meterage = module.exports.getMeterageOfStation(lastStation.station);
     }
     return stationDetails;
   },

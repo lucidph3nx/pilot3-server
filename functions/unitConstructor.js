@@ -20,10 +20,10 @@ module.exports = class Unit {
     this.linkedCar = '';
     this.linkedServiceId = '';
     // work out which car is linked to a service, if any
-    if (this.FP !== undefined && this.FP.linkedServiceId !== '') {
+    if (this.FP !== undefined && this.FP.linkedServiceId !== undefined) {
       this.linkedServiceId = this.FP.linkedServiceId;
       this.linkedCar = 'FP';
-    } else if (this.FT.linkedServiceId !== '') {
+    } else if (this.FT !== undefined && this.FT.linkedServiceId !== undefined) {
       this.linkedServiceId = this.FT.linkedServiceId;
       this.linkedCar = 'FP';
     } else {

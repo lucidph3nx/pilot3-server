@@ -195,7 +195,7 @@ module.exports = class CurrentData {
    */
   updateUnitLists() {
     const logging = this.functionFlags.pilotSQLLogging;
-    const unitsAndCars = getCurrentUnitList(this.geVisVehicles);
+    const unitsAndCars = getCurrentUnitList(this.geVisVehicles.features);
     this.unitList = unitsAndCars[0];
     this.carList = unitsAndCars[1];
     if (logging) {
