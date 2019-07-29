@@ -49,6 +49,19 @@ module.exports = class Service {
     this.linkedVehicle = vehicle;
     this.linkedVehicleId = this.linkedVehicle ? this.linkedVehicle.vehicleId : '';
     this.secondVehicle = secondVehicle;
+    this.carsFarApart = false;
+    if (this.secondVehicle !== undefined) {
+      const firstCarLocation = {
+        latitude: this.linkedVehicle.location.lat,
+        longitude: this.linkedVehicle.location.long,
+      };
+      const secondCarLocation = {
+        latitude: this.secondVehicle.location.lat,
+        longitude: this.secondVehicle.location.long,
+      };
+      // cars greater than 2km apart
+      this.carsFarApart = (linearLogic.distanceBetween2Points(firstCarLocation, secondCarLocation) > 2000);
+    }
     if (this.fromTimetable) {
       this.locationAge = 0;
       this.location = {
@@ -91,7 +104,8 @@ module.exports = class Service {
         this.thirdParty,
         this.serviceDescription);
     this.hasDeparted = (this.currenttime > this.timetable.departs);
-    this.arrived = (this.lastStation == this.timetable.destination);
+    this.hasArrived = (this.lastStation == this.timetable.destination);
+    this.shouldHaveArrivedByNow = (this.currenttime > this.timetable.arrives);
     if (!this.IncorrectLine) {
       this.scheduleVariance = delayCalculation.getScheduleVariance(this.thirdParty,
           this.currenttime,
@@ -163,7 +177,7 @@ module.exports = class Service {
         statusMessage = 'Previous Service Delayed';
       }
       stopProcessing = true;
-    } else if (this.arrived) {
+    } else if (this.hasArrived) {
       statusMessage = 'Arriving';
       stopProcessing = true;
     }
@@ -189,9 +203,9 @@ module.exports = class Service {
     // compare turnarounds to lateness to look for issues
     const trainTurnaroundExceeded = (this.hasNextService
       && (this.nextTurnaround + 5 < this.varianceFriendly));
-    const leTurnaroundExceeded = (this.crew.LE.nextService.serviceId !== ''
+    const leTurnaroundExceeded = (this.crew.LE.nextService.serviceId !== '' && !this.crew.LE.nextIsSignOff
       && (this.crew.LE.nextService.turnaround + 5 < this.varianceFriendly));
-    const tmTurnaroundExceeded = (this.crew.TM.nextService.serviceId !== ''
+    const tmTurnaroundExceeded = (this.crew.TM.nextService.serviceId !== '' && !this.crew.TM.nextIsSignOff
       && (this.crew.TM.nextService.turnaround + 5 < this.varianceFriendly));
 
     if (!stopProcessing
@@ -250,23 +264,13 @@ module.exports = class Service {
           tempStatus = 'Awaiting Departure';
           statusArray[0] = tempStatus;
           statusArray[1] = tempStatus;
-        } else if (this.secondVehicle !== undefined) {
-          const firstCarLocation = {
-            latitude: this.linkedVehicle.location.lat,
-            longitude: this.linkedVehicle.location.long,
-          };
-          const secondCarLocation = {
-            latitude: this.secondVehicle.location.lat,
-            longitude: this.secondVehicle.location.long,
-          };
-          if (linearLogic.distanceBetween2Points(firstCarLocation, secondCarLocation) > 2000) {
-            console.log('distance between units exceeds 2km');
-            tempStatus = 'GPS Fault';
-            statusArray[1] = tempStatus;
-          } else {
-            tempStatus = 'Check OMS Linking';
-            statusArray[1] = tempStatus;
-          }
+        } else if (this.secondVehicle !== undefined && this.carsFarApart) {
+          // console.log('distance between units exceeds 2km');
+          tempStatus = 'GPS Fault';
+          statusArray[1] = tempStatus;
+        } else if (this.shouldHaveArrivedByNow && this.locationAge > 180) {
+          tempStatus = 'System Fault';
+          statusArray[1] = tempStatus;
         } else {
           tempStatus = 'Check OMS Linking';
           statusArray[1] = tempStatus;

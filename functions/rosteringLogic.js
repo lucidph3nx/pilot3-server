@@ -33,7 +33,7 @@ module.exports = {
         }
         // if sign off, next service is Sign-off
         if (rosterItems[s].dutyType == 'SOF') {
-          nextServiceId = rosterItems[s].dutyName;
+          nextServiceId = rosterItems[s].dutyType;
           break;
         }
       }
@@ -122,6 +122,7 @@ module.exports = {
             serviceDepartsString: '',
             turnaround: '',
           };
+          this.nextIsSignOff = false;
           if (shiftId) {
             // filter rosters for just this shift
             const staffRosterItems = roster.filter((roster) => roster.shiftId == shiftId);
@@ -138,7 +139,11 @@ module.exports = {
                 timetable,
                 false,
                 '').arrives;
-            const nextServiceId = getNextServiceCrewRoster(serviceId, shiftId, roster);
+            let nextServiceId = getNextServiceCrewRoster(serviceId, shiftId, roster);
+            if (nextServiceId == 'SOF') {
+              nextServiceId = 'Sign-off';
+              this.nextIsSignOff = true;
+            }
             const nextServiceDeparts = timetableLogic.getTimetableDetails(nextServiceId,
                 timetable,
                 false,
