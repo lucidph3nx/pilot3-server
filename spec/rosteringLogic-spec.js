@@ -83,7 +83,7 @@ describe('Find out next service for Crew Member', function() {
     serviceId = '9229';
     shiftId = 'WLE613';
     nextServiceId = getNextServiceCrewRoster(serviceId, shiftId, testRosterDuties);
-    expect(nextServiceId).toBe('Sign-off');
+    expect(nextServiceId).toBe('SOF');
 
     serviceId = '5634';
     shiftId = 'ULE610';

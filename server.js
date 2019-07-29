@@ -10,8 +10,8 @@ const app = express();
 
 // ======functions flags=======
 const functionFlags = {
-  pilotSQLLogging: true, // log to Pilot DB
-  fullDebugMode: false, // full test data run
+  pilotSQLLogging: false, // log to Pilot DB
+  fullDebugMode: true, // full test data run
   debugDataToUse: '20190722091137', // '20190723082606',
   workingOffsiteMode: false, // run with GeVis but no Compass or VDS -- DOES NOT WORK YET
   snapshotMode: false,

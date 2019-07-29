@@ -50,7 +50,7 @@ module.exports = class Service {
     this.linkedVehicleId = this.linkedVehicle ? this.linkedVehicle.vehicleId : '';
     this.secondVehicle = secondVehicle;
     this.carsFarApart = false;
-    if (this.secondVehicle !== undefined) {
+    if (this.secondVehicle !== null && this.secondVehicle !== undefined) {
       const firstCarLocation = {
         latitude: this.linkedVehicle.location.lat,
         longitude: this.linkedVehicle.location.long,
@@ -177,7 +177,7 @@ module.exports = class Service {
         statusMessage = 'Previous Service Delayed';
       }
       stopProcessing = true;
-    } else if (this.hasArrived) {
+    } else if (this.hasArrived && this.locationAge < 180) {
       statusMessage = 'Arriving';
       stopProcessing = true;
     }
@@ -268,7 +268,7 @@ module.exports = class Service {
           // console.log('distance between units exceeds 2km');
           tempStatus = 'GPS Fault';
           statusArray[1] = tempStatus;
-        } else if (this.shouldHaveArrivedByNow && this.locationAge > 180) {
+        } else if (this.shouldHaveArrivedByNow && this.locationAge > 120) {
           tempStatus = 'System Fault';
           statusArray[1] = tempStatus;
         } else {

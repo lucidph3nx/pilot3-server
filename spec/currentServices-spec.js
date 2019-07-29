@@ -145,6 +145,14 @@ describe('Service Constuctor status Generation', function() {
     expect(status).toBe('Check OMS Linking');
   });
 
+  it('Correctly Identifies a service as Tracking System Fault', function() {
+    const train = currentServices1.filter((service) => {
+      return service.serviceId === '6210';
+    });
+    const status = train[0].statusMessage;
+    expect(status).toBe('System Fault');
+  });
+
   it('Correctly Identifies a service in the TAITA storage road', function() {
     const train = currentServices2.filter((service) => {
       return service.serviceId === '4613';
