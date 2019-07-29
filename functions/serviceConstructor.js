@@ -289,6 +289,7 @@ module.exports = class Service {
       stopProcessing = true;
     }
     if (this.linkedVehicle !== null
+      && statusMessage != 'Awaiting Departure'
       && statusMessage != 'Non-Metlink Service'
       && this.linkedVehicle.location.speed == 0
       && this.lastStationCurrent == false) {
