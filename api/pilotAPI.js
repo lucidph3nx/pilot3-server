@@ -294,6 +294,21 @@ module.exports = function(app, current, functionFlags) {
       console.log(error);
     });
   });
+
+  // get holistic year report for staff member
+  app.get('/api/holisticYear', (request, response) => {
+    const staffId = request.query.staffId;
+    const year = request.query.year;
+    const fs = require('fs');
+    const jsonString = fs.readFileSync('./data/testData/testHolistic16283.json');
+    const testresponse = JSON.parse(jsonString);
+    const holisticYear = testresponse;
+    const apiResponse = {'time': moment(), holisticYear};
+    response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+    response.write(JSON.stringify(apiResponse));
+    response.end();
+  });
+
   const port = 4000;
   app.listen(port, '0.0.0.0');
   console.log('Pilot API listening on ' + port);
