@@ -131,5 +131,33 @@ module.exports = {
           );
     });
   },
+  // returns reliability and punctuality stats for date
+  trainPerformance: function(date) {
+    return new Promise((resolve, reject) => {
+      const requestedDay = date;
+      const trainPerformance = [];
+      let linePerformance = {};
+      knex.select()
+          .table('dbo.trainPerformance')
+          .where('date', requestedDay)
+          .then(function(response) {
+            for (let lp = 0; lp < response.length; lp++) {
+              linePerformance = {};
+              linePerformance = {
+                date: response[lp].date,
+                line: response[lp].Line,
+                reliabilityFailure: response[lp].reliabilityFailure,
+                punctualityFailure: response[lp].punctualityFailure,
+                totalServices: response[lp].totalServices,
+                percentPunctualityFailure: parseFloat(response[lp].percentPunctualityFailure.toFixed(1)),
+                percentReliabilityFailure: parseFloat(response[lp].percentReliabilityFailure.toFixed(1)),
+              };
+              trainPerformance.push(linePerformance);
+            }
+            resolve(trainPerformance);
+          }
+          );
+    });
+  },
   // other functions
 };

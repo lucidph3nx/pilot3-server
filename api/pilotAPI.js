@@ -275,6 +275,25 @@ module.exports = function(app, current, functionFlags) {
       console.log(error);
     });
   });
+  // get train performance statistics by line
+  app.get('/api/trainPerformance', (request, response) => {
+    let requestedDay;
+    if (request.query.date) {
+      requestedDay = moment(request.query.date).format('YYYY-MM-DD');
+    } else {
+      requestedDay = moment().format('YYYY-MM-DD');
+    }
+    let trainPerformance;
+    compassAPI.trainPerformance(requestedDay).then((result) => {
+      trainPerformance = result;
+      const apiResponse = {'time': moment(), trainPerformance};
+      response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+      response.write(JSON.stringify(apiResponse));
+      response.end();
+    }).catch((error) => {
+      console.log(error);
+    });
+  });
   const port = 4000;
   app.listen(port, '0.0.0.0');
   console.log('Pilot API listening on ' + port);
