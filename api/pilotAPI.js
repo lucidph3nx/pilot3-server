@@ -1,6 +1,7 @@
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 const rosteringLogic = require('./../functions/rosteringLogic');
+const nzRailConventions = require('./../data/nzRailConventions');
 const getStaffPhotoFromId = require('./../functions/staffImage');
 const getRunningSheetForStation = require('./../functions/runningSheetForStation');
 // =======API=======
@@ -248,7 +249,7 @@ module.exports = function(app, current, functionFlags) {
       response.end();
     }
   });
-  // get list of staff who are "as Required" now
+  // get list of staff who are 'as Required' now
   app.get('/api/asRequiredStaff', (request, response) => {
     const apiResponse = rosteringLogic.common.getAsRequiredStaff(current.rosterDuties);
     response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
@@ -297,13 +298,45 @@ module.exports = function(app, current, functionFlags) {
 
   // get holistic year report for staff member
   app.get('/api/holisticYear', (request, response) => {
+    // nzRailConventions
     const staffId = request.query.staffId;
     const year = request.query.year;
     const fs = require('fs');
     const jsonString = fs.readFileSync('./data/testData/testHolistic16283.json');
     const testresponse = JSON.parse(jsonString);
-    const holisticYear = testresponse;
-    const apiResponse = {'time': moment(), holisticYear};
+    const holisticYear = [];
+    for (let i = 0; i < testresponse.length; i++) {
+      let dayType = 'WORK';
+      for (const [key, value] of nzRailConventions.holisticReportCounterMap.entries()) {
+        if (value == testresponse[0].dayCode) {
+          dayType = key;
+        }
+      }
+      if (testresponse[0].GEWP == 1) {
+        dayType = 'GEWP';
+      }
+
+      const entry = {
+        'date': testresponse[0].date,
+        'dayType': dayType,
+        'GEWP': (testresponse[0].GEWP == 1),
+        'dayCode': testresponse[0].dayCode,
+        'location': testresponse[0].shiftLocation ? (testresponse[0].shiftLocation).trim() : null,
+        'workType': testresponse[0].shiftType ? (testresponse[0].shiftType).trim() : null,
+        'hourFrom': testresponse[0].minFrom ? moment(testresponse[0].date).add('minute', testresponse[0].minFrom).format('HH:mm') : null,
+        'hourTo': testresponse[0].minTo ? moment(testresponse[0].date).add('minute', testresponse[0].minTo).format('HH:mm') : null,
+        'totalHours': testresponse[0].totalMin ? moment(testresponse[0].date).add('minute', testresponse[0].totalMin).format('HH:mm') : null,
+      };
+      holisticYear.push(entry);
+    }
+    const apiResponse = {
+      'reportTime': moment(),
+      'staffId': '16283',
+      'year': '2017',
+      'sickToLeaveRatio': 0.6,
+      'holisticYearData': holisticYear,
+      'dayCodes': nzRailConventions.holisticReportCodes,
+    };
     response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
     response.write(JSON.stringify(apiResponse));
     response.end();

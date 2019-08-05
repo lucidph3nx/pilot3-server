@@ -317,4 +317,35 @@ module.exports = {
     });
   },
   // other exports here
+  futureInterfaceString: `
+  DECLARE @startdate datetime;
+DECLARE @enddate datetime;
+DECLARE @StaffMember numeric;
+SET @StaffMember = '16283';
+SET @startdate = '2017-01-01';
+SET @enddate ='2018-01-01';
+ SELECT DISTINCT
+  [VDS_TDW].[dbo].[AfPosition].[DatPosition] As 'date',
+  [VDS_TDW].[dbo].[AfPosition].[Matricule] As 'staffId',
+  [VDS_TDW].[dbo].[AfPosition].[TypPositionReal] As 'workType',
+  ISNULL(ISNULL([VDS_TDW].[dbo].[AfPosition].[CodAbsence], [VDS_TDW].[dbo].[AfPosition].[CodReposReal]),
+  ISNULL([VDS_TDW].[dbo].[AfPosition].[CodNatureDispoReal], [VDS_TDW].[dbo].[TsTour].[NomTour])) As 'shift',
+	[VDS_TDW].[dbo].[TsTour].[CodCatPersonnel] As 'shiftType',
+	[VDS_TDW].[dbo].[TsTour].[CodSecteur] As 'shiftLocation',
+	[VDS_TDW].[dbo].[TsTour].[HreDeb] AS 'minFrom',
+	[VDS_TDW].[dbo].[TsTour].[HreFin] As 'minTo',
+	[VDS_TDW].[dbo].[TsTour].[TempsEff] 'totalMin',
+  CASE WHEN [VDS_TDW].[dbo].[CpMouvement].[CodCompteur] = 'GEWP' THEN 1 ELSE 0 END As 'GEWP'
+ FROM [VDS_TDW].[dbo].[AfPosition]
+  LEFT JOIN  [VDS_TDW].[dbo].[TsTour] ON
+  [VDS_TDW].[dbo].[AfPosition].[SeqTourReal] = [VDS_TDW].[dbo].[TsTour].[SeqTour]
+  LEFT JOIN [VDS_TDW].[dbo].[CpMouvement] ON
+  [VDS_TDW].[dbo].[CpMouvement].[Dat] = [VDS_TDW].[dbo].[AfPosition].[DatPosition]
+  AND [VDS_TDW].[dbo].[AfPosition].[Matricule] = [VDS_TDW].[dbo].[CpMouvement].[Matricule]
+  AND [VDS_TDW].[dbo].[CpMouvement].[CodCompteur] = 'GEWP'
+ WHERE [VDS_TDW].[dbo].[AfPosition].[Matricule] = @StaffMember
+  AND [VDS_TDW].[dbo].[AfPosition].[DatPosition] >= @startdate
+  AND [VDS_TDW].[dbo].[AfPosition].[DatPosition] < @enddate
+ ORDER BY [VDS_TDW].[dbo].[AfPosition].[DatPosition]
+ `,
 };
