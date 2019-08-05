@@ -306,11 +306,14 @@ module.exports = function(app, current, functionFlags) {
     const testresponse = JSON.parse(jsonString);
     const holisticYear = [];
     for (let i = 0; i < testresponse.length; i++) {
-      let dayType = 'WORK';
+      let dayType = '';
       for (const [key, value] of nzRailConventions.holisticReportCounterMap.entries()) {
-        if (value == testresponse[i].dayCode) {
-          dayType = key;
+        if (key == testresponse[i].dayCode) {
+          dayType = value;
         }
+      }
+      if (dayType == '') {
+        dayType = 'WORK';
       }
       if (testresponse[i].GEWP == 1) {
         dayType = 'GEWP';
@@ -323,9 +326,9 @@ module.exports = function(app, current, functionFlags) {
         'dayCode': testresponse[i].dayCode,
         'location': testresponse[i].shiftLocation ? (testresponse[i].shiftLocation).trim() : null,
         'workType': testresponse[i].shiftType ? (testresponse[i].shiftType).trim() : null,
-        'hourFrom': testresponse[i].minFrom ? moment(testresponse[i].date).add('minute', testresponse[i].minFrom).format('HH:mm') : null,
-        'hourTo': testresponse[i].minTo ? moment(testresponse[i].date).add('minute', testresponse[i].minTo).format('HH:mm') : null,
-        'totalHours': testresponse[i].totalMin ? moment(testresponse[i].date).add('minute', testresponse[i].totalMin).format('HH:mm') : null,
+        'hourFrom': testresponse[i].minFrom ? moment(testresponse[i].date).add(testresponse[i].minFrom, 'minute').format('HH:mm') : null,
+        'hourTo': testresponse[i].minTo ? moment(testresponse[i].date).add(testresponse[i].minTo, 'minute').format('HH:mm') : null,
+        'totalHours': testresponse[i].totalMin ? moment(testresponse[i].date).add(testresponse[i].totalMin, 'minute').format('HH:mm') : null,
       };
       holisticYear.push(entry);
     }
