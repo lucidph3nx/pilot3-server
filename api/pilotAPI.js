@@ -308,24 +308,24 @@ module.exports = function(app, current, functionFlags) {
     for (let i = 0; i < testresponse.length; i++) {
       let dayType = 'WORK';
       for (const [key, value] of nzRailConventions.holisticReportCounterMap.entries()) {
-        if (value == testresponse[0].dayCode) {
+        if (value == testresponse[i].dayCode) {
           dayType = key;
         }
       }
-      if (testresponse[0].GEWP == 1) {
+      if (testresponse[i].GEWP == 1) {
         dayType = 'GEWP';
       }
 
       const entry = {
-        'date': testresponse[0].date,
+        'date': testresponse[i].date,
         'dayType': dayType,
-        'GEWP': (testresponse[0].GEWP == 1),
-        'dayCode': testresponse[0].dayCode,
-        'location': testresponse[0].shiftLocation ? (testresponse[0].shiftLocation).trim() : null,
-        'workType': testresponse[0].shiftType ? (testresponse[0].shiftType).trim() : null,
-        'hourFrom': testresponse[0].minFrom ? moment(testresponse[0].date).add('minute', testresponse[0].minFrom).format('HH:mm') : null,
-        'hourTo': testresponse[0].minTo ? moment(testresponse[0].date).add('minute', testresponse[0].minTo).format('HH:mm') : null,
-        'totalHours': testresponse[0].totalMin ? moment(testresponse[0].date).add('minute', testresponse[0].totalMin).format('HH:mm') : null,
+        'GEWP': (testresponse[i].GEWP == 1),
+        'dayCode': testresponse[i].dayCode,
+        'location': testresponse[i].shiftLocation ? (testresponse[i].shiftLocation).trim() : null,
+        'workType': testresponse[i].shiftType ? (testresponse[i].shiftType).trim() : null,
+        'hourFrom': testresponse[i].minFrom ? moment(testresponse[i].date).add('minute', testresponse[i].minFrom).format('HH:mm') : null,
+        'hourTo': testresponse[i].minTo ? moment(testresponse[i].date).add('minute', testresponse[i].minTo).format('HH:mm') : null,
+        'totalHours': testresponse[i].totalMin ? moment(testresponse[i].date).add('minute', testresponse[i].totalMin).format('HH:mm') : null,
       };
       holisticYear.push(entry);
     }
