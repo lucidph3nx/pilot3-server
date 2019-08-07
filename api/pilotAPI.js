@@ -329,6 +329,7 @@ module.exports = function(app, current, functionFlags) {
         'hourFrom': testresponse[i].minFrom ? moment(testresponse[i].date).add(testresponse[i].minFrom, 'minute').format('HH:mm') : null,
         'hourTo': testresponse[i].minTo ? moment(testresponse[i].date).add(testresponse[i].minTo, 'minute').format('HH:mm') : null,
         'totalHours': testresponse[i].totalMin ? moment(testresponse[i].date).add(testresponse[i].totalMin, 'minute').format('HH:mm') : null,
+        'totalHoursNumber': testresponse[i].totalMin ? testresponse[i].totalMin/60 : 0,
       };
       holisticYear.push(entry);
     }

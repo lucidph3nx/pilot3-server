@@ -316,6 +316,38 @@ module.exports = {
           );
     });
   },
+  holisticYearData: function holisticYearData(staffId, startDate, endDate) {
+    return new Promise((resolve, reject) => {
+      const holisticYearData = [];
+      let entry = {};
+      knex.select()
+          .table('WEBSN.holisticCalendarData')
+          .where('staffId', '=', staffId)
+          .whereBetween('date', [startDate, endDate])
+          .orderBy('date')
+          .then(function(response) {
+            for (let i = 0; i < response.length; i++) {
+              entry = {};
+              entry = {
+                date: response[i].date,
+                staffId: response[i].staffId,
+                workType: response[i].workType,
+                shift: response[i].shift,
+                shiftType: response[i].shiftType,
+                shiftLocation: response[i].shiftLocation,
+                minFrom: response[i].minFrom ? moment(response[i].date).add(response[i].minFrom, 'minute').format('HH:mm') : null,
+                minTo: response[i].minTo ? moment(response[i].date).add(response[i].minTo, 'minute').format('HH:mm') : null,
+                totalMin: response[i].totalMin ? moment(response[i].date).add(response[i].totalMin, 'minute').format('HH:mm') : null,
+                totalHoursNumber: response[i].totalMin ? response[i].totalMin/60 : 0,
+                GEWP: (response[i].GEWP == 1),
+              };
+              holisticYearData.push(entry);
+            }
+            resolve(holisticYearData);
+          }
+          );
+    });
+  },
   // other exports here
   futureInterfaceString: `
   DECLARE @startdate datetime;
