@@ -328,17 +328,18 @@ module.exports = {
           .then(function(response) {
             for (let i = 0; i < response.length; i++) {
               entry = {};
+              const thisDate = moment.utc(response[i].date).format('YYYY-MM-DD');
               entry = {
-                date: response[i].date,
-                staffId: response[i].staffId,
+                date: thisDate,
+                staffId: response[i].staffId.trim(),
                 workType: response[i].workType,
-                shift: response[i].shift,
-                shiftType: response[i].shiftType,
-                shiftLocation: response[i].shiftLocation,
-                minFrom: response[i].minFrom ? moment(response[i].date).add(response[i].minFrom, 'minute').format('HH:mm') : null,
-                minTo: response[i].minTo ? moment(response[i].date).add(response[i].minTo, 'minute').format('HH:mm') : null,
-                totalMin: response[i].totalMin ? moment(response[i].date).add(response[i].totalMin, 'minute').format('HH:mm') : null,
-                totalHoursNumber: response[i].totalMin ? response[i].totalMin/60 : 0,
+                dayCode: response[i].shift,
+                shiftType: response[i].shiftType ? (response[i].shiftType).trim() : null,
+                shiftLocation: response[i].shiftLocation ? (response[i].shiftLocation).trim() : null,
+                hourFrom: response[i].minFrom ? moment(thisDate).add(response[i].minFrom, 'minute').format('HH:mm') : null,
+                hourTo: response[i].minTo ? moment(thisDate).add(response[i].minTo, 'minute').format('HH:mm') : null,
+                totalHours: response[i].totalMin ? moment(thisDate).add(response[i].totalMin, 'minute').format('HH:mm') : null,
+                totalHoursNumber: response[i].totalMin ? response[i].totalMin/60 : null,
                 GEWP: (response[i].GEWP == 1),
               };
               holisticYearData.push(entry);

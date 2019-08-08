@@ -300,50 +300,72 @@ module.exports = function(app, current, functionFlags) {
   app.get('/api/holisticYear', (request, response) => {
     // nzRailConventions
     const staffId = request.query.staffId;
-    const year = request.query.year;
-    const fs = require('fs');
-    const jsonString = fs.readFileSync('./data/testData/testHolistic16283.json');
-    const testresponse = JSON.parse(jsonString);
+    const startDate = moment(request.query.year+'-01-01').format('YYYY-MM-DD');
+    const endDate = moment(request.query.year+'-01-01')
+        .add(1, 'year')
+        .subtract(1, 'day').format('YYYY-MM-DD');
+    // const fs = require('fs');
+    // const jsonString = fs.readFileSync('./data/testData/testHolistic16283.json');
+    // const testresponse = JSON.parse(jsonString);
     const holisticYear = [];
-    for (let i = 0; i < testresponse.length; i++) {
-      let dayType = '';
-      for (const [key, value] of nzRailConventions.holisticReportCounterMap.entries()) {
-        if (key == testresponse[i].dayCode) {
-          dayType = value;
+    vdsRosterAPI.holisticYearData(staffId, startDate, endDate).then((data) => {
+      for (let i = 0; i < data.length; i++) {
+        let dayType = '';
+        for (const [key, value] of nzRailConventions.holisticReportCounterMap.entries()) {
+          if (key == data[i].dayCode) {
+            dayType = value;
+          }
+        }
+        if (dayType == '') {
+          dayType = 'WORK';
+        }
+        if (data[i].GEWP == 1) {
+          dayType = 'GEWP';
+        }
+        let totalHoursNumber;
+        if (data[i].totalHoursNumber !== null) {
+          totalHoursNumber = Number((data[i].totalHoursNumber).toFixed(2));
+        } else {
+          totalHoursNumber = 0;
+        }
+        const entry = {
+          'date': data[i].date,
+          'dayType': dayType,
+          'GEWP': data[i].GEWP,
+          'dayCode': data[i].dayCode,
+          'location': data[i].shiftLocation,
+          'workType': data[i].shiftType,
+          'hourFrom': data[i].hourFrom,
+          'hourTo': data[i].hourTo,
+          'totalHours': data[i].totalHours,
+          'totalHoursNumber': totalHoursNumber,
+        };
+        holisticYear.push(entry);
+      }
+      let leaveTotal = 0;
+      let sickTotal = 0;
+      for (let i = 0; i < holisticYear.length; i++) {
+        if (holisticYear[i].dayType == 'LEAVE') {
+          leaveTotal++;
+        } else if (holisticYear[i].dayType == 'SICK') {
+          sickTotal++;
         }
       }
-      if (dayType == '') {
-        dayType = 'WORK';
-      }
-      if (testresponse[i].GEWP == 1) {
-        dayType = 'GEWP';
-      }
-
-      const entry = {
-        'date': testresponse[i].date,
-        'dayType': dayType,
-        'GEWP': (testresponse[i].GEWP == 1),
-        'dayCode': testresponse[i].dayCode,
-        'location': testresponse[i].shiftLocation ? (testresponse[i].shiftLocation).trim() : null,
-        'workType': testresponse[i].shiftType ? (testresponse[i].shiftType).trim() : null,
-        'hourFrom': testresponse[i].minFrom ? moment(testresponse[i].date).add(testresponse[i].minFrom, 'minute').format('HH:mm') : null,
-        'hourTo': testresponse[i].minTo ? moment(testresponse[i].date).add(testresponse[i].minTo, 'minute').format('HH:mm') : null,
-        'totalHours': testresponse[i].totalMin ? moment(testresponse[i].date).add(testresponse[i].totalMin, 'minute').format('HH:mm') : null,
-        'totalHoursNumber': testresponse[i].totalMin ? testresponse[i].totalMin/60 : 0,
+      const sickToLeaveRatio = sickTotal / leaveTotal;
+      const apiResponse = {
+        'reportTime': moment(),
+        'staffId': data[0].staffId,
+        'year': moment(data[0].date).format('YYYY'),
+        'sickToLeaveRatio': sickToLeaveRatio,
+        'holisticYearData': holisticYear,
+        'dayCodes': nzRailConventions.holisticReportCodes,
       };
-      holisticYear.push(entry);
-    }
-    const apiResponse = {
-      'reportTime': moment(),
-      'staffId': '16283',
-      'year': '2017',
-      'sickToLeaveRatio': 0.6,
-      'holisticYearData': holisticYear,
-      'dayCodes': nzRailConventions.holisticReportCodes,
-    };
-    response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
-    response.write(JSON.stringify(apiResponse));
-    response.end();
+      response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+      response.write(JSON.stringify(apiResponse));
+      response.end();
+    }).catch((error) => {
+      console.log(error);
+    });
   });
 
   const port = 4000;
