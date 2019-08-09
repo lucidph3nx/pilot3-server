@@ -268,7 +268,7 @@ module.exports = class Service {
           // console.log('distance between units exceeds 2km');
           tempStatus = 'GPS Fault';
           statusArray[1] = tempStatus;
-        } else if (this.shouldHaveArrivedByNow && this.locationAge > 120) {
+        } else if (this.shouldHaveArrivedByNow && this.locationAge > (120 * 60)) {
           tempStatus = 'System Fault';
           statusArray[1] = tempStatus;
         } else {

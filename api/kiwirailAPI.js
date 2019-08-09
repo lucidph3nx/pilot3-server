@@ -58,7 +58,7 @@ module.exports = {
         });
         response.on('end', function() {
           if (body.substring(0, 1) == '<') {
-            status = 'NEW GeVis returned service unavailable';
+            status = 'GeVis returned service unavailable';
           } else {
             const geVisVehicles = JSON.parse(body);
             if (geVisVehicles.features == []) {
@@ -67,7 +67,27 @@ module.exports = {
             if (geVisVehicles.error !== undefined && geVisVehicles.error.code == 498) {
               status = 'GeVis Token Invalid Or Expired';
             }
-
+            if (geVisVehicles.features !== [] && status == 'Connection OK') {
+              let mostUpToDateTrain;
+              let latestPing = 99999999999999999999;
+              for (let i = 0; i < geVisVehicles.features.length; i++) {
+                const thisTrain = geVisVehicles.features[i].attributes;
+                if (thisTrain.TIMESTMPNZ < latestPing
+                  && (thisTrain.EQUIPDESC == 'Matangi Power Car'
+                  || thisTrain.EQUIPDESC == 'Matangi Trailer Car')) {
+                  latestPing = thisTrain.TIMESTMPNZ;
+                  mostUpToDateTrain = thisTrain;
+                }
+              }
+              latestPing = mostUpToDateTrain.TIMESTMPNZ;
+              const gisPing = mostUpToDateTrain.TIMESTMPGIS;
+              const timeNow = moment.utc(gisPing);
+              const latestPositionTime = moment.utc(latestPing);
+              const differenceRAW = Number(timeNow.diff(latestPositionTime).valueOf() / 1000 / 60);
+              if (differenceRAW > 1) {
+                status = 'GeVis Vehicles not updating';
+              }
+            }
             resolve(status);
           }
         });

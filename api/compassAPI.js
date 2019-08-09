@@ -25,7 +25,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       knex.raw('select 1 as dbIsUp')
           .then(function(response) {
-            if (response.dbIsUp == 1) {
+            if (response[0].dbIsUp == 1) {
               resolve('Connection Ok');
             } else {
               resolve('Connection Error');
