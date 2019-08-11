@@ -83,8 +83,8 @@ module.exports = {
               const gisPing = mostUpToDateTrain.TIMESTMPGIS;
               const timeNow = moment.utc(gisPing);
               const latestPositionTime = moment.utc(latestPing);
-              const differenceRAW = Number(timeNow.diff(latestPositionTime).valueOf() / 1000 / 60);
-              if (differenceRAW > 1) {
+              const differenceRAW = Number(timeNow.diff(latestPositionTime).valueOf() / 1000);
+              if (differenceRAW > 20) {
                 status = 'GeVis Vehicles not updating';
               }
             }
