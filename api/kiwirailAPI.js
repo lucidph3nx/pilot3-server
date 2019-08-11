@@ -69,10 +69,10 @@ module.exports = {
             }
             if (geVisVehicles.features !== [] && status == 'Connection OK') {
               let mostUpToDateTrain;
-              let latestPing = 99999999999999999999;
+              let latestPing = 0;
               for (let i = 0; i < geVisVehicles.features.length; i++) {
                 const thisTrain = geVisVehicles.features[i].attributes;
-                if (thisTrain.TIMESTMPNZ < latestPing
+                if (thisTrain.TIMESTMPNZ > latestPing
                   && (thisTrain.EQUIPDESC == 'Matangi Power Car'
                   || thisTrain.EQUIPDESC == 'Matangi Trailer Car')) {
                   latestPing = thisTrain.TIMESTMPNZ;
