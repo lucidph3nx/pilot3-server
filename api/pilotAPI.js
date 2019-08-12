@@ -7,6 +7,7 @@ const getRunningSheetForStation = require('./../functions/runningSheetForStation
 // =======API=======
 let vdsRosterAPI;
 let compassAPI;
+
 // only define the API modules if credentials file exists
 const fs = require('fs');
 const path = require('path');
@@ -18,6 +19,9 @@ if (fs.existsSync(credentialPath)) {
 const express = require('express');
 
 module.exports = function(app, current, functionFlags) {
+  // =======PilotAPIModules========
+  require('./pilotAPI/serverStatus')(app, current, functionFlags);
+
   app.use('/staff', express.static(path.resolve('./data/img/staff')));
   // cross origin requests
   app.use(function(req, res, next) {
@@ -109,16 +113,6 @@ module.exports = function(app, current, functionFlags) {
     response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
     response.write(JSON.stringify(apiResponse));
     response.end();
-  });
-  // get all roster duties today
-  app.get('/api/test', (request, response) => {
-    vdsRosterAPI.testfunction().then((result) => {
-      const currentRosterDuties = response;
-      const apiResponse = {'Time': moment(), currentRosterDuties};
-      response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
-      response.write(JSON.stringify(apiResponse));
-      response.end();
-    });
   });
   // get all roster duties today
   app.get('/api/currentRoster', (request, response) => {
@@ -278,11 +272,10 @@ module.exports = function(app, current, functionFlags) {
   });
   // get train performance statistics by line
   app.get('/api/trainPerformance', (request, response) => {
-    let requestedDay;
+    // default is today if not specified
+    let requestedDay = moment().format('YYYY-MM-DD');
     if (request.query.date) {
       requestedDay = moment(request.query.date).format('YYYY-MM-DD');
-    } else {
-      requestedDay = moment().format('YYYY-MM-DD');
     }
     let trainPerformance;
     compassAPI.trainPerformance(requestedDay).then((result) => {
