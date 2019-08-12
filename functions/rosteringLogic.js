@@ -2,6 +2,8 @@
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 const timetableLogic = require('./timetableLogic');
+const linearLogic = require('./linearLogic');
+const nzRailConventions = require('./../data/nzRailConventions');
 
 module.exports = {
   // to serve all roster related functions
@@ -88,6 +90,66 @@ module.exports = {
         }
       }
       return dayRoster;
+    },
+    formatRosterDuties: function(rosterDuties, filterStaffId, filterShiftId, includeColours) {
+      let rosterArray = rosterDuties;
+      const responseArray = [];
+      if (filterStaffId) {
+        rosterArray = rosterDuties.filter((duty) => duty.staffId == filterStaffId);
+      }
+      if (filterShiftId) {
+        rosterArray = rosterDuties.filter((duty) => duty.shiftId == filterShiftId);
+      }
+      if (includeColours) {
+        const dutyTypeCodes = nzRailConventions.dutyTypeCodes;
+        const serviceIdlineAssociations = nzRailConventions.serviceIdlineAssociations;
+        const getPrefixFromServiceId = linearLogic.getPrefixFromServiceId;
+        for (let i = 0; i < rosterArray.length; i++) {
+          let colourCode = '#ffffff';
+          const dutyType = rosterArray[i].dutyType;
+          const servicePrefix = getPrefixFromServiceId(rosterArray[i].dutyName);
+          if (rosterArray[i].dutyType == 'TRIP'
+          || rosterArray[i].dutyType == 'TRIPT'
+          || rosterArray[i].dutyType == 'TRIPP') {
+            if (serviceIdlineAssociations.has(servicePrefix)) {
+              colourCode = serviceIdlineAssociations.get(servicePrefix).colour;
+            }
+          } else {
+            if (dutyTypeCodes.has(dutyType)) {
+              colourCode = dutyTypeCodes.get(dutyType);
+            }
+          }
+          rosterArray[i].colourCode = colourCode;
+        }
+      }
+      for (let i = 0; i < rosterArray.length; i++) {
+        const shiftId = rosterArray[i].shiftId;
+        const checkResponseArray = responseArray.filter((shift) => shift.shiftId == shiftId);
+        if (checkResponseArray.length == 0) {
+          const rawDutyArray = rosterArray.filter((shift) => shift.shiftId == shiftId);
+          const dutyArray = [];
+          rawDutyArray.forEach((duty) => {
+            dutyArray.push({
+              name: duty.dutyName,
+              type: duty.dutyType,
+              startTime: duty.dutyStartTime,
+              startTimeString: duty.dutyStartTimeString,
+              endTime: duty.dutyEndTime,
+              endTimeString: duty.dutyEndTimeString,
+              colourCode: duty.colourCode,
+            });
+          });
+          responseArray.push({
+            shiftId: rosterArray[i].shiftId,
+            shiftType: rosterArray[i].shiftType,
+            staffId: rosterArray[i].staffId,
+            staffName: rosterArray[i].staffName,
+            shiftCovered: rosterArray[i].shiftCovered,
+            rosterDuties: dutyArray,
+          });
+        }
+      }
+      return responseArray;
     },
     /**
 * Takes a service Id and the roster

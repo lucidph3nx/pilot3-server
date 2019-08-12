@@ -36,14 +36,14 @@ module.exports = {
     });
   },
   // returns current datetime and object with todays VDS roster per trip
-  rosterDuties: function() {
+  rosterDuties: function(date = moment()) {
     return new Promise((resolve, reject) => {
-      const today = moment().format('YYYY-MM-DD');
+      const requestDate = date.format('YYYY-MM-DD');
       const currentRoster = [];
       let serviceRoster = {};
       knex.select()
           .table('WEBSN.actualDuties')
-          .where('date', today)
+          .where('date', requestDate)
           .orderBy('date')
           .orderBy('staffId')
           .orderBy('minutesFrom')

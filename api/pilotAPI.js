@@ -21,6 +21,8 @@ const express = require('express');
 module.exports = function(app, current, functionFlags) {
   // =======PilotAPIModules========
   require('./pilotAPI/serverStatus')(app, current, functionFlags);
+  require('./pilotAPI/services')(app, current, functionFlags);
+  require('./pilotAPI/roster')(app, current, functionFlags);
 
   app.use('/staff', express.static(path.resolve('./data/img/staff')));
   // cross origin requests
