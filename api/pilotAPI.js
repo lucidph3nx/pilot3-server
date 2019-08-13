@@ -19,12 +19,6 @@ if (fs.existsSync(credentialPath)) {
 const express = require('express');
 
 module.exports = function(app, current, functionFlags) {
-  // =======PilotAPIModules========
-  require('./pilotAPI/serverStatus')(app, current, functionFlags);
-  require('./pilotAPI/services')(app, current, functionFlags);
-  require('./pilotAPI/roster')(app, current, functionFlags);
-
-  app.use('/staff', express.static(path.resolve('./data/img/staff')));
   // cross origin requests
   app.use(function(req, res, next) {
     let oneof = false;
@@ -50,6 +44,13 @@ module.exports = function(app, current, functionFlags) {
       next();
     }
   });
+
+  // =======PilotAPIModules========
+  require('./pilotAPI/serverStatus')(app, current, functionFlags);
+  require('./pilotAPI/services')(app, current, functionFlags);
+  require('./pilotAPI/roster')(app, current, functionFlags);
+
+  app.use('/staff', express.static(path.resolve('./data/img/staff')));
 
   app.get('/api/currentStatusFull', (request, response) => {
     const currentMoment = moment();

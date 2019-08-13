@@ -93,7 +93,7 @@ module.exports = {
     },
     formatRosterDuties: function(rosterDuties, filterStaffId, filterShiftId, includeColours) {
       let rosterArray = rosterDuties;
-      const responseArray = [];
+      let responseArray = [];
       if (filterStaffId) {
         rosterArray = rosterDuties.filter((duty) => duty.staffId == filterStaffId);
       }
@@ -149,6 +149,14 @@ module.exports = {
           });
         }
       }
+
+      responseArray = responseArray.sort((a, b) => {
+        // if (vote1.votes > vote2.votes) return 1;
+        // if (vote1.votes < vote2.votes) return -1;
+        // if (vote1.shiftId > vote2.shiftId) return 1;
+        // if (vote1.shiftId < vote2.shiftId) return -1;
+        return (a.shiftId > b.shiftId ? -1 : (a.shiftId < b.shiftId ? 1 : 0));
+      });
       return responseArray;
     },
     /**

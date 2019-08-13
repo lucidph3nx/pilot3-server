@@ -21,7 +21,7 @@ module.exports = function(app, current, functionFlags) {
     if (request.query.date) {
       requestDate = moment(request.query.date);
     } else {
-      requestDate = moment()
+      requestDate = moment();
     }
     const requestStaffId = request.query.staffId;
     const requestShiftId = request.query.shiftId;
