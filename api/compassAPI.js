@@ -159,5 +159,101 @@ module.exports = {
           );
     });
   },
+  serviceDetail: function(date, serviceId) {
+    return new Promise((resolve, reject) => {
+      const requestedDay = date.format('YYYY-MM-DD');
+      knex.select()
+          .table('dbo.serviceDetail')
+          .where('date', requestedDay)
+          .where('serviceId', serviceId)
+          .then(function(response) {
+            module.exports.serviceDetailTimingPoints(date, serviceId).then((timingPoints) => {
+              const keys = Object.keys(response[0]);
+              const consist = [];
+              keys.forEach((key) => {
+                if (key.substring(0, 7) == 'consist') {
+                  if (response[0][key] !== null) {
+                    consist.push(response[0][key]);
+                  }
+                }
+              });
+              const serviceDetails = {
+                date: response[0].date,
+                serviceId: response[0].serviceId,
+                line: response[0].line,
+                peak: (response[0].peak !== 0),
+                direction: (response[0].direction !== 0),
+                consist: consist,
+                punctualityFaulure: (response[0].punctualityFailure !== 0),
+                reliabilityFaulure: (response[0].reliabilityFaulure !== 0),
+                busReplaced: (response[0].busReplaced !== 0),
+                departs: cps2m(response[0].date, response[0].departs),
+                origin: response[0].origin,
+                arrives: cps2m(response[0].date, response[0].arrives),
+                destination: response[0].destination,
+                delayOverall: response[0].impactSecOverall,
+                delayBreakdown: {
+                  origin: response[0].impactSecOrigin,
+                  TSR: response[0].impactSecTSR,
+                  betweenStations: response[0].impactSecBetweenStations,
+                  atStations: response[0].impactSecAtStations,
+                },
+                timingPoints: timingPoints,
+                crew: [],
+              };
+              resolve(serviceDetails);
+            });
+          }
+          );
+    });
+    /**
+         * Takes a time Compass format
+         * Converts it into a moment object
+         * @param {string} date
+         * @param {string} compasstime
+         * @return {object} - Moment object
+         */
+    function cps2m(date, compasstime) {
+      const thisMoment = moment(date);
+      thisMoment.set('hour', compasstime.substring(0, 2));
+      thisMoment.set('minute', compasstime.substring(2, 4));
+      thisMoment.set('second', compasstime.substring(4, 6));
+      thisMoment.set('miliseconds', 0);
+      return thisMoment;
+    }
+  },
+  serviceDetailTimingPoints: function(date, serviceId) {
+    return new Promise((resolve, reject) => {
+      const requestedDay = date.format('YYYY-MM-DD');
+      const timingPoints = [];
+      let timingPoint;
+      knex.select()
+          .table('dbo.serviceDetailTimingPoints')
+          .where('date', requestedDay)
+          .where('serviceId', serviceId)
+          .then(function(response) {
+            for (let tp = 0; tp < response.length; tp++) {
+              timingPoint = {};
+              timingPoint = {
+                sequence: response[tp].sequence,
+                location: response[tp].location,
+                activityType: response[tp].activityType,
+                plannedTime: response[tp].plannedTime,
+                actualTime: response[tp].actualTime,
+                TSRDelaySec: response[tp].TSRDelaySec,
+                delaySec: response[tp].delaySec,
+                earlyDepart: (response[tp].earlyDepart !== 0),
+                timingSource: response[tp].timingSource,
+                punctualityFailure: (response[tp].punctualityFailure !== 0),
+                impactSeconds: response[tp].impactSeconds,
+                totalServices: response[tp].totalServices,
+              };
+              timingPoints.push(timingPoint);
+            }
+            resolve(timingPoints);
+          }
+          );
+    });
+  },
   // other functions
 };

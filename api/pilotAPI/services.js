@@ -1,5 +1,16 @@
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
+// =======API=======
+let vdsRosterAPI;
+let compassAPI;
+// only define the API modules if credentials file exists
+const fs = require('fs');
+const path = require('path');
+const credentialPath = path.join(__dirname, '../..', 'credentials.js');
+if (fs.existsSync(credentialPath)) {
+  vdsRosterAPI = require('../vdsRosterAPI');
+  compassAPI = require('../compassAPI');
+}
 
 module.exports = function(app, current, functionFlags) {
   app.get('/api/services/current', (request, response) => {
@@ -24,29 +35,23 @@ module.exports = function(app, current, functionFlags) {
     response.write(JSON.stringify(apiResponse));
     response.end();
   });
-  // app.get('/api/services/history', (request, response) => {
-  //   const currentMoment = moment();
-  //   const date = moment(request.query.date);
-  //   const serviceId = request.query.serviceId;
+  app.get('/api/services/detail', (request, response) => {
+    const currentMoment = moment();
+    const date = moment(request.query.date);
+    const serviceId = request.query.serviceId;
+    let serviceDetail;
+    compassAPI.serviceDetail(date, serviceId).then((result) => {
+      serviceDetail = result;
 
-  //   const apiResponse = {
-  //     'time': currentMoment,
-  //     'date': date,
-  //     'serviceId': serviceId,
-  //     'line': 'lineId',
-  //     'consist': [],
-  //     'punctualityFaulure': false,
-  //     'reliabilityFaulure': false,
-  //     'departs': 'departs',
-  //     'origin': 'origin',
-  //     'arrives': 'arrives',
-  //     'destination': 'destination',
-  //     'timingPoints': [],
-  //     'crew': [],
-
-  //   };
-  //   response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
-  //   response.write(JSON.stringify(apiResponse));
-  //   response.end();
-  // });
+      const apiResponse = {
+        'time': currentMoment,
+        'serviceDetail': serviceDetail,
+      };
+      response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+      response.write(JSON.stringify(apiResponse));
+      response.end();
+    }).catch((error) => {
+      console.log(error);
+    });
+  });
 };

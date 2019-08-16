@@ -52,49 +52,6 @@ module.exports = function(app, current, functionFlags) {
 
   app.use('/staff', express.static(path.resolve('./data/img/staff')));
 
-  app.get('/api/currentStatusFull', (request, response) => {
-    const currentMoment = moment();
-    const currentStatus = current.status;
-    const Current = {'time': currentMoment, 'status': currentStatus};
-    response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
-    response.write(JSON.stringify(Current));
-    response.end();
-  });
-  app.get('/api/currentStatus', (request, response) => {
-    let currentMoment;
-    let currentStatus;
-    if (functionFlags.fullDebugMode) {
-      currentMoment = moment(functionFlags.debugDataToUse, 'YYYYMMDDHHmmss');
-      currentStatus = 'TEST DATA ONLY';
-    } else {
-      currentMoment = moment();
-      currentStatus = '';
-    }
-    const Current = {'time': currentMoment, 'status': currentStatus};
-    response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
-    response.write(JSON.stringify(Current));
-    response.end();
-  });
-  // get list of all train servics that are active now
-  app.get('/api/currentServices', (request, response, next) => {
-    const servicesWeb = [];
-    current.runningServices.forEach((service) =>
-      servicesWeb.push(service.webLegacy())
-    );
-    const currentServices = servicesWeb;
-    const apiResponse = {'Time': moment(), currentServices};
-    response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
-    response.write(JSON.stringify(apiResponse));
-    response.end();
-  });
-  // get list of all train servics that are active now
-  app.get('/api/currentServicesDEBUG', (request, response, next) => {
-    const currentServices = current.runningServices;
-    const apiResponse = {'Time': moment(), currentServices};
-    response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
-    response.write(JSON.stringify(apiResponse));
-    response.end();
-  });
   // get the status for all Matangi Train Units
   app.get('/api/currentUnitList', (request, response) => {
     const currentUnitList = [];

@@ -42,7 +42,7 @@ module.exports = {
       const currentRoster = [];
       let serviceRoster = {};
       knex.select()
-          .table('WEBSN.actualDuties')
+          .table('WEBSN.actualDuties') // eventually Pilot.rosterDuties
           .where('date', requestDate)
           .orderBy('date')
           .orderBy('staffId')
@@ -63,7 +63,7 @@ module.exports = {
                 shiftCovered = false;
               }
               if (response[trp].dutyName !== null && response[trp].dutyType
-                    !== null && response[trp].dutyType !== 'REC') {
+              !== null && response[trp].dutyType !== 'REC') {
                 serviceRoster = {
                   shiftId: response[trp].shiftName.trim(),
                   shiftType: response[trp].shiftType.trim(),
@@ -100,6 +100,50 @@ module.exports = {
       return thisMoment;
     }
   },
+  // returns all staff and their rostered shift or absence per day
+  rosterDay: function(date = moment()) {
+    return new Promise((resolve, reject) => {
+      const requestDate = date.format('YYYY-MM-DD');
+      const currentRoster = [];
+      let dayRoster = {};
+      knex.select()
+          .table('Pilot.rosterDay')
+          .where('date', requestDate)
+          .orderBy('date')
+          .orderBy('staffId')
+          .orderBy('minutesFrom')
+          .then(function(response) {
+            for (let r = 0; r < response.length; r++) {
+              dayRoster = {};
+              const workType = response[r].workType.trim();
+
+              if (workType !== 'T') {
+                dayRoster = {
+                  staffId: response[r].staffId.trim(),
+                  work: false,
+                  absence: true,
+                  absenceCode: response[r].shiftName.trim(),
+                };
+              } else {
+                dayRoster = {
+                  staffId: response[r].staffId.trim(),
+                  work: true,
+                  absence: false,
+                  shiftId: response[r].shiftName.trim(),
+                  shiftType: response[r].shiftType.trim(),
+                  shiftLocation: response[r].shiftLocation.trim(),
+                  startTimeMin: response[r].minFrom,
+                  endTimeMin: response[r].minTo,
+                  totalMin: response[r].totalMin,
+                  GEWP: response[r].GEWP,
+                };
+              }
+              currentRoster.push(dayRoster);
+            }
+            resolve(currentRoster);
+          });
+    });
+  },
   // returns current counters for each location and position - days roster status
   dayRosterStatus: function dayStatus(date) {
     return new Promise((resolve, reject) => {
@@ -133,7 +177,7 @@ module.exports = {
       let serviceRoster = {};
       knex.select()
           .table('WEBSN.actualDuties')
-          .where({'date': searchdate, 'dutyName': serviceId})
+          .where({ 'date': searchdate, 'dutyName': serviceId })
           .orderBy('date')
           .orderBy('staffId')
           .orderBy('minutesFrom')
@@ -339,7 +383,7 @@ module.exports = {
                 hourFrom: response[i].minFrom ? moment(thisDate).add(response[i].minFrom, 'minute').format('HH:mm') : null,
                 hourTo: response[i].minTo ? moment(thisDate).add(response[i].minTo, 'minute').format('HH:mm') : null,
                 totalHours: response[i].totalMin ? moment(thisDate).add(response[i].totalMin, 'minute').format('HH:mm') : null,
-                totalHoursNumber: response[i].totalMin ? response[i].totalMin/60 : null,
+                totalHoursNumber: response[i].totalMin ? response[i].totalMin / 60 : null,
                 GEWP: (response[i].GEWP == 1),
               };
               holisticYearData.push(entry);
