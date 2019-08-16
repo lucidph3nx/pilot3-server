@@ -182,7 +182,7 @@ module.exports = {
                 serviceId: response[0].serviceId,
                 line: response[0].line,
                 peak: (response[0].peak !== 0),
-                direction: (response[0].direction !== 0),
+                direction: response[0].direction,
                 consist: consist,
                 punctualityFaulure: (response[0].punctualityFailure !== 0),
                 reliabilityFaulure: (response[0].reliabilityFaulure !== 0),
@@ -234,12 +234,28 @@ module.exports = {
           .then(function(response) {
             for (let tp = 0; tp < response.length; tp++) {
               timingPoint = {};
+              let activityType;
+              switch (response[tp].activityType) {
+                case 'O':
+                  activityType = 'Origin';
+                  break;
+                case 'A':
+                  activityType = 'Arrives';
+                  break;
+                case 'D':
+                  activityType = 'Departs';
+                  break;
+                case 'T':
+                  activityType = 'Terminates';
+                  break;
+              }
+              
               timingPoint = {
                 sequence: response[tp].sequence,
                 location: response[tp].location,
-                activityType: response[tp].activityType,
-                plannedTime: response[tp].plannedTime,
-                actualTime: response[tp].actualTime,
+                activityType: activityType,
+                plannedTime: moment.utc(response[tp].plannedTime).format('HH:mm:ss'),
+                actualTime: moment.utc(response[tp].actualTime).format('HH:mm:ss'),
                 TSRDelaySec: response[tp].TSRDelaySec,
                 delaySec: response[tp].delaySec,
                 earlyDepart: (response[tp].earlyDepart !== 0),
