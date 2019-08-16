@@ -41,15 +41,17 @@ module.exports = function(app, current, functionFlags) {
     const serviceId = request.query.serviceId;
     let serviceDetail;
     compassAPI.serviceDetail(date, serviceId).then((result) => {
-      serviceDetail = result;
-
-      const apiResponse = {
-        'time': currentMoment,
-        'serviceDetail': serviceDetail,
-      };
-      response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
-      response.write(JSON.stringify(apiResponse));
-      response.end();
+      vdsRosterAPI.rosteredCrew(date, serviceId).then((crewResult) => {
+        serviceDetail = result;
+        serviceDetail.crew = crewResult;
+        const apiResponse = {
+          'time': currentMoment,
+          'serviceDetail': serviceDetail,
+        };
+        response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+        response.write(JSON.stringify(apiResponse));
+        response.end();
+      })
     }).catch((error) => {
       console.log(error);
     });
