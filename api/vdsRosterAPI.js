@@ -170,14 +170,14 @@ module.exports = {
     });
   },
   // returns the rostered crew for a service on a date.
-  rosteredCrew: function rosteredCrew(date, serviceId) {
+  rosteredCrew: function rosteredCrew(date, serviceId, staffList = []) {
     return new Promise((resolve, reject) => {
       const currentRoster = [];
       const searchdate = moment(date).format('YYYY-MM-DD');
       let serviceRoster = {};
       knex.select()
           .table('WEBSN.actualDuties')
-          .where({ 'date': searchdate, 'dutyName': serviceId })
+          .where({'date': searchdate, 'dutyName': serviceId})
           .orderBy('date')
           .orderBy('staffId')
           .orderBy('minutesFrom')
@@ -187,9 +187,15 @@ module.exports = {
               let staffId;
               let staffName;
               let shiftCovered;
+              let staffListData = [];
+              let photoURL = '';
               if (response[trp].uncovered !== 1) {
                 staffId = response[trp].staffId.trim();
-                staffName = response[trp].firstName.trim() + ' ' + response[trp].lastName.trim();
+                if (staffList !== []) {
+                  staffListData = staffList.filter((staff) => staff.staffId == staffId);
+                }
+                staffName = staffListData[0].name;
+                photoURL = 'staffImage?staffId='+staffId.padStart(3, '0');
                 shiftCovered = true;
               } else {
                 staffId = '';
@@ -204,6 +210,7 @@ module.exports = {
                 dutyName: response[trp].dutyName.trim(),
                 dutyType: response[trp].dutyType.trim(),
                 shiftCovered: shiftCovered,
+                photoURL: photoURL,
               };
               currentRoster.push(serviceRoster);
             }

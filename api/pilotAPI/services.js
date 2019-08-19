@@ -41,7 +41,7 @@ module.exports = function(app, current, functionFlags) {
     const serviceId = request.query.serviceId;
     let serviceDetail;
     compassAPI.serviceDetail(date, serviceId).then((result) => {
-      vdsRosterAPI.rosteredCrew(date, serviceId).then((crewResult) => {
+      vdsRosterAPI.rosteredCrew(date, serviceId, current.staffList).then((crewResult) => {
         serviceDetail = result;
         serviceDetail.crew = crewResult;
         const apiResponse = {

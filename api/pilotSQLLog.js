@@ -80,4 +80,26 @@ module.exports = {
       });
     },
   },
+  getStaffList: function() {
+    return new Promise((resolve, reject) => {
+      const currentStaffList = [];
+      let staffMember = {};
+      knex.select()
+          .table('pilot.currentStaffList')
+          .then(function(response) {
+            for (let s = 0; s < response.length; s++) {
+              staffMember = {
+                staffId: response[s].staffId,
+                name: response[s].name,
+                position: response[s].position,
+                ADId: response[s].ADId,
+                managerName: response[s].managerName,
+                managerPosition: response[s].managerPosition,
+              };
+              currentStaffList.push(staffMember);
+            }
+            resolve(currentStaffList);
+          });
+    });
+  }
 };

@@ -1,5 +1,7 @@
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
+
+const stationMeterage = require('../data/stationMeterage');
 // ======Authentication credentials=======
 const credentials = require('../credentials');
 const knex = require('knex')({
@@ -57,13 +59,64 @@ module.exports = {
                   arrives: cps2m(response[tp].arrives),
                   departs: cps2m(response[tp].departs),
                   station: response[tp].station,
-                  stationSequence: (response[tp].stationSequence -1),
+                  stationSequence: (response[tp].stationSequence - 1),
                   dayType: response[tp].dayType,
                 };
                 currentTimetable.push(timingPoint);
               }
             }
             resolve(currentTimetable);
+          }
+          );
+    });
+    /**
+         * Takes a time Compass format
+         * Converts it into a moment object
+         * @param {string} compasstime
+         * @return {object} - Moment object
+         */
+    function cps2m(compasstime) {
+      const thisMoment = moment();
+      thisMoment.set('hour', compasstime.substring(0, 2));
+      thisMoment.set('minute', compasstime.substring(2, 4));
+      thisMoment.set('second', compasstime.substring(4, 6));
+      thisMoment.set('miliseconds', 0);
+      return thisMoment;
+    }
+  },
+  // returns timetable for date
+  getTimetable: function(date) {
+    return new Promise((resolve, reject) => {
+      const requestedDay = date.format('YYYY-MM-DD');
+      const timetable = [];
+      let timingPoint = {};
+      knex.select()
+          .table('dbo.servicetimetable')
+          .where(knex.raw('TT_ID = [COMPASS].[TDW_Calc_TTID_From_Date] (\''+requestedDay+'\')'))
+          .orderBy('blockId')
+          .orderBy('serviceDeparts')
+          .orderBy('serviceId')
+          .orderBy('stationSequence')
+          .then(function(response) {
+            for (let tp = 0; tp < response.length; tp++) {
+              timingPoint = {};
+              if (response[tp].serviceId !== null) {
+                timingPoint = {
+                  serviceId: response[tp].serviceId,
+                  line: response[tp].line,
+                  direction: response[tp].direction,
+                  blockId: response[tp].blockId,
+                  consist: response[tp].units,
+                  arrives: cps2m(response[tp].arrives),
+                  departs: cps2m(response[tp].departs),
+                  station: response[tp].station,
+                  stationSequence: (response[tp].stationSequence - 1),
+                  dayType: response[tp].dayType,
+                };
+                timetable.push(timingPoint);
+              }
+            }
+            resolve(timetable);
           }
           );
     });
@@ -168,40 +221,44 @@ module.exports = {
           .where('serviceId', serviceId)
           .then(function(response) {
             module.exports.serviceDetailTimingPoints(date, serviceId).then((timingPoints) => {
-              const keys = Object.keys(response[0]);
-              const consist = [];
-              keys.forEach((key) => {
-                if (key.substring(0, 7) == 'consist') {
-                  if (response[0][key] !== null) {
-                    consist.push(response[0][key]);
+              if (response[0] !== undefined) {
+                const keys = Object.keys(response[0]);
+                const consist = [];
+                keys.forEach((key) => {
+                  if (key.substring(0, 7) == 'consist') {
+                    if (response[0][key] !== null) {
+                      consist.push(response[0][key]);
+                    }
                   }
-                }
-              });
-              const serviceDetails = {
-                date: response[0].date,
-                serviceId: response[0].serviceId,
-                line: response[0].line,
-                peak: (response[0].peak !== 0),
-                direction: response[0].direction,
-                consist: consist,
-                punctualityFaulure: (response[0].punctualityFailure !== 0),
-                reliabilityFaulure: (response[0].reliabilityFaulure !== 0),
-                busReplaced: (response[0].busReplaced !== 0),
-                departs: cps2m(response[0].date, response[0].departs),
-                origin: response[0].origin,
-                arrives: cps2m(response[0].date, response[0].arrives),
-                destination: response[0].destination,
-                delayOverall: response[0].impactSecOverall,
-                delayBreakdown: {
-                  origin: response[0].impactSecOrigin,
-                  TSR: response[0].impactSecTSR,
-                  betweenStations: response[0].impactSecBetweenStations,
-                  atStations: response[0].impactSecAtStations,
-                },
-                timingPoints: timingPoints,
-                crew: [],
-              };
-              resolve(serviceDetails);
+                });
+                const serviceDetails = {
+                  date: response[0].date,
+                  serviceId: response[0].serviceId,
+                  line: response[0].line,
+                  peak: (response[0].peak !== 0),
+                  direction: response[0].direction,
+                  consist: consist,
+                  punctualityFailure: (response[0].punctualityFailure !== 0),
+                  reliabilityFailure: (response[0].reliabilityFailure !== 0),
+                  busReplaced: (response[0].busReplaced !== 0),
+                  departs: cps2m(response[0].date, response[0].departs),
+                  origin: response[0].origin,
+                  arrives: cps2m(response[0].date, response[0].arrives),
+                  destination: response[0].destination,
+                  delayOverall: response[0].impactSecOverall,
+                  delayBreakdown: {
+                    origin: response[0].impactSecOrigin,
+                    TSR: response[0].impactSecTSR,
+                    betweenStations: response[0].impactSecBetweenStations,
+                    atStations: response[0].impactSecAtStations,
+                  },
+                  timingPoints: timingPoints,
+                  crew: [],
+                };
+                resolve(serviceDetails);
+              } else {
+                resolve({});
+              }
             });
           }
           );
@@ -249,13 +306,17 @@ module.exports = {
                   activityType = 'Terminates';
                   break;
               }
-              
+              const meterage = stationMeterage.filter((stationMeterage) =>
+                stationMeterage.stationId == response[tp].location);
+
               timingPoint = {
                 sequence: response[tp].sequence,
                 location: response[tp].location,
+                locationMeterage: meterage[0].meterage,
                 activityType: activityType,
                 plannedTime: moment.utc(response[tp].plannedTime).format('HH:mm:ss'),
                 actualTime: moment.utc(response[tp].actualTime).format('HH:mm:ss'),
+                secondsLate: response[tp].secondsLate,
                 TSRDelaySec: response[tp].TSRDelaySec,
                 delaySec: response[tp].delaySec,
                 earlyDepart: (response[tp].earlyDepart !== 0),

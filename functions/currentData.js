@@ -76,6 +76,7 @@ module.exports = class CurrentData {
     this.rosterDutiesLastUpdated = moment('1970-01-01');
     this.rosterDayStatus = [];
     this.rosterStatusLastUpdated = moment('1970-01-01');
+    this.staffList = [];
     this.timetable = [];
     this.tripSheet = [];
     this.timetableLastUpdated = moment('1970-01-01');
@@ -311,6 +312,17 @@ module.exports = class CurrentData {
     } else {
       return false;
     }
+  }
+  /**
+ * updates staff List from PilotDB
+ */
+  updateStaffList() {
+    PilotSQLLog.getStaffList().then((result) => {
+      this.staffList = result;
+      this.pilotLog('Staff List loaded ok');
+    }).catch((error) => {
+      console.log(error);
+    });
   }
   /**
    * updates timetable from Compass
