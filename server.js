@@ -22,6 +22,7 @@ const applicationSettings = {
   rosterDutiesLifespan: 10,
   rosterDayStatusLifespan: 5,
   busReplacementListLifespan: 5,
+  weatherLifespan: 5,
   // timetable changeover time
   timetableUpdateHour: 3,
 };
@@ -102,6 +103,9 @@ function refreshData() {
   }
   if (!data.rosterDayStatusValid()) {
     data.updateRosterDayStatus();
+  }
+  if (!data.weatherValid()) {
+    data.updateWeather();
   }
   setTimeout(refreshData, 10 * 1000);
 }

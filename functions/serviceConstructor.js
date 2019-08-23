@@ -106,7 +106,7 @@ module.exports = class Service {
     this.hasDeparted = (this.currenttime > this.timetable.departs);
     this.hasArrived = (this.lastStation == this.timetable.destination);
     this.shouldHaveArrivedByNow = (this.currenttime > this.timetable.arrives);
-    if (!this.IncorrectLine) {
+    if (!this.IncorrectLine && !this.hasArrived) {
       this.scheduleVariance = delayCalculation.getScheduleVariance(this.thirdParty,
           this.currenttime,
           this.direction,

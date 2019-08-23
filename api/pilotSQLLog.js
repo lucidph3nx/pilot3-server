@@ -79,6 +79,25 @@ module.exports = {
         console.log(error);
       });
     },
+    weatherObservation: function(weather) {
+      const temp = {
+        dateTime: moment(weather.dateTime).format('YYYY-MM-DD HH:mm:ss'),
+        measurementLocation: weather.measurementLocation,
+        closestStn: weather.closestStn,
+        humidity: !isNaN(Number(weather.humidity)) ? Number(weather.humidity) : null,
+        pressure: !isNaN(Number(weather.pressure)) ? Number(weather.pressure) : null,
+        rainfall: !isNaN(Number(weather.rainfall)) ? Number(weather.rainfall) : null,
+        temp: !isNaN(Number(weather.temp)) ? Number(weather.temp) : null,
+        windDirection: weather.windDirection,
+        windSpeed: !isNaN(Number(weather.windSpeed)) ? Number(weather.windSpeed) : null,
+      };
+      knex.insert(temp).into('pilot.weatherLog').then(function(result) {
+        // console.log(result);
+      }).catch((error) => {
+        console.log(temp);
+        console.log(error);
+      });
+    },
   },
   getStaffList: function() {
     return new Promise((resolve, reject) => {
@@ -101,5 +120,5 @@ module.exports = {
             resolve(currentStaffList);
           });
     });
-  }
+  },
 };

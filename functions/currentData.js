@@ -8,6 +8,7 @@ const timetableLogic = require('../functions/timetableLogic');
 
 // =======API=======
 let kiwirailAPI;
+let metserviceAPI;
 let vdsRosterAPI;
 let compassAPI;
 let PilotSQLLog;
@@ -18,6 +19,7 @@ const path = require('path');
 const credentialPath = path.join(__dirname, '..', 'credentials.js');
 if (fs.existsSync(credentialPath)) {
   kiwirailAPI = require('../api/kiwirailAPI');
+  metserviceAPI = require('../api/metserviceAPI');
   vdsRosterAPI = require('../api/vdsRosterAPI');
   compassAPI = require('../api/compassAPI');
   PilotSQLLog = require('../api/pilotSQLLog');
@@ -82,6 +84,8 @@ module.exports = class CurrentData {
     this.timetableLastUpdated = moment('1970-01-01');
     this.busReplacementList = [];
     this.busReplacementsLastUpdated = moment('1970-01-01');
+    this.weatherObservations = [];
+    this.weatherObservationsLastUpdated = moment('1970-01-01');
   }
   /**
    * checks GeVis, VDS and Compass
@@ -205,6 +209,37 @@ module.exports = class CurrentData {
       });
     }
   }
+  /**
+   * checks if weather observations are valid
+   * and up to date
+   * @return {boolean} valid or not
+   */
+  weatherValid() {
+    const lifespan = this.applicationSettings.weatherLifespan;
+    const uptoDate = (this.weatherObservationsLastUpdated > moment().subtract(lifespan, 'minutes'));
+    const empty = (this.weatherObservations.length == 0);
+    if (uptoDate & !empty) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  /**
+   * updates weather observations using metservice data
+   */
+  updateWeather() {
+    metserviceAPI.getWeatherObservations().then((result) => {
+      this.weatherObservations = result;
+      this.weatherObservationsLastUpdated = moment();
+      this.pilotLog('Weather loaded ok');
+      for (let i = 0; i < this.weatherObservations.length; i++) {
+        PilotSQLLog.logSQL.weatherObservation(this.weatherObservations[i]);
+      }
+    }).catch((error) => {
+      this.pilotLog(error);
+    });
+  }
+  // metserviceAPI
   /**
    * updates roster duties from VDS or dummy data if in debug mode
    */
