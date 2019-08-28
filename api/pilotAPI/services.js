@@ -56,4 +56,27 @@ module.exports = function(app, current, functionFlags) {
       console.log(error);
     });
   });
+  app.get('/api/services/timeDistance', (request, response) => {
+    const currentMoment = moment();
+    const date = moment(request.query.date);
+    const line = request.query.line;
+    let timeDistancePoints;
+    compassAPI.trainFixes(date, line).then((result) => {
+      timeDistancePoints = result;
+      const apiResponse = {
+        'time': currentMoment,
+        'timeDistance': {
+          'date': date,
+          'line': line,
+          'timeDistancePoints': timeDistancePoints,
+        }
+      };
+      response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+      response.write(JSON.stringify(apiResponse));
+      response.end();
+
+    }).catch((error) => {
+      console.log(error);
+    });
+  });
 };

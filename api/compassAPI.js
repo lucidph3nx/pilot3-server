@@ -2,6 +2,7 @@ const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 
 const stationMeterage = require('../data/stationMeterage');
+const nzRailConventions = require('../data/nzRailConventions');
 // ======Authentication credentials=======
 const credentials = require('../credentials');
 const knex = require('knex')({
@@ -328,6 +329,43 @@ module.exports = {
               timingPoints.push(timingPoint);
             }
             resolve(timingPoints);
+          }
+          );
+    });
+  },
+  trainFixes: function(date, line) {
+    return new Promise((resolve, reject) => {
+      const requestedDay = date.format('YYYY-MM-DD');
+      const fixPoints = [];
+      let fixPoint;
+      const stationMap = nzRailConventions.kiwirailMetlinkStationCodes;
+      knex.select()
+          .table('dbo.locationTrainFixes')
+          .where('date', requestedDay)
+          .where('line', line)
+          .then(function(response) {
+            for (let fix = 0; fix < response.length; fix++) {
+              let stationCode;
+              for (const [key, value] of stationMap.entries()) {
+                if (key == response[fix].location) {
+                  stationCode = value;
+                }
+              }
+              fixPoint = {};
+              const meterage = stationMeterage.filter((stationMeterage) =>
+                stationMeterage.stationId == stationCode);
+
+              fixPoint = {
+                serviceId: response[fix].serviceId,
+                line: response[fix].line,
+                dateTime: moment(response[fix].dateTime),
+                type: response[fix].type,
+                location: stationCode,
+                locationMeterage: meterage[0].meterage,
+              };
+              fixPoints.push(fixPoint);
+            }
+            resolve(fixPoints);
           }
           );
     });
