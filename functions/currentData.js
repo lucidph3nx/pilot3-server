@@ -228,12 +228,15 @@ module.exports = class CurrentData {
    * updates weather observations using metservice data
    */
   updateWeather() {
+    const logging = this.functionFlags.pilotSQLLogging;
     metserviceAPI.getWeatherObservations().then((result) => {
       this.weatherObservations = result;
       this.weatherObservationsLastUpdated = moment();
       this.pilotLog('Weather loaded ok');
-      for (let i = 0; i < this.weatherObservations.length; i++) {
-        PilotSQLLog.logSQL.weatherObservation(this.weatherObservations[i]);
+      if (logging) {
+        for (let i = 0; i < this.weatherObservations.length; i++) {
+          PilotSQLLog.logSQL.weatherObservation(this.weatherObservations[i]);
+        }
       }
     }).catch((error) => {
       this.pilotLog(error);
