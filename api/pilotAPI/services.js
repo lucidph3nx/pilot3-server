@@ -69,12 +69,11 @@ module.exports = function(app, current, functionFlags) {
           'date': date,
           'line': line,
           'timeDistancePoints': timeDistancePoints,
-        }
+        },
       };
       response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
       response.write(JSON.stringify(apiResponse));
       response.end();
-
     }).catch((error) => {
       console.log(error);
     });

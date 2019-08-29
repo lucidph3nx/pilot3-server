@@ -339,10 +339,30 @@ module.exports = {
       const fixPoints = [];
       let fixPoint;
       const stationMap = nzRailConventions.kiwirailMetlinkStationCodes;
+      const lineNamesMetlinkKiwirail = nzRailConventions.lineNamesMetlinkKiwirail;
+      const metlinklines = [];
+      for (const [key, value] of lineNamesMetlinkKiwirail.entries()) {
+        if (value == line) {
+          metlinklines.push(key);
+        }
+      }
+      let line1;
+      let line2;
+      if (metlinklines.length == 2) {
+        line1 = metlinklines[0];
+        line2 = metlinklines[1];
+      } else {
+        line1 = metlinklines[0];
+        line2 = 'UNDEFINED';
+      }
       knex.select()
-          .table('dbo.locationTrainFixes')
+          .from('dbo.locationTrainFixes')
           .where('date', requestedDay)
-          .where('line', line)
+          .andWhere(function() {
+            this.where('line', line1).orWhere('line', line2)
+          })
+          .orderBy('serviceId')
+          .orderBy('dateTime')
           .then(function(response) {
             for (let fix = 0; fix < response.length; fix++) {
               let stationCode;

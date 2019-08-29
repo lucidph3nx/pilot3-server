@@ -194,7 +194,11 @@ module.exports = {
                 if (staffList !== []) {
                   staffListData = staffList.filter((staff) => staff.staffId == staffId);
                 }
-                staffName = staffListData[0].name;
+                if (staffListData.length !== 0) {
+                  staffName = staffListData[0].name;
+                } else {
+                  staffName = response[trp].firstName.trim() + ' ' + response[trp].lastName.trim();
+                }
                 photoURL = 'staffImage?staffId='+staffId.padStart(3, '0');
                 shiftCovered = true;
               } else {
@@ -214,6 +218,15 @@ module.exports = {
               };
               currentRoster.push(serviceRoster);
             }
+            // sort array by LE, TM then PO's
+            const ordering = {};
+            const sortOrder = ['LE', 'TM', 'PO'];
+            for (let i=0; i<sortOrder.length; i++) {
+              ordering[sortOrder[i]] = i;
+            }
+            currentRoster.sort( function(a, b) {
+              return (ordering[a.shiftType] - ordering[b.shiftType]) || a.shiftId.localeCompare(b.shiftId);
+            });
             resolve(currentRoster);
           });
     });
