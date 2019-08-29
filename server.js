@@ -8,14 +8,29 @@ const CurrentData = require('./functions/currentData');
 const express = require('express');
 const app = express();
 
+// =======environment=======
+const os = require('os');
+const env = os.hostname();
+let productionFlag = false;
+// automatic production flag based on host
+if (env == 'APNZPTDWAPP01') {
+  productionFlag = true;
+}
 // ======functions flags=======
 const functionFlags = {
-  pilotSQLLogging: true, // log to Pilot DB
+  pilotSQLLogging: false, // log to Pilot DB
   fullDebugMode: false, // full test data run
   debugDataToUse: '20190722091137', // '20190723082606',
   workingOffsiteMode: false, // run with GeVis but no Compass or VDS -- DOES NOT WORK YET
   snapshotMode: false,
 };
+if (productionFlag) {
+  // production defaults, regardless of settings
+  functionFlags.pilotSQLLogging = true;
+  functionFlags.fullDebugMode = false;
+  functionFlags.workingOffsiteMode = false;
+  functionFlags.snapshotMode = false;
+}
 const applicationSettings = {
   // lifespans for data in minutes
   tokenLifespan: 60,
