@@ -64,4 +64,30 @@ module.exports = {
     }
     return Promise.all(weatherPromises);
   },
+  checkAPI: function() {
+    return new Promise(function(resolve, reject) {
+      const options = {
+        hostname: 'www.metservice.com',
+        path: 'https://www.metservice.com/publicData/localObs_wellington-city',
+        method: 'GET',
+        json: true,
+      };
+      https.get(options, function(response) {
+        let body = '';
+        response.on('data', function(chunk) {
+          body += chunk;
+        });
+        response.on('end', function() {
+          const tempWeather = JSON.parse(body);
+          if (tempWeather.location !== undefined) {
+            resolve('Connection Ok');
+          } else {
+            resolve('Connection Error');
+          }
+        });
+      }).on('error', function(error) {
+        resolve('Connection Error');
+      });
+    });
+  },
 };

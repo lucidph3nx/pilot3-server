@@ -58,6 +58,10 @@ module.exports = class CurrentData {
         message: '',
         updateTime: moment('1970-01-01'),
       },
+      METSERVICE: {
+        message: '',
+        updateTime: moment('1970-01-01'),
+      },
     };
     // geVis token to get Vehciles from Kiwirail
     if (alternativeToken) {
@@ -105,6 +109,10 @@ module.exports = class CurrentData {
       compassAPI.checkCompassDBConnection().then((result) => {
         this.status.COMPASS.message = result;
         this.status.COMPASS.updateTime = moment();
+      });
+      metserviceAPI.checkAPI().then((result) => {
+        this.status.METSERVICE.message = result;
+        this.status.METSERVICE.updateTime = moment();
       });
     }
   }

@@ -91,7 +91,7 @@ module.exports = {
          * @return {object} - Moment object
          */
     function mpm2m(minutesPastMidnight) {
-      const thisMoment = moment();
+      const thisMoment = moment.utc();
       thisMoment.set('hour', 0);
       thisMoment.set('minute', 0);
       thisMoment.set('seconds', 0);
