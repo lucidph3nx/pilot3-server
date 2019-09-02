@@ -243,7 +243,9 @@ module.exports = class CurrentData {
       this.pilotLog('Weather loaded ok');
       if (logging) {
         for (let i = 0; i < this.weatherObservations.length; i++) {
-          PilotSQLLog.logSQL.weatherObservation(this.weatherObservations[i]);
+          if (this.weatherObservations[i] !== undefined) {
+            PilotSQLLog.logSQL.weatherObservation(this.weatherObservations[i]);
+          }
         }
       }
     }).catch((error) => {

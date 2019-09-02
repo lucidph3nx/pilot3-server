@@ -43,18 +43,22 @@ module.exports = {
               });
               response.on('end', function() {
                 const tempWeather = JSON.parse(body);
-                const weatherMeasurement = {
-                  measurementLocation: tempWeather.location,
-                  closestStn: weatherLocations[i].nearestStation,
-                  dateTime: tempWeather.threeHour.dateTimeISO,
-                  humidity: tempWeather.threeHour.humidity,
-                  pressure: tempWeather.threeHour.pressure,
-                  rainfall: tempWeather.threeHour.rainfall,
-                  temp: tempWeather.threeHour.temp,
-                  windDirection: tempWeather.threeHour.windDirection,
-                  windSpeed: tempWeather.threeHour.windSpeed,
-                };
-                resolve(weatherMeasurement);
+                if (tempWeather.threeHour !== undefined) {
+                  const weatherMeasurement = {
+                    measurementLocation: tempWeather.location,
+                    closestStn: weatherLocations[i].nearestStation,
+                    dateTime: tempWeather.threeHour.dateTimeISO,
+                    humidity: tempWeather.threeHour.humidity,
+                    pressure: tempWeather.threeHour.pressure,
+                    rainfall: tempWeather.threeHour.rainfall,
+                    temp: tempWeather.threeHour.temp,
+                    windDirection: tempWeather.threeHour.windDirection,
+                    windSpeed: tempWeather.threeHour.windSpeed,
+                  };
+                  resolve(weatherMeasurement);
+                } else {
+                  resolve(undefined);
+                }
               });
             }).on('error', function(error) {
               reject(new Error('Got error: ' + error.message));
