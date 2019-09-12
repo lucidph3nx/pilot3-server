@@ -337,6 +337,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       const requestedDay = date.format('YYYY-MM-DD');
       const fixPoints = [];
+      const serviceFixPoints = [];
       let fixPoint;
       const stationMap = nzRailConventions.kiwirailMetlinkStationCodes;
       const lineNamesMetlinkKiwirail = nzRailConventions.lineNamesMetlinkKiwirail;
@@ -359,7 +360,8 @@ module.exports = {
           .from('dbo.locationTrainFixes')
           .where('date', requestedDay)
           .andWhere(function() {
-            this.where('line', line1).orWhere('line', line2)
+            // eslint-disable-next-line no-invalid-this
+            this.where('line', line1).orWhere('line', line2);
           })
           .orderBy('serviceId')
           .orderBy('dateTime')
@@ -385,7 +387,97 @@ module.exports = {
               };
               fixPoints.push(fixPoint);
             }
-            resolve(fixPoints);
+            // push first service:
+            let currentServiceId = fixPoints[0].serviceId;
+            let currentPoints = fixPoints.filter((service) =>
+              service.serviceId == currentServiceId);
+            serviceFixPoints.push({
+              serviceId: currentServiceId,
+              fixPoints: currentPoints,
+            });
+            for (let i = 0; i < fixPoints.length; i++) {
+              if (currentServiceId !== fixPoints[i].serviceId) {
+                currentServiceId = fixPoints[i].serviceId;
+                currentPoints = fixPoints.filter((service) =>
+                  service.serviceId == currentServiceId);
+                serviceFixPoints.push({
+                  serviceId: currentServiceId,
+                  fixPoints: currentPoints,
+                });
+              }
+            }
+            resolve(serviceFixPoints);
+          }
+          );
+    });
+  },
+  trainPlan: function(date, line) {
+    return new Promise((resolve, reject) => {
+      const requestedDay = date.format('YYYY-MM-DD');
+      const planPoints = [];
+      const servicePlanPoints = [];
+      let fixPoint;
+      const lineNamesMetlinkKiwirail = nzRailConventions.lineNamesMetlinkKiwirail;
+      const metlinklines = [];
+      for (const [key, value] of lineNamesMetlinkKiwirail.entries()) {
+        if (value == line) {
+          metlinklines.push(key);
+        }
+      }
+      let line1;
+      let line2;
+      if (metlinklines.length == 2) {
+        line1 = metlinklines[0];
+        line2 = metlinklines[1];
+      } else {
+        line1 = metlinklines[0];
+        line2 = 'UNDEFINED';
+      }
+      knex.select()
+          .from('dbo.locationTrainPlan')
+          .where('date', requestedDay)
+          .andWhere(function() {
+            // eslint-disable-next-line no-invalid-this
+            this.where('line', line1).orWhere('line', line2);
+          })
+          .orderBy('serviceId')
+          .orderBy('dateTime')
+          .then(function(response) {
+            for (let pt = 0; pt < response.length; pt++) {
+              fixPoint = {};
+              const meterage = stationMeterage.filter((stationMeterage) =>
+                stationMeterage.stationId == response[pt].location);
+
+              fixPoint = {
+                serviceId: response[pt].serviceId,
+                line: response[pt].line,
+                dateTime: moment(response[pt].dateTime),
+                type: response[pt].type,
+                location: response[pt].location,
+                locationMeterage: meterage[0].meterage,
+              };
+              planPoints.push(fixPoint);
+            }
+            // push first service:
+            let currentServiceId = planPoints[0].serviceId;
+            let currentPoints = planPoints.filter((service) =>
+              service.serviceId == currentServiceId);
+            servicePlanPoints.push({
+              serviceId: currentServiceId,
+              fixPoints: currentPoints,
+            });
+            for (let i = 0; i < planPoints.length; i++) {
+              if (currentServiceId !== planPoints[i].serviceId) {
+                currentServiceId = planPoints[i].serviceId;
+                currentPoints = planPoints.filter((service) =>
+                  service.serviceId == currentServiceId);
+                servicePlanPoints.push({
+                  serviceId: currentServiceId,
+                  fixPoints: currentPoints,
+                });
+              }
+            }
+            resolve(servicePlanPoints);
           }
           );
     });

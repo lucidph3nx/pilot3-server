@@ -60,20 +60,25 @@ module.exports = function(app, current, functionFlags) {
     const currentMoment = moment();
     const date = moment(request.query.date);
     const line = request.query.line;
-    let timeDistancePoints;
-    compassAPI.trainFixes(date, line).then((result) => {
-      timeDistancePoints = result;
-      const apiResponse = {
-        'time': currentMoment,
-        'timeDistance': {
-          'date': date,
-          'line': line,
-          'timeDistancePoints': timeDistancePoints,
-        },
-      };
-      response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
-      response.write(JSON.stringify(apiResponse));
-      response.end();
+    let plannedTimeDistancePoints;
+    let actualTimeDistancePoints;
+    compassAPI.trainFixes(date, line).then((fixesResult) => {
+      compassAPI.trainPlan(date, line).then((planResult) => {
+        plannedTimeDistancePoints = planResult;
+        actualTimeDistancePoints = fixesResult;
+        const apiResponse = {
+          'time': currentMoment,
+          'timeDistance': {
+            'date': date,
+            'line': line,
+            'plannedTimeDistancePoints': plannedTimeDistancePoints,
+            'actualTimeDistancePoints': actualTimeDistancePoints,
+          },
+        };
+        response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+        response.write(JSON.stringify(apiResponse));
+        response.end();
+      });
     }).catch((error) => {
       console.log(error);
     });
