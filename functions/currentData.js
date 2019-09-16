@@ -162,7 +162,6 @@ module.exports = class CurrentData {
    */
   updateVehicles() {
     const fullDebugMode = this.functionFlags.fullDebugMode;
-    const dummyData = testDataOrganiser(this.functionFlags.debugDataToUse);
     return new Promise((resolve, reject) => {
       if (!fullDebugMode) {
         if (this.tokenValid()) {
@@ -177,6 +176,7 @@ module.exports = class CurrentData {
         }
       } else {
         // get dummy vehicles
+        const dummyData = testDataOrganiser(this.functionFlags.debugDataToUse);
         this.geVisVehicles = dummyData.geVisVehicles;
         this.pilotLog('TEST GeVis Vehicles loaded ok');
         resolve();
@@ -188,10 +188,10 @@ module.exports = class CurrentData {
    */
   updateRunningServices() {
     const fullDebugMode = this.functionFlags.fullDebugMode;
-    const dummyData = testDataOrganiser(this.functionFlags.debugDataToUse);
     const logging = this.functionFlags.pilotSQLLogging;
     let time;
     if (fullDebugMode) {
+      const dummyData = testDataOrganiser(this.functionFlags.debugDataToUse);
       time = dummyData.time;
     } else {
       time = moment();
@@ -258,7 +258,6 @@ module.exports = class CurrentData {
    */
   updateRosterDuties() {
     const fullDebugMode = this.functionFlags.fullDebugMode;
-    const dummyData = testDataOrganiser(this.functionFlags.debugDataToUse);
     if (!fullDebugMode) {
       vdsRosterAPI.rosterDuties().then((result) => {
         this.rosterDuties = result;
@@ -269,6 +268,7 @@ module.exports = class CurrentData {
       });
     } else {
       // get dummy roster duties
+      const dummyData = testDataOrganiser(this.functionFlags.debugDataToUse);
       this.rosterDuties = dummyData.rosterDuties;
       this.rosterDutiesLastUpdated = moment();
       this.pilotLog('TEST VDS Roster Duties loaded ok');
@@ -294,7 +294,6 @@ module.exports = class CurrentData {
    */
   updateRosterDayStatus() {
     const fullDebugMode = this.functionFlags.fullDebugMode;
-    const dummyData = testDataOrganiser(this.functionFlags.debugDataToUse);
     if (!fullDebugMode) {
       vdsRosterAPI.dayRosterStatus(moment()).then((result) => {
         this.rosterDayStatus = result;
@@ -305,6 +304,7 @@ module.exports = class CurrentData {
       });
     } else {
       // get dummy roster day status
+      const dummyData = testDataOrganiser(this.functionFlags.debugDataToUse);
       this.rosterDayStatus = dummyData.rosterDayStatus;
       this.rosterStatusLastUpdated = moment();
       this.pilotLog('TEST VDS Roster Day Status loaded ok');
