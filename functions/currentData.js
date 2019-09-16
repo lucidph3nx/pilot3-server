@@ -331,7 +331,6 @@ module.exports = class CurrentData {
    */
   updateBusReplacementsList() {
     const fullDebugMode = this.functionFlags.fullDebugMode;
-    const dummyData = testDataOrganiser(this.functionFlags.debugDataToUse);
     if (!fullDebugMode) {
       compassAPI.busReplacements().then((result) => {
         this.busReplacementList = result;
@@ -342,6 +341,7 @@ module.exports = class CurrentData {
       });
     } else {
       // get dummy bus replacement list
+      const dummyData = testDataOrganiser(this.functionFlags.debugDataToUse);
       this.busReplacementList = dummyData.busReplacementList;
       this.busReplacementsLastUpdated = moment();
       this.pilotLog('TEST Compass bus replacement list loaded ok');
