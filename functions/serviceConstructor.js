@@ -301,6 +301,19 @@ module.exports = class Service {
         this.lastStation = 'WAIK';
         tempStatus = 'In Turn Back Road';
         statusArray[2] = tempStatus;
+      } else if (this.lastStation == this.timetable.destination) {
+        // overshot station
+        if (this.lastStation == 'TAIT') {
+          tempStatus = 'In Storage Road';
+          statusArray[2] = tempStatus;
+        } else if (this.lastStation == 'PAEK') {
+          tempStatus = 'Relay to Yard';
+          statusArray[2] = tempStatus;
+        } else {
+          tempStatus = 'Overrun Error';
+          statusArray[2] = tempStatus;
+        }
+
       } else {
         tempStatus = 'Stopped between stations';
         statusArray[2] = tempStatus;
