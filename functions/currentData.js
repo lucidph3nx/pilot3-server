@@ -378,22 +378,8 @@ module.exports = class CurrentData {
    */
   updateTimetable() {
     const fullDebugMode = this.functionFlags.fullDebugMode;
-    const dummyData = testDataOrganiser(this.functionFlags.debugDataToUse);
     const workingOffsiteMode = this.functionFlags.workingOffsiteMode;
-    if (workingOffsiteMode) {
-      const time = moment();
-
-      // get dummy timetable, change all dates to today.
-      const tempTimetable = dummyData.timetable;
-      tempTimetable.forEach(function(timePoint) {
-        const dayDifference = time.diff(moment(timePoint.arrives), 'days');
-        timePoint.arrives = moment(timePoint.arrives).add(dayDifference, 'days');
-        timePoint.departs = moment(timePoint.departs).add(dayDifference, 'days');
-      });
-      this.timetable = tempTimetable;
-      this.timetableLastUpdated = moment();
-      this.pilotLog('TEST Compass timetable loaded ok -OFFSITEMODE');
-    } else if (!fullDebugMode) {
+    if (!fullDebugMode && !workingOffsiteMode) {
       timetableLogic.getCurrentTimetable().then((result) => {
         this.timetable = result;
         this.tripSheet = timetableLogic.getTripSheet(result);
@@ -403,7 +389,7 @@ module.exports = class CurrentData {
         console.log(error);
       });
     } else {
-      // get dummy timetable
+      const dummyData = testDataOrganiser(this.functionFlags.debugDataToUse);
       this.timetable = dummyData.timetable;
       this.tripSheet = timetableLogic.getTripSheet(dummyData.timetable);
       this.timetableLastUpdated = moment();

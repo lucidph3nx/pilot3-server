@@ -313,7 +313,6 @@ module.exports = class Service {
           tempStatus = 'Overrun Error';
           statusArray[2] = tempStatus;
         }
-
       } else {
         tempStatus = 'Stopped between stations';
         statusArray[2] = tempStatus;
