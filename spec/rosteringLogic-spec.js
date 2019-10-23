@@ -143,7 +143,7 @@ describe('get list of "as required" staff from roster', function() {
     const getAsRequiredStaff = rosteringLogic.common.getAsRequiredStaff;
     const asRequiredStaff = getAsRequiredStaff(testRosterDuties);
 
-    // should return 50 results
+    // should return 59 results
     expect(asRequiredStaff.length).toBe(59);
 
     expect(asRequiredStaff[0].staffId).toBe('038');
