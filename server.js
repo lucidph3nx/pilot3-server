@@ -19,7 +19,7 @@ if (env == 'APNZPTDWAPP01') {
 // ======functions flags=======
 const functionFlags = {
   pilotSQLLogging: false, // log to Pilot DB
-  fullDebugMode: true, // full test data run
+  fullDebugMode: false, // full test data run
   debugDataToUse: '20190723082606', // '20190722091137',
   workingOffsiteMode: false, // run with GeVis but no Compass or VDS -- DOES NOT WORK YET
   snapshotMode: false,
@@ -42,8 +42,8 @@ const applicationSettings = {
   timetableUpdateHour: 3,
 };
 const alternativeToken = {
-  token: 'OJ2da6w2jZTdUS5MJ5i-I-d9KGLwVeCT3e1Ir2G_6lo.',
-  updateTime: moment('2019-07-23 16:00:00'),
+  token: 'YakuExe9fLRPMc3d7IFbZfn61PcPQw5Yi6FtoH04oNg.',
+  updateTime: moment('2019-11-01 16:00:00'),
   pending: false,
 };
 

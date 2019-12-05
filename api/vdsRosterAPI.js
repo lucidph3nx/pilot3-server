@@ -199,7 +199,7 @@ module.exports = {
                 } else {
                   staffName = response[trp].firstName.trim() + ' ' + response[trp].lastName.trim();
                 }
-                photoURL = 'staffImage?staffId='+staffId.padStart(3, '0');
+                photoURL = 'image?staffId='+staffId.padStart(3, '0');
                 shiftCovered = true;
               } else {
                 staffId = '';

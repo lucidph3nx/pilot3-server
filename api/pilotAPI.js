@@ -2,7 +2,6 @@ const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 const rosteringLogic = require('./../functions/rosteringLogic');
 const nzRailConventions = require('./../data/nzRailConventions');
-const getStaffPhotoFromId = require('./../functions/staffImage');
 const getRunningSheetForStation = require('./../functions/runningSheetForStation');
 // =======API=======
 let vdsRosterAPI;
@@ -49,6 +48,7 @@ module.exports = function(app, current, functionFlags) {
   require('./pilotAPI/serverStatus')(app, current, functionFlags);
   require('./pilotAPI/services')(app, current, functionFlags);
   require('./pilotAPI/roster')(app, current, functionFlags);
+  require('./pilotAPI/staff')(app, current, functionFlags);
 
   app.use('/staff', express.static(path.resolve('./data/img/staff')));
 
@@ -190,18 +190,6 @@ module.exports = function(app, current, functionFlags) {
     response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
     response.write(JSON.stringify(apiResponse));
     response.end();
-  });
-  // get staff image from staffId
-  app.get('/api/staffImage', (request, response) => {
-    const requestedStaffId = request.query.staffId;
-    let responsePath;
-    if (getStaffPhotoFromId(requestedStaffId) !== '') {
-      responsePath = path.resolve(getStaffPhotoFromId(requestedStaffId));
-      response.sendFile(responsePath);
-    } else {
-      response.writeHead(404);
-      response.end();
-    }
   });
   // get list of staff who are 'as Required' now
   app.get('/api/asRequiredStaff', (request, response) => {
