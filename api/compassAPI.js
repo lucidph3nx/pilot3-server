@@ -355,7 +355,6 @@ module.exports = {
           .where('kiwirailLineId', kiwirailLineId)
           .where('direction', direction)
           .where('speedband', speedband)
-          .orderBy('distanceFrom', 'desc')
           .then(function(response) {
             for (let sr = 0; sr < response.length; sr++) {
               let TSR = {};
