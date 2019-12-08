@@ -3,6 +3,7 @@ moment().tz('Pacific/Auckland').format();
 
 const stationMeterage = require('../data/stationMeterage');
 const nzRailConventions = require('../data/nzRailConventions');
+const linearLogic = require('../functions/linearLogic');
 // ======Authentication credentials=======
 const credentials = require('../credentials');
 const knex = require('knex')({
@@ -222,44 +223,47 @@ module.exports = {
           .where('serviceId', serviceId)
           .then(function(response) {
             module.exports.serviceDetailTimingPoints(date, serviceId).then((timingPoints) => {
-              if (response[0] !== undefined) {
-                const keys = Object.keys(response[0]);
-                const consist = [];
-                keys.forEach((key) => {
-                  if (key.substring(0, 7) == 'consist') {
-                    if (response[0][key] !== null) {
-                      consist.push(response[0][key]);
+              module.exports.serviceDetailTSR(date, response[0].line, response[0].direction).then((TSRList) => {
+                if (response[0] !== undefined) {
+                  const keys = Object.keys(response[0]);
+                  const consist = [];
+                  keys.forEach((key) => {
+                    if (key.substring(0, 7) == 'consist') {
+                      if (response[0][key] !== null) {
+                        consist.push(response[0][key]);
+                      }
                     }
-                  }
-                });
-                const serviceDetails = {
-                  date: response[0].date,
-                  serviceId: response[0].serviceId,
-                  line: response[0].line,
-                  peak: (response[0].peak !== 0),
-                  direction: response[0].direction,
-                  consist: consist,
-                  punctualityFailure: (response[0].punctualityFailure !== 0),
-                  reliabilityFailure: (response[0].reliabilityFailure !== 0),
-                  busReplaced: (response[0].busReplaced !== 0),
-                  departs: cps2m(response[0].date, response[0].departs),
-                  origin: response[0].origin,
-                  arrives: cps2m(response[0].date, response[0].arrives),
-                  destination: response[0].destination,
-                  delayOverall: response[0].impactSecOverall,
-                  delayBreakdown: {
-                    origin: response[0].impactSecOrigin,
-                    TSR: response[0].impactSecTSR,
-                    betweenStations: response[0].impactSecBetweenStations,
-                    atStations: response[0].impactSecAtStations,
-                  },
-                  timingPoints: timingPoints,
-                  crew: [],
-                };
-                resolve(serviceDetails);
-              } else {
-                resolve({});
-              }
+                  });
+                  const serviceDetails = {
+                    date: response[0].date,
+                    serviceId: response[0].serviceId,
+                    line: response[0].line,
+                    peak: (response[0].peak !== 0),
+                    direction: response[0].direction,
+                    consist: consist,
+                    punctualityFailure: (response[0].punctualityFailure !== 0),
+                    reliabilityFailure: (response[0].reliabilityFailure !== 0),
+                    busReplaced: (response[0].busReplaced !== 0),
+                    departs: cps2m(response[0].date, response[0].departs),
+                    origin: response[0].origin,
+                    arrives: cps2m(response[0].date, response[0].arrives),
+                    destination: response[0].destination,
+                    delayOverall: response[0].impactSecOverall,
+                    delayBreakdown: {
+                      origin: response[0].impactSecOrigin,
+                      TSR: response[0].impactSecTSR,
+                      betweenStations: response[0].impactSecBetweenStations,
+                      atStations: response[0].impactSecAtStations,
+                    },
+                    timingPoints: timingPoints,
+                    crew: [],
+                    TSRList: TSRList,
+                  };
+                  resolve(serviceDetails);
+                } else {
+                  resolve({});
+                }
+              });
             });
           }
           );
@@ -329,6 +333,43 @@ module.exports = {
               timingPoints.push(timingPoint);
             }
             resolve(timingPoints);
+          }
+          );
+    });
+  },
+  serviceDetailTSR: function(date, metlinkLineId, direction) {
+    return new Promise((resolve, reject) => {
+      const requestedDay = date.format('YYYY-MM-DD');
+      const TSRList = [];
+      let speedband;
+      if (metlinkLineId == 'WRL') {
+        speedband = 3;
+      } else {
+        speedband = 1;
+      }
+      const kiwirailLineId = linearLogic.convertMetlinkLinetoKiwirailLine(metlinkLineId);
+      knex.select()
+          .table('dbo.TSRList')
+          .where('dateFrom', '<=', requestedDay)
+          .where('dateTo', '>=', requestedDay)
+          .where('kiwirailLineId', kiwirailLineId)
+          .where('direction', direction)
+          .where('speedband', speedband)
+          .orderBy('distanceFrom', 'desc')
+          .then(function(response) {
+            for (let sr = 0; sr < response.length; sr++) {
+              let TSR = {};
+              TSR = {
+                TSRId: response[sr].TSRId,
+                distanceFrom: response[sr].distanceFrom,
+                distanceTo: response[sr].distanceTo,
+                H40Area: response[sr].H40Area,
+                ASSeconds: response[sr].ASSeconds,
+                NSSeconds: response[sr].NSSeconds,
+              };
+              TSRList.push(TSR);
+            }
+            resolve(TSRList);
           }
           );
     });
