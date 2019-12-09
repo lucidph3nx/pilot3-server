@@ -142,6 +142,7 @@ module.exports = {
           responseArray.push({
             shiftId: rosterArray[i].shiftId,
             shiftType: rosterArray[i].shiftType,
+            shiftLocation: rosterArray[i].shiftLocation,
             staffId: rosterArray[i].staffId,
             staffName: rosterArray[i].staffName,
             shiftCovered: rosterArray[i].shiftCovered,

@@ -62,19 +62,28 @@ module.exports = {
                 staffName = '';
                 shiftCovered = false;
               }
+              let shiftType;
+              if (response[trp].shiftType.trim() == 'TXO') {
+                shiftType = 'RCTXO';
+              } else {
+                shiftType = response[trp].shiftType.trim();
+              }
               if (response[trp].dutyName !== null && response[trp].dutyType
               !== null && response[trp].dutyType !== 'REC') {
+                const dutyStartTimeMoment = mpm2m(response[trp].minutesFrom);
+                const dutyEndTimeMoment = mpm2m(response[trp].minutesTo);
                 serviceRoster = {
                   shiftId: response[trp].shiftName.trim(),
-                  shiftType: response[trp].shiftType.trim(),
+                  shiftType: shiftType,
+                  shiftLocation: response[trp].location.trim(),
                   staffId: staffId,
                   staffName: staffName,
                   dutyName: response[trp].dutyName.trim(),
                   dutyType: response[trp].dutyType.trim(),
-                  dutyStartTime: mpm2m(response[trp].minutesFrom),
-                  dutyStartTimeString: mpm2m(response[trp].minutesFrom).format('HH:mm'),
-                  dutyEndTime: mpm2m(response[trp].minutesTo),
-                  dutyEndTimeString: mpm2m(response[trp].minutesTo).format('HH:mm'),
+                  dutyStartTime: dutyStartTimeMoment.tz('Pacific/Auckland').format(),
+                  dutyStartTimeString: dutyStartTimeMoment.tz('Pacific/Auckland').format('HH:mm'),
+                  dutyEndTime: dutyEndTimeMoment.tz('Pacific/Auckland').format(),
+                  dutyEndTimeString: dutyEndTimeMoment.tz('Pacific/Auckland').format('HH:mm'),
                   shiftCovered: shiftCovered,
                 };
                 currentRoster.push(serviceRoster);
@@ -91,7 +100,7 @@ module.exports = {
          * @return {object} - Moment object
          */
     function mpm2m(minutesPastMidnight) {
-      const thisMoment = moment.utc();
+      const thisMoment = moment();
       thisMoment.set('hour', 0);
       thisMoment.set('minute', 0);
       thisMoment.set('seconds', 0);
