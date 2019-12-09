@@ -23,7 +23,7 @@ module.exports = function(app, current, functionFlags) {
     }
     response.type(`image/${format || 'png'}`);
 
-    const photoRelativePath = getStaffPhotoFromId(requestedStaffId)
+    const photoRelativePath = getStaffPhotoFromId(requestedStaffId);
     // if file exists
     if (photoRelativePath !== '') {
       const responsePath = path.resolve(photoRelativePath);

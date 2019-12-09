@@ -360,8 +360,8 @@ module.exports = {
               let TSR = {};
               TSR = {
                 TSRId: response[sr].TSRId,
-                distanceFrom: response[sr].distanceFrom*1000,
-                distanceTo: response[sr].distanceTo*1000,
+                distanceFrom: Math.round(response[sr].distanceFrom*1000),
+                distanceTo: Math.round(response[sr].distanceTo*1000),
                 H40Area: response[sr].H40Area,
                 ASSeconds: response[sr].ASSeconds,
                 NSSeconds: response[sr].NSSeconds,
