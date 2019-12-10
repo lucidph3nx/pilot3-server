@@ -25,7 +25,6 @@ module.exports = function(app, current, functionFlags) {
     }
     const requestStaffId = request.query.staffId;
     const requestShiftId = request.query.shiftId;
-
     vdsRosterAPI.rosterDuties(requestDate).then((data) => {
       let roster = data;
       roster = rosteringLogic.crewRoster.formatRosterDuties(roster, requestStaffId, requestShiftId, includeColours);
@@ -36,6 +35,32 @@ module.exports = function(app, current, functionFlags) {
       response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
       response.write(JSON.stringify(apiResponse));
       response.end();
+    });
+  });
+  app.get('/api/roster/uncoveredShifts', (request, response) => {
+    const requestedDay = moment(request.query.date);
+    let apiResponse;
+    vdsRosterAPI.uncoveredShifts(requestedDay).then((result) => {
+      const uncoveredShifts = result;
+      apiResponse = {'Time': moment(), uncoveredShifts};
+      response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+      response.write(JSON.stringify(apiResponse));
+      response.end();
+    }).catch((error) => {
+      console.log(error);
+    });
+  });
+  app.get('/api/roster/availableStaff', (request, response) => {
+    const requestedDay = moment(request.query.date);
+    let apiResponse;
+    vdsRosterAPI.availableStaff(requestedDay).then((result) => {
+      const availableStaff = result;
+      apiResponse = {'Time': moment(), availableStaff};
+      response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+      response.write(JSON.stringify(apiResponse));
+      response.end();
+    }).catch((error) => {
+      console.log(error);
     });
   });
 };

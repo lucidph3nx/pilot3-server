@@ -281,6 +281,33 @@ module.exports = {
       return thisMoment;
     }
   },
+  // returns uncovered shifts for day
+  availableStaff: function availableStaff(date) {
+    return new Promise((resolve, reject) => {
+      const searchdate = moment(date).format('YYYY-MM-DD');
+      const availableStaff = [];
+      let staff = {};
+      knex.select()
+          .table('WEBSN.availableStaff')
+          .where('date', searchdate)
+          .then(function(response) {
+            for (let st = 0; st < response.length; st++) {
+              staff = {};
+              staff = {
+                rosterGrid: response[st].rosterGrid.trim(),
+                staffType: response[st].staffType.trim(),
+                location: response[st].location.trim(),
+                availabilityType: response[st].availabilityType.trim(),
+                staffId: response[st].staffId.trim(),
+                staffName: response[st].firstName.trim() + ' ' + response[st].lastName.trim(),
+              };
+              availableStaff.push(staff);
+            }
+            resolve(availableStaff);
+          }
+          );
+    });
+  },
   visboardHeadcount: function visboardHeadcount() {
     return new Promise((resolve, reject) => {
       const headcounts = [];
