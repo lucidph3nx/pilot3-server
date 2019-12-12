@@ -37,6 +37,23 @@ module.exports = function(app, current, functionFlags) {
       response.end();
     });
   });
+  app.get('/api/roster/staffRoster', (request, response) => {
+    const currentMoment = moment();
+    const includeColours = request.query.colours;
+    const requestDateFrom = moment(request.query.dateFrom);
+    const requestDateTo = moment(request.query.dateTo);
+    const requestStaffId = request.query.staffId;
+    vdsRosterAPI.staffRoster(requestDateFrom, requestDateTo, requestStaffId, includeColours).then((data) => {
+      const roster = data;
+      const apiResponse = {
+        'time': currentMoment,
+        'roster': roster,
+      };
+      response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+      response.write(JSON.stringify(apiResponse));
+      response.end();
+    });
+  });
   app.get('/api/roster/uncoveredShifts', (request, response) => {
     const requestedDay = moment(request.query.date);
     let apiResponse;

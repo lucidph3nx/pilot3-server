@@ -1,12 +1,33 @@
 
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
-const getStaffPhotoFromId = require('./../../functions/staffImage');
-const path = require('path');
+
+// =======API=======
+let vdsRosterAPI;
+// only define the API modules if credentials file exists
 const fs = require('fs');
+const path = require('path');
+const credentialPath = path.join(__dirname, '../..', 'credentials.js');
+if (fs.existsSync(credentialPath)) {
+  vdsRosterAPI = require('../vdsRosterAPI');
+}
+const getStaffPhotoFromId = require('./../../functions/staffImage');
 const sharp = require('sharp');
 
 module.exports = function(app, current, functionFlags) {
+  app.get('/api/staff/details', (request, response) => {
+    const requestedStaffId = request.query.staffId;
+    let apiResponse;
+    vdsRosterAPI.staffDetails(requestedStaffId).then((result) => {
+      const staffDetails = result;
+      apiResponse = {'Time': moment(), staffDetails};
+      response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+      response.write(JSON.stringify(apiResponse));
+      response.end();
+    }).catch((error) => {
+      console.log(error);
+    });
+  });
   // get staff image from staffId
   app.get('/api/staff/image', (request, response) => {
     const requestedStaffId = request.query.staffId;

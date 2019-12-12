@@ -22,6 +22,9 @@ const knex = require('knex')({
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 
+const linearLogic = require('./../functions/linearLogic');
+const nzRailConventions = require('./../data/nzRailConventions');
+
 module.exports = {
   checkVDSDBConnection: function() {
     return new Promise((resolve, reject) => {
@@ -101,6 +104,121 @@ module.exports = {
          */
     function mpm2m(minutesPastMidnight) {
       const thisMoment = moment();
+      thisMoment.set('hour', 0);
+      thisMoment.set('minute', 0);
+      thisMoment.set('seconds', 0);
+      thisMoment.set('miliseconds', 0);
+      thisMoment.add(minutesPastMidnight, 'minutes');
+      return thisMoment;
+    }
+  },
+  // (requestDateFrom, requestDateTo, requestStaffId)
+  staffRoster: function(dateFrom, dateTo, staffId, includeColours) {
+    return new Promise((resolve, reject) => {
+      const requestDateFrom = dateFrom.format('YYYY-MM-DD');
+      const requestDateTo = dateTo.format('YYYY-MM-DD');
+      const roster = [];
+      let dayRoster = {};
+      knex.select()
+          .table('Pilot.staffRoster')
+          .where('date', '>=', requestDateFrom)
+          .where('date', '<=', requestDateTo)
+          .where('staffId', staffId)
+          .orderBy('date')
+          .orderBy('staffId')
+          .orderBy('minutesFrom')
+          .then(function(response) {
+            for (let trp = 0; trp < response.length; trp++) {
+              // if new day
+              if (trp == 0 || (dayRoster.date.isSame(response[trp].date, 'day') == false)) {
+                if (trp !== 0) {
+                  roster.push(dayRoster);
+                }
+                let GEWP = false;
+                if (response[trp].GEWP == 1) {
+                  GEWP = true;
+                }
+                let shiftStartTimeMoment = null;
+                let shiftEndTimeMoment = null;
+                let shiftTotalTime = null;
+                let shiftType = null;
+                let shiftLocation = null;
+                if (response[trp].shiftType !== null) {
+                  shiftStartTimeMoment = mpm2m(response[trp].minFrom).tz('Pacific/Auckland').format();
+                  shiftEndTimeMoment = mpm2m(response[trp].minTo).tz('Pacific/Auckland').format();
+                  shiftTotalTime = mpm2m(response[trp].totalMin).format('HH:mm');
+                  shiftLocation = response[trp].shiftLocation.trim();
+                  if (response[trp].shiftType.trim() == 'TXO') {
+                    shiftType = 'RCTXO';
+                  } else {
+                    shiftType = response[trp].shiftType.trim();
+                  }
+                }
+                dayRoster = {
+                  date: moment(response[trp].date),
+                  staffId: response[trp].staffId.trim(),
+                  staffName: response[trp].firstName.trim() + ' ' + response[trp].lastName.trim(),
+                  workType: response[trp].workType.trim(),
+                  shift: response[trp].shift.trim(),
+                  GEWP: GEWP,
+                  shiftType: shiftType,
+                  shiftLocation: shiftLocation,
+                  shiftStart: shiftStartTimeMoment,
+                  shiftEnd: shiftEndTimeMoment,
+                  totalTime: shiftTotalTime,
+                  rosterDuties: [],
+                };
+              }
+              if (response[trp].shiftType !== null && response[trp].dutyType !== 'REC') {
+                const dutyStartTimeMoment = mpm2m(response[trp].date, response[trp].minutesFrom);
+                const dutyEndTimeMoment = mpm2m(response[trp].date, response[trp].minutesTo);
+                const duty = {
+                  dutyName: response[trp].dutyName.trim(),
+                  dutyType: response[trp].dutyType.trim(),
+                  startTime: dutyStartTimeMoment.tz('Pacific/Auckland').format(),
+                  dutyStartTimeString: dutyStartTimeMoment.tz('Pacific/Auckland').format('HH:mm'),
+                  endTime: dutyEndTimeMoment.tz('Pacific/Auckland').format(),
+                  dutyEndTimeString: dutyEndTimeMoment.tz('Pacific/Auckland').format('HH:mm'),
+                };
+                let colourCode;
+                if (includeColours) {
+                  const dutyTypeCodes = nzRailConventions.dutyTypeCodes;
+                  const serviceIdlineAssociations = nzRailConventions.serviceIdlineAssociations;
+                  const getPrefixFromServiceId = linearLogic.getPrefixFromServiceId;
+                  colourCode = '#ffffff';
+                  const dutyType = response[trp].dutyType;
+                  const servicePrefix = getPrefixFromServiceId(response[trp].dutyName);
+                  if (response[trp].dutyType == 'TRIP'
+                  || response[trp].dutyType == 'TRIPT'
+                  || response[trp].dutyType == 'TRIPP') {
+                    if (serviceIdlineAssociations.has(servicePrefix)) {
+                      colourCode = serviceIdlineAssociations.get(servicePrefix).colour;
+                    }
+                  } else {
+                    if (dutyTypeCodes.has(dutyType)) {
+                      colourCode = dutyTypeCodes.get(dutyType);
+                    }
+                  }
+                  duty.colourCode = colourCode;
+                }
+                dayRoster.rosterDuties.push(duty);
+              }
+            }
+            // push final day
+            roster.push(dayRoster);
+            resolve(roster);
+          });
+    });
+
+    /**
+         * Takes a time in min past midnight
+         * Converts it into a moment object
+         * @param {string} date - day of time
+         * @param {string} minutesPastMidnight
+         * @return {object} - Moment object
+         */
+    function mpm2m(date, minutesPastMidnight) {
+      const thisMoment = moment(date);
       thisMoment.set('hour', 0);
       thisMoment.set('minute', 0);
       thisMoment.set('seconds', 0);
@@ -304,6 +422,49 @@ module.exports = {
               availableStaff.push(staff);
             }
             resolve(availableStaff);
+          }
+          );
+    });
+  },
+  staffDetails: function availableStaff(staffId) {
+    return new Promise((resolve, reject) => {
+      let staffDetails = {};
+      knex.select()
+          .table('Pilot.staffList')
+          .where('staffId', staffId)
+          .then(function(response) {
+            const currentRoster = {
+              rosterName: null,
+              location: null,
+              staffType: null,
+              contract: null,
+            };
+            if (response[0].currentRoster !== null) {
+              currentRoster.rosterName = response[0].currentRoster.trim();
+              currentRoster.location = response[0].location.trim();
+              currentRoster.staffType = response[0].staffType.trim();
+              currentRoster.contract = response[0].contract.trim();
+            }
+            let birthDate = response[0].birthDate;
+            let phone1 = response[0].phone1;
+            let phone2 = response[0].phone2;
+            if (birthDate !== null) birthDate = moment(birthDate).format('DD/MM/YYYY');
+            if (phone1 !== null) phone1 = phone1.trim();
+            if (phone2 !== null) phone2 = phone2.trim();
+
+            staffDetails = {
+              staffId: response[0].staffId.trim(),
+              staffName: response[0].firstName.trim() + ' ' + response[0].lastName.trim(),
+              birthDate: birthDate,
+              startDate: moment(response[0].startDate).format('DD/MM/YYYY'),
+              exitDate: moment(response[0].exitDate).format('DD/MM/YYYY'),
+              activeDirectoryId: response[0].activeDirectoryId.trim(),
+              photoURL: 'image?staffId='+response[0].staffId.trim().padStart(3, '0'),
+              phone1: phone1,
+              phone2: phone2,
+              currentRoster: currentRoster,
+            };
+            resolve(staffDetails);
           }
           );
     });
