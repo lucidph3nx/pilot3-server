@@ -80,4 +80,57 @@ module.exports = function(app, current, functionFlags) {
       console.log(error);
     });
   });
+  app.get('/api/roster/crew', (request, response) => {
+    const requestedDay = moment(request.query.date);
+    const requestedServiceId = request.query.serviceId;
+    let apiResponse;
+    vdsRosterAPI.rosteredCrew(requestedDay, requestedServiceId).then((result) => {
+      const rosteredCrew = result;
+      apiResponse = {'Time': moment(), rosteredCrew};
+      response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+      response.write(JSON.stringify(apiResponse));
+      response.end();
+    }).catch((error) => {
+      console.log(error);
+    });
+  });
+  // get roster Day Status
+  app.get('/api/roster/dayStatus', (request, response) => {
+    let currentRosterDayStatus = current.rosterDayStatus;
+    const requestedDay = moment(request.query.date);
+    let apiResponse;
+    // if today provide prefetched data, else fetch fresh from the vds kitchen
+    if (requestedDay.isSame(moment(), 'day')) {
+      apiResponse = {'Time': moment(), currentRosterDayStatus};
+      response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+      response.write(JSON.stringify(apiResponse));
+      response.end();
+    } else {
+      vdsRosterAPI.dayRosterStatus(requestedDay).then((result) => {
+        currentRosterDayStatus = result;
+        apiResponse = {'Time': moment(), currentRosterDayStatus};
+        response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+        response.write(JSON.stringify(apiResponse));
+        response.end();
+      }).catch((error) => {
+        console.log(error);
+      });
+    }
+  });
+  // get all roster duties for a particular shift today
+  app.get('/api/roster/shiftDuties', (request, response) => {
+    const getDayRosterFromShiftId = rosteringLogic.crewRoster.getDayRosterFromShiftId;
+    const requestedShift = request.query.shiftId;
+    const apiResponse = getDayRosterFromShiftId(requestedShift, current.rosterDuties);
+    response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+    response.write(JSON.stringify(apiResponse));
+    response.end();
+  });
+  // get list of staff who are 'as Required' now
+  app.get('/api/roster/asRequiredStaff', (request, response) => {
+    const apiResponse = rosteringLogic.common.getAsRequiredStaff(current.rosterDuties);
+    response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+    response.write(JSON.stringify(apiResponse));
+    response.end();
+  });
 };
