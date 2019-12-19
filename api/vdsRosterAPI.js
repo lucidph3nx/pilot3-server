@@ -45,7 +45,7 @@ module.exports = {
       const currentRoster = [];
       let serviceRoster = {};
       knex.select()
-          .table('WEBSN.actualDuties') // eventually Pilot.rosterDuties
+          .table('Pilot.rosterDuties')
           .where('date', requestDate)
           .orderBy('date')
           .orderBy('staffId')
