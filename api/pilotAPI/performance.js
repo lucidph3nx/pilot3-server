@@ -29,12 +29,14 @@ module.exports = function(app, current, functionFlags) {
   // get train performance statistics by line
   app.get('/api/performance/day', (request, response) => {
     // default is today if not specified
-    let requestedDay = moment().format('YYYY-MM-DD');
-    if (request.query.date) {
-      requestedDay = moment(request.query.date).format('YYYY-MM-DD');
+    let requestedDayFrom = moment().format('YYYY-MM-DD');
+    let requestedDayTo = moment().format('YYYY-MM-DD');
+    if (request.query.dateFrom && request.query.dateTo) {
+      requestedDayFrom = moment(request.query.dateFrom).format('YYYY-MM-DD');
+      requestedDayTo = moment(request.query.dateTo).format('YYYY-MM-DD');
     }
     let trainPerformance;
-    compassAPI.trainPerformance(requestedDay).then((result) => {
+    compassAPI.trainPerformance(requestedDayFrom, requestedDayTo).then((result) => {
       trainPerformance = result;
       const apiResponse = {'time': moment(), trainPerformance};
       response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});

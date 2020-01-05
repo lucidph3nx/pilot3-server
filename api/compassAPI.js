@@ -187,25 +187,30 @@ module.exports = {
     });
   },
   // returns reliability and punctuality stats for date
-  trainPerformance: function(date) {
+  trainPerformance: function(dateFrom, dateTo) {
     return new Promise((resolve, reject) => {
-      const requestedDay = date;
+      const requestedDateFrom = dateFrom;
+      const requestedDayTo = dateTo;
       const trainPerformance = [];
       let linePerformance = {};
-      knex.select()
+      knex.select('Line')
+          .sum('reliabilityFailure')
+          .sum('punctualityFailure')
+          .sum('totalServices')
           .table('dbo.trainPerformance')
-          .where('date', requestedDay)
+          .where('date', '>=', requestedDateFrom)
+          .where('date', '<=', requestedDayTo)
+          .groupBy('Line')
           .then(function(response) {
             for (let lp = 0; lp < response.length; lp++) {
               linePerformance = {};
               linePerformance = {
-                date: response[lp].date,
                 line: response[lp].Line,
-                reliabilityFailure: response[lp].reliabilityFailure,
-                punctualityFailure: response[lp].punctualityFailure,
-                totalServices: response[lp].totalServices,
-                percentPunctualityFailure: parseFloat(response[lp].percentPunctualityFailure.toFixed(1)),
-                percentReliabilityFailure: parseFloat(response[lp].percentReliabilityFailure.toFixed(1)),
+                reliabilityFailure: response[lp][''][0],
+                punctualityFailure: response[lp][''][1],
+                totalServices: response[lp][''][2],
+                percentPunctualityFailure: parseFloat((1 - response[lp][''][1] / response[lp][''][2])*100).toFixed(1),
+                percentReliabilityFailure: parseFloat((1 - response[lp][''][0] / response[lp][''][2])*100).toFixed(1),
               };
               trainPerformance.push(linePerformance);
             }
