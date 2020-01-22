@@ -4,9 +4,11 @@ moment().tz('Pacific/Auckland').format();
 
 // ======supporting functions=======
 const CurrentData = require('./functions/currentData');
+
 // =======express=======
 const express = require('express');
 const app = express();
+const dmck = require('./api/dmck')(app);
 
 // =======environment=======
 const os = require('os');
@@ -23,6 +25,7 @@ const functionFlags = {
   debugDataToUse: '20190723082606', // '20190722091137',
   workingOffsiteMode: false, // run with GeVis but no Compass or VDS -- DOES NOT WORK YET
   snapshotMode: false,
+  authorised: false,
 };
 if (productionFlag) {
   // production defaults, regardless of settings
@@ -50,6 +53,9 @@ const alternativeToken = {
 const data = new CurrentData(functionFlags, applicationSettings, alternativeToken);
 // =======API=======
 require('./api/pilotAPI')(app, data, functionFlags);
+dmck.then((response) => {
+  functionFlags.authorised = response;
+});
 
 // begin server
 refreshData();
@@ -57,6 +63,9 @@ refreshData();
  * Function to maintain current data for all dependancies
  */
 function refreshData() {
+  dmck.then((response) => {
+    functionFlags.authorised = response;
+  });
   // Take test data snapshot
   if (functionFlags.snapshotMode) {
     if (data.tokenValid()

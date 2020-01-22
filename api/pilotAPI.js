@@ -3,6 +3,7 @@ moment().tz('Pacific/Auckland').format();
 const path = require('path');
 const express = require('express');
 
+
 module.exports = function(app, current, functionFlags) {
   // cross origin requests
   app.use(function(req, res, next) {
@@ -27,6 +28,16 @@ module.exports = function(app, current, functionFlags) {
       res.send(200);
     } else {
       next();
+    }
+  });
+
+  app.use(function(req, res, next) {
+    if (functionFlags.authorised) {
+      console.log('Authy');
+      next();
+    } else {
+      console.log('Unauthorised Error');
+      res.status(500).send('Unauthorised Error');
     }
   });
 
