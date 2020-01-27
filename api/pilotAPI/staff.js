@@ -142,4 +142,21 @@ module.exports = function(app, current, functionFlags) {
       console.log(error);
     });
   });
+  // get a current staff list
+  app.get('/api/staff/list', (request, response) => {
+    const staffList = [];
+
+    for (const person of current.staffList) {
+      if (person.name !== undefined) {
+        staffList.push(person.name+' ('+person.staffId+')');
+      }
+    }
+    const apiResponse = {
+      'Time': moment(),
+      'list': staffList,
+    };
+    response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+    response.write(JSON.stringify(apiResponse));
+    response.end();
+  });
 };
