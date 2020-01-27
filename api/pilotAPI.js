@@ -33,7 +33,6 @@ module.exports = function(app, current, functionFlags) {
 
   app.use(function(req, res, next) {
     if (functionFlags.authorised) {
-      console.log('Authy');
       next();
     } else {
       console.log('Unauthorised Error');
