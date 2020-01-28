@@ -151,6 +151,7 @@ module.exports = function(app, current, functionFlags) {
         staffList.push(person.name+' ('+person.staffId+')');
       }
     }
+    staffList.sort();
     const apiResponse = {
       'Time': moment(),
       'list': staffList,
