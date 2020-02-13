@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 const puppeteer = require('puppeteer');
@@ -63,6 +64,67 @@ module.exports = {
       // });
       await browser.close();
       return thisgeVisToken;
+    })().catch((error) => {
+      browser.close();
+      console.log(error);
+    });
+  },
+  /**
+   * uses pupperteer to log into Maximo and retrieve the tokens required to load the NIS list
+   */
+  getMaximoTokens: async function getMaximoTokens() {
+    return (async () => {
+      const tokens = {
+        __requestid: '',
+        uisessionid: '',
+        csrftoken: '',
+        cookies: {},
+      };
+      const args = ['--enable-features=NetworkService'];
+      const options = {
+        args,
+        headless: true,
+        ignoreHTTPSErrors: false,
+      };
+      const browser = await puppeteer.launch(options);
+      const page = await browser.newPage();
+      await page.setCacheEnabled(false);
+      await page.goto('http://192.168.103.11/maximo/webclient/login/login.jsp');
+      await page.waitForSelector('#username');
+      await page.type('#username', credentials.Maximo.username),
+      await page.type('#password', credentials.Maximo.password),
+      await page.click('#loginbutton'),
+      // eslint-disable-next-line max-len
+      await page.waitForRequest('http://192.168.103.11/maximo/webclient/skins/skins-20161213-2009/tivoli13/images/btn_nextpage.gif');
+      await page.goto('http://192.168.103.11/maximo/ui/?event=loadapp&value=plustwo');
+      await page.evaluate(() => {
+        console.log(sendEvent('click', 'toolbar2_tbs_1_tbcb_0_action-img', null));
+      });
+      await page.waitForSelector('#menu0');
+      await page.evaluate(() => {
+        console.log(sendEvent('click', 'mainrec_menus', 'RUNREPORTS_OPTION'));
+      });
+      await page.waitForSelector('#reportFilesPLUSTWO-dialog_inner');
+      await page.evaluate(() => {
+        console.log(sendEvent('click', 'ma6b93efe_tdrow_[C:0]_ttxt-lb[R:29]', null));
+      });
+      await page.waitForSelector('#mefedc979-pb');
+      await page.evaluate(() => {
+        console.log(sendEvent('click', 'mefedc979-pb', ''));
+      });
+      // eslint-disable-next-line max-len
+      const newTab = await browser.waitForTarget((target) => target.url().startsWith('http://192.168.103.11/maximo/report'));
+      const newPage = await newTab.page();
+      const reportURL = await newPage.url();
+      const stringarray = reportURL.split('?');
+      const params = stringarray[1].split('&');
+      tokens.__requestid = params[2].split('=')[1];
+      tokens.uisessionid = params[3].split('=')[1];
+      tokens.csrftoken = params[4].split('=')[1];
+      tokens.cookies = await newPage.cookies();
+      await page.waitFor(1000);
+      await browser.close();
+      return tokens;
     })().catch((error) => {
       browser.close();
       console.log(error);

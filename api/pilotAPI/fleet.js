@@ -24,4 +24,15 @@ module.exports = function(app, current, functionFlags) {
     response.write(JSON.stringify(apiResponse));
     response.end();
   });
+  // get the current NIS List
+  app.get('/api/fleet/currentNISList', (request, response) => {
+    const currentNISList = [];
+    current.NISList.list.forEach((unit) =>
+      currentNISList.push(unit)
+    );
+    const apiResponse = {'Time': moment(current.NISList.updated).format(), currentNISList};
+    response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+    response.write(JSON.stringify(apiResponse));
+    response.end();
+  });
 };

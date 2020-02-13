@@ -1,6 +1,8 @@
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
 const https = require('https');
+// ======Authentication credentials=======
+const credentials = require('../credentials');
 
 module.exports = function(app) {
   // get the status for all Matangi Train Units
@@ -9,7 +11,7 @@ module.exports = function(app) {
       hostname: 'sheets.googleapis.com',
       port: app.get('port'),
       // eslint-disable-next-line max-len
-      path: 'https://sheets.googleapis.com/v4/spreadsheets/12kyxBUTvs8V2-kWculIjscB8PpaTNY2Y3POVrnSus3w?ranges=A1&fields=sheets(data.rowData.values)&key=AIzaSyCaVrygESDPqly9YFsUbEHBQ8W-2jqG0lo',
+      path: 'https://sheets.googleapis.com/v4/spreadsheets/12kyxBUTvs8V2-kWculIjscB8PpaTNY2Y3POVrnSus3w?ranges=A1&fields=sheets(data.rowData.values)&key='+credentials.GoogleAPI.key,
       method: 'GET',
       json: true,
     };

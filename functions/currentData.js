@@ -8,6 +8,7 @@ const timetableLogic = require('../functions/timetableLogic');
 
 // =======API=======
 let kiwirailAPI;
+let maximoAPI;
 let metserviceAPI;
 let vdsRosterAPI;
 let compassAPI;
@@ -19,6 +20,7 @@ const path = require('path');
 const credentialPath = path.join(__dirname, '..', 'credentials.js');
 if (fs.existsSync(credentialPath)) {
   kiwirailAPI = require('../api/kiwirailAPI');
+  maximoAPI = require('../api/maximoAPI');
   metserviceAPI = require('../api/metserviceAPI');
   vdsRosterAPI = require('../api/vdsRosterAPI');
   compassAPI = require('../api/compassAPI');
@@ -62,6 +64,10 @@ module.exports = class CurrentData {
         message: '',
         updateTime: moment('1970-01-01'),
       },
+      MAXIMO: {
+        message: '',
+        updateTime: moment('1970-01-01'),
+      },
     };
     // geVis token to get Vehciles from Kiwirail
     if (alternativeToken) {
@@ -73,11 +79,20 @@ module.exports = class CurrentData {
         pending: false,
       };
     }
+    this.maximoTokens = {
+      token: undefined,
+      updateTime: moment('1970-01-01'),
+      pending: false,
+    };
     this.creationTime = moment();
     this.geVisVehicles = [];
     this.runningServices = [];
     this.unitList = [];
     this.carList = [];
+    this.NISList = {
+      list: [],
+      updated: moment('1970-01-01'),
+    };
     this.rosterDuties = [];
     this.rosterDutiesLastUpdated = moment('1970-01-01');
     this.rosterDayStatus = [];
@@ -114,6 +129,10 @@ module.exports = class CurrentData {
         this.status.METSERVICE.message = result;
         this.status.METSERVICE.updateTime = moment();
       });
+      maximoAPI.checkAPI(this.maximoTokens).then((result) => {
+        this.status.MAXIMO.message = result;
+        this.status.MAXIMO.updateTime = moment();
+      });
     }
   }
   /**
@@ -129,6 +148,24 @@ module.exports = class CurrentData {
     }
     if (this.geVisToken.token == undefined ||
       this.geVisToken.updateTime < moment().subtract(lifespan, 'minutes')) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+  /**
+   * checks to see if the current Maximo token is valid
+   * if full debug it just returns true
+   * @return {boolean} valid or not
+   */
+  maximoTokenValid() {
+    const fullDebugMode = this.functionFlags.fullDebugMode;
+    const lifespan = this.applicationSettings.maximoTokenLifespan;
+    if (fullDebugMode) {
+      return true;
+    }
+    if (this.maximoTokens.token == undefined ||
+      this.maximoTokens.updateTime < moment().subtract(lifespan, 'minutes')) {
       return false;
     } else {
       return true;
@@ -152,6 +189,26 @@ module.exports = class CurrentData {
       }).catch((error) => {
         this.geVisToken.pending = false;
         this.pilotLog('GeVis token retreval ' + error);
+      });
+    }
+  }
+  /**
+   * updates the geVis token using puppeteer
+   */
+  updateMaximoTokens() {
+    const tokenPending = this.maximoTokens.pending;
+    if (!tokenPending) {
+      // get new token using puppeteer
+      this.maximoTokens.pending = true;
+      this.pilotLog('Maximo Auth Token Retrival Begun');
+      puppeteerOps.getMaximoTokens().then((result) => {
+        this.maximoTokens.pending = false;
+        this.maximoTokens.token = result;
+        this.maximoTokens.updateTime = moment();
+        this.pilotLog('Maximo Auth Token Retrieved Ok');
+      }).catch((error) => {
+        this.maximoTokens.pending = false;
+        this.pilotLog('Maximo token retreval ' + error);
       });
     }
   }
@@ -180,6 +237,24 @@ module.exports = class CurrentData {
         this.geVisVehicles = dummyData.geVisVehicles;
         this.pilotLog('TEST GeVis Vehicles loaded ok');
         resolve();
+      }
+    });
+  }
+  /**
+   * updates the NIS list from Maximo if token is valid
+   * @return {Promise}
+   */
+  updateNISList() {
+    return new Promise((resolve, reject) => {
+      if (this.maximoTokenValid()) {
+        maximoAPI.maximoNISList(this.maximoTokens).then((result) => {
+          this.NISList = result;
+          this.pilotLog('Maximo NIS List loaded ok');
+          resolve();
+        }).catch((error) => {
+          this.pilotLog(error);
+          resolve();
+        });
       }
     });
   }

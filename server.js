@@ -37,6 +37,7 @@ if (productionFlag) {
 const applicationSettings = {
   // lifespans for data in minutes
   tokenLifespan: 60,
+  maximoTokenLifespan: 120,
   rosterDutiesLifespan: 10,
   rosterDayStatusLifespan: 5,
   busReplacementListLifespan: 5,
@@ -111,6 +112,13 @@ function refreshData() {
     });
   } else {
     data.updateToken();
+  }
+  // update Maximo based data
+  if (data.maximoTokenValid()) {
+    // update NIS List from Maximo
+    data.updateNISList();
+  } else {
+    data.updateMaximoTokens();
   }
   // update Compass based data where appropriate
   // also update staff List from Pilot DB 9same time)

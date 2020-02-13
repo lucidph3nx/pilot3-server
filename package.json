@@ -11,12 +11,14 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.3",
+    "html-entities": "^1.2.1",
     "knex": "^0.18.3",
     "moment-timezone": "^0.5.26",
     "mssql": "^4.1.0",
     "npm": "^6.13.6",
-    "puppeteer": "^1.18.1",
-    "sharp": "^0.23.4"
+    "puppeteer": "^1.20.0",
+    "sharp": "^0.23.4",
+    "xml2js": "^0.4.23"
   },
   "devDependencies": {
     "eslint": "^6.0.1",
