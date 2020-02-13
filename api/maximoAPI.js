@@ -64,14 +64,14 @@ module.exports = {
                     item.status = value;
                     break;
                   case 'Unit':
-                    item.unit = value
+                    item.unit = value;
                     break;
                   case 'NIS/Rst Detail':
                     item.NIS = value.includes('NIS');
                     item.plannedNIS = value.includes('NIS') && value.includes('Planned');
                     item.unplannedNIS = value.includes('NIS') && value.includes('Unplanned');
                     item.restricted = !value.includes('NIS');
-                    item.detail = value
+                    item.detail = value;
                     break;
                   case 'Description':
                     item.description = value;
