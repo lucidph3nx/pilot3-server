@@ -172,6 +172,21 @@ module.exports = class CurrentData {
     }
   }
   /**
+   * checks if NIS List is valid
+   * and up to date
+   * @return {boolean} valid or not
+   */
+  listNISValid() {
+    const lifespan = this.applicationSettings.NISListLifespan;
+    const uptoDate = (this.NISList.updated > moment().subtract(lifespan, 'minutes'));
+    const empty = (this.NISList.list.length == 0);
+    if (uptoDate & !empty) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  /**
    * updates the geVis token using puppeteer
    */
   updateToken() {

@@ -37,7 +37,8 @@ if (productionFlag) {
 const applicationSettings = {
   // lifespans for data in minutes
   tokenLifespan: 60,
-  maximoTokenLifespan: 120,
+  maximoTokenLifespan: 1,
+  NISListLifespan: 1,
   rosterDutiesLifespan: 10,
   rosterDayStatusLifespan: 5,
   busReplacementListLifespan: 5,
@@ -116,7 +117,9 @@ function refreshData() {
   // update Maximo based data
   if (data.maximoTokenValid()) {
     // update NIS List from Maximo
-    data.updateNISList();
+    if (!data.listNISValid()) {
+      data.updateNISList();
+    }
   } else {
     data.updateMaximoTokens();
   }
