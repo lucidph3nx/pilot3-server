@@ -80,6 +80,7 @@ module.exports = {
   holisticReportCodes: [
     {dayType: 'OFF', colour: '#C8C8C8'},
     {dayType: 'SICK', colour: '#FF0000'},
+    {dayType: 'ALT', colour: '#FF6781'},
     {dayType: 'STAT', colour: '#538ed5'},
     {dayType: 'LEAVE', colour: '#339966'},
     {dayType: 'ASL', colour: '#CC99FF'},

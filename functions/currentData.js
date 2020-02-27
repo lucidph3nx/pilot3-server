@@ -215,12 +215,11 @@ module.exports = class CurrentData {
     if (!tokenPending) {
       // get new token using puppeteer
       this.maximoTokens.pending = true;
-      this.pilotLog('Maximo Auth Token Retrival Begun');
       puppeteerOps.getMaximoTokens().then((result) => {
         this.maximoTokens.pending = false;
         this.maximoTokens.token = result;
         this.maximoTokens.updateTime = moment();
-        this.pilotLog('Maximo Auth Token Retrieved Ok');
+        this.pilotLog('Maximo Auth Updated');
       }).catch((error) => {
         this.maximoTokens.pending = false;
         this.pilotLog('Maximo token retreval ' + error);

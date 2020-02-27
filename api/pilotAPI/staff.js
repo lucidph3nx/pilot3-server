@@ -73,7 +73,7 @@ module.exports = function(app, current, functionFlags) {
   });
   // get holistic year report for staff member
   app.get('/api/staff/holisticYear', (request, response) => {
-    // nzRailConventions
+    let counters = [];
     const staffId = request.query.staffId;
     const startDate = moment(request.query.year+'-01-01').format('YYYY-MM-DD');
     const endDate = moment(request.query.year+'-01-01')
@@ -116,6 +116,19 @@ module.exports = function(app, current, functionFlags) {
           'totalHoursNumber': totalHoursNumber,
         };
         holisticYear.push(entry);
+        let colour;
+        for (let i = 0; i < nzRailConventions.holisticReportCodes.length; i++) {
+          if (nzRailConventions.holisticReportCodes[i].dayType == dayType) {
+            colour = nzRailConventions.holisticReportCodes[i].colour;
+          }
+        }
+        if (dayType !== 'WORK' && dayType !== 'OFF') {
+          if (dayType == 'GEWP') {
+            counters = incrementCounter('GEWP', colour, counters);
+          } else {
+            counters = incrementCounter(data[i].dayCode, colour, counters);
+          }
+        }
       }
       let leaveTotal = 0;
       let sickTotal = 0;
@@ -133,6 +146,7 @@ module.exports = function(app, current, functionFlags) {
         'year': moment(data[0].date).format('YYYY'),
         'sickToLeaveRatio': sickToLeaveRatio,
         'holisticYearData': holisticYear,
+        'holisticYearCounters': counters,
         'dayCodes': nzRailConventions.holisticReportCodes,
       };
       response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
@@ -161,3 +175,21 @@ module.exports = function(app, current, functionFlags) {
     response.end();
   });
 };
+/**
+ * incrememnts counters in the counters array
+ * if code does not exist it is added
+ * @param {string} code
+ * @param {string} colour
+ * @param {array} counters
+ * @return {array} counters
+ */
+function incrementCounter(code, colour, counters) {
+  for (let i = 0; i < counters.length; i++) {
+    if (counters[i].code === code) {
+      counters[i].count++;
+      return counters;
+    }
+  }
+  counters.push({code: code, colour: colour, count: 1});
+  return counters;
+}
