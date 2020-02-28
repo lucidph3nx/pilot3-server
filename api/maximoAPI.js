@@ -93,6 +93,7 @@ module.exports = {
                           break;
                         case 'Unit':
                           item.unit = value;
+                          item.matangi = (value.substring(0, 2) == 'F-');
                           break;
                         case 'NIS/Rst Detail':
                           item.NIS = value.includes('NIS');

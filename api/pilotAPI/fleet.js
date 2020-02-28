@@ -27,10 +27,14 @@ module.exports = function(app, current, functionFlags) {
   // get the current NIS List
   app.get('/api/fleet/currentNISList', (request, response) => {
     const currentNISList = [];
-    current.NISList.list.forEach((unit) =>
-      currentNISList.push(unit)
-    );
-    const apiResponse = {'Time': moment(current.NISList.updated).format(), currentNISList};
+    let matangiNISCount = 0
+    current.NISList.list.forEach((unit) => {
+      currentNISList.push(unit);
+      if (unit.matangi && unit.NIS) {
+        matangiNISCount++;
+      }
+    });
+    const apiResponse = {'Time': moment(current.NISList.updated).format(), currentNISList, matangiNISCount};
     response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
     response.write(JSON.stringify(apiResponse));
     response.end();
