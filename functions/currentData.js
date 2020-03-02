@@ -259,11 +259,17 @@ module.exports = class CurrentData {
    * @return {Promise}
    */
   updateNISList() {
+    const logging = this.functionFlags.pilotSQLLogging;
     return new Promise((resolve, reject) => {
       if (this.maximoTokenValid()) {
         maximoAPI.maximoNISList(this.maximoTokens).then((result) => {
           this.NISList = result;
           this.pilotLog('Maximo NIS List loaded ok');
+          if (logging) {
+            this.NISList.list.forEach(function(workOrder) {
+              PilotSQLLog.logSQL.notInService(workOrder);
+            });
+          }
           resolve();
         }).catch((error) => {
           this.pilotLog(error);

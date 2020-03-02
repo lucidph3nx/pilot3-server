@@ -98,6 +98,40 @@ module.exports = {
         console.log(error);
       });
     },
+    notInService: function(workOrder) {
+      return new Promise((resolve, reject) => {
+        knex.select()
+            .table('pilot.notInServiceLog')
+            .where('WorkOrderId', workOrder.workOrderId)
+            .then(function(response) {
+              if (response.length !== 0) {
+              // update
+                knex.update({updatedDate: moment().format('YYYY-MM-DD HH:mm:ss')})
+                    .table('pilot.notInServiceLog')
+                    .where({workOrderId: workOrder.workOrderId});
+              } else {
+                const temp = {
+                  workOrderId: workOrder.workOrderId,
+                  unit: workOrder.unit,
+                  matangi: workOrder.matangi ? 1 : 0,
+                  NIS: workOrder.NIS ? 1 : 0,
+                  plannedNIS: workOrder.plannedNIS ? 1 : 0,
+                  unplannedNIS: workOrder.unplannedNIS ? 1 : 0,
+                  restricted: workOrder.restricted ? 1 : 0,
+                  detail: workOrder.detail,
+                  description: workOrder.description,
+                  reportedDate: moment(workOrder.reportedDate).format('YYYY-MM-DD HH:mm:ss'),
+                  updatedDate: moment().format('YYYY-MM-DD HH:mm:ss'),
+                };
+                knex.insert(temp).into('pilot.notInServiceLog').then(function(result) {
+                  resolve();
+                });
+              }
+            });
+      }).catch((error) => {
+        console.log(error);
+      });
+    },
   },
   getStaffList: function() {
     return new Promise((resolve, reject) => {

@@ -27,7 +27,7 @@ module.exports = function(app, current, functionFlags) {
   // get the current NIS List
   app.get('/api/fleet/currentNISList', (request, response) => {
     const currentNISList = [];
-    let matangiNISCount = 0
+    let matangiNISCount = 0;
     current.NISList.list.forEach((unit) => {
       currentNISList.push(unit);
       if (unit.matangi && unit.NIS) {
