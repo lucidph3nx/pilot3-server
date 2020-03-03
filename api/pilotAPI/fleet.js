@@ -1,5 +1,6 @@
 const moment = require('moment-timezone');
 moment().tz('Pacific/Auckland').format();
+const PilotSQLLog = require('../../api/pilotSQLLog');
 
 module.exports = function(app, current, functionFlags) {
   // get the status for all Matangi Train Units
@@ -38,5 +39,26 @@ module.exports = function(app, current, functionFlags) {
     response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
     response.write(JSON.stringify(apiResponse));
     response.end();
+  });
+  // get a historical NIS Report
+  app.get('/api/fleet/historicNIS', (request, response) => {
+    const requestedDay = moment(request.query.date);
+    let dayNISList;
+    let graphNISData;
+    let apiResponse;
+    PilotSQLLog.dayNISList(requestedDay).then((resultDay) => {
+      PilotSQLLog.dayNISgraph(requestedDay).then((resultGraphData) => {
+        dayNISList = resultDay;
+        graphNISData = resultGraphData;
+        apiResponse = {'Time': moment(), 'requestedDay': requestedDay, graphNISData, dayNISList};
+        response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+        response.write(JSON.stringify(apiResponse));
+        response.end();
+      }).catch((error) => {
+        console.log(error);
+      });
+    }).catch((error) => {
+      console.log(error);
+    });
   });
 };

@@ -108,7 +108,9 @@ module.exports = {
               // update
                 knex.update({updatedDate: moment().format('YYYY-MM-DD HH:mm:ss')})
                     .table('pilot.notInServiceLog')
-                    .where({workOrderId: workOrder.workOrderId});
+                    .where({workOrderId: workOrder.workOrderId}).then(function(result) {
+                      resolve();
+                    });
               } else {
                 const temp = {
                   workOrderId: workOrder.workOrderId,
@@ -152,6 +154,56 @@ module.exports = {
               currentStaffList.push(staffMember);
             }
             resolve(currentStaffList);
+          });
+    });
+  },
+  dayNISgraph: function(date) {
+    return new Promise((resolve, reject) => {
+      const requestDate = moment.utc(date).format('YYYY-MM-DD HH:mm:ss');
+      const graphNISData = [];
+      knex.raw('EXECUTE [pilot].[graphNIS] ?', requestDate)
+          .then(function(response) {
+            for (let s = 0; s < response.length; s++) {
+              if (moment.utc(response[s].hour, 'YYYY-MM-DD HH:mm:ss').isAfter(moment.utc()) == false) {
+                const dataPoint = {
+                  dateTime: moment.utc(response[s].hour),
+                  countNIS: response[s].countNIS,
+                  available: response[s].available,
+                };
+                graphNISData.push(dataPoint);
+              }
+            }
+            resolve(graphNISData);
+          });
+    });
+  },
+  dayNISList: function(date) {
+    return new Promise((resolve, reject) => {
+      const requestDateStart = moment(date).format('YYYY-MM-DD HH:mm:ss');
+      const requestDateEnd = moment(date).add(1, 'day').format('YYYY-MM-DD HH:mm:ss');
+      const dayNISData = [];
+      knex.select()
+          .table('pilot.notInServiceLog')
+          .where('reportedDate', '<', requestDateEnd)
+          .andWhere('updatedDate', '>', requestDateStart)
+          .then(function(response) {
+            for (let s = 0; s < response.length; s++) {
+              const WorkOrder = {
+                workOrderId: response[s].workOrderId,
+                unit: response[s].unit,
+                matangi: response[s].matangi ? true : false,
+                NIS: response[s].NIS ? true : false,
+                plannedNIS: response[s].plannedNIS ? true : false,
+                unplannedNIS: response[s].unplannedNIS ? true : false,
+                restricted: response[s].restricted ? true : false,
+                detail: response[s].detail,
+                description: response[s].description,
+                reportedDate: response[s].reportedDate,
+                updatedDate: response[s].updatedDate,
+              };
+              dayNISData.push(WorkOrder);
+            }
+            resolve(dayNISData);
           });
     });
   },

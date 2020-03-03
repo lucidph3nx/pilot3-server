@@ -129,6 +129,8 @@ module.exports = {
       });
       postRequest.write('');
       postRequest.end();
+    }).catch((error) => {
+      console.log(error);
     });
   },
   checkAPI: function(maximoTokens) {
