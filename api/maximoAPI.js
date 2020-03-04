@@ -64,56 +64,60 @@ module.exports = {
                 chunks.push(chunk);
               });
               res.on('end', function() {
-                const body = Buffer.concat(chunks);
-                const xml = entities.decode(body.toString());
-                parseString(xml, function(err, result) {
+                try {
+                  const body = Buffer.concat(chunks);
+                  const xml = entities.decode(body.toString());
+                  parseString(xml, function(err, result) {
                   // eslint-disable-next-line max-len
-                  const timeUpdated = result['soapenv:Envelope']['soapenv:Body'][0]['GetUpdatedObjectsResponse'][0]['Update'][0]['UpdateContent'][0]['Content'][0]['div'][0]['table'][0]['tr'][2]['td'][0]['table'][0]['tr'][0]['td'][0]['div'][0]['_'];
-                  // eslint-disable-next-line max-len
-                  const table = result['soapenv:Envelope']['soapenv:Body'][0]['GetUpdatedObjectsResponse'][0]['Update'][0]['UpdateContent'][0]['Content'][0]['div'][0]['table'][0]['tr'][1]['td'][0]['table'][2]['tr'];
-                  const tableHeaders = table[0]['th'];
-                  const headers = [];
-                  const listNIS = {
-                    list: [],
-                    updated: moment(timeUpdated, 'DD.MM.YYYY hh:mm:ss'),
-                  };
-                  for (let i = 0; i < tableHeaders.length; i++) {
-                    headers.push(tableHeaders[i]['div'][0]['_']);
-                  }
-                  for (let i = 1; i < table.length; i++) {
-                    const item = {};
-                    for (let h = 0; h < headers.length; h++) {
-                      const value = table[i]['td'][h]['div'][0];
-                      switch (headers[h]) {
-                        case 'Workorder No':
-                          item.workOrderId = value;
-                          break;
-                        case 'Status':
-                          item.status = value;
-                          break;
-                        case 'Unit':
-                          item.unit = value;
-                          item.matangi = (value.substring(0, 2) == 'F-');
-                          break;
-                        case 'NIS/Rst Detail':
-                          item.NIS = value.includes('NIS');
-                          item.plannedNIS = value.includes('NIS') && value.includes('Planned');
-                          item.unplannedNIS = value.includes('NIS') && value.includes('Unplanned');
-                          item.restricted = !value.includes('NIS');
-                          item.detail = value;
-                          break;
-                        case 'Description':
-                          item.description = value;
-                          break;
-                        case 'Reported Date':
-                          item.reportedDate = moment(value, 'DD.MM.YYYY hh:mm:ss').format();
-                          break;
-                      }
+                    const timeUpdated = result['soapenv:Envelope']['soapenv:Body'][0]['GetUpdatedObjectsResponse'][0]['Update'][0]['UpdateContent'][0]['Content'][0]['div'][0]['table'][0]['tr'][2]['td'][0]['table'][0]['tr'][0]['td'][0]['div'][0]['_'];
+                    // eslint-disable-next-line max-len
+                    const table = result['soapenv:Envelope']['soapenv:Body'][0]['GetUpdatedObjectsResponse'][0]['Update'][0]['UpdateContent'][0]['Content'][0]['div'][0]['table'][0]['tr'][1]['td'][0]['table'][2]['tr'];
+                    const tableHeaders = table[0]['th'];
+                    const headers = [];
+                    const listNIS = {
+                      list: [],
+                      updated: moment(timeUpdated, 'DD.MM.YYYY hh:mm:ss'),
+                    };
+                    for (let i = 0; i < tableHeaders.length; i++) {
+                      headers.push(tableHeaders[i]['div'][0]['_']);
                     }
-                    listNIS.list.push(item);
-                  }
-                  resolve(listNIS);
-                });
+                    for (let i = 1; i < table.length; i++) {
+                      const item = {};
+                      for (let h = 0; h < headers.length; h++) {
+                        const value = table[i]['td'][h]['div'][0];
+                        switch (headers[h]) {
+                          case 'Workorder No':
+                            item.workOrderId = value;
+                            break;
+                          case 'Status':
+                            item.status = value;
+                            break;
+                          case 'Unit':
+                            item.unit = value;
+                            item.matangi = (value.substring(0, 2) == 'F-');
+                            break;
+                          case 'NIS/Rst Detail':
+                            item.NIS = value.includes('NIS');
+                            item.plannedNIS = value.includes('NIS') && value.includes('Planned');
+                            item.unplannedNIS = value.includes('NIS') && value.includes('Unplanned');
+                            item.restricted = !value.includes('NIS');
+                            item.detail = value;
+                            break;
+                          case 'Description':
+                            item.description = value;
+                            break;
+                          case 'Reported Date':
+                            item.reportedDate = moment(value, 'DD.MM.YYYY hh:mm:ss').format();
+                            break;
+                        }
+                      }
+                      listNIS.list.push(item);
+                    }
+                    resolve(listNIS);
+                  });
+                } catch (err) {
+                  console.log(err);
+                }
               });
               res.on('error', function(error) {
                 console.error(error);

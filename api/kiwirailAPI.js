@@ -67,7 +67,7 @@ module.exports = {
             if (geVisVehicles.error !== undefined && geVisVehicles.error.code == 498) {
               status = 'GeVis Token Invalid Or Expired';
             }
-            if (geVisVehicles.features !== [] && status == 'Connection OK') {
+            if (geVisVehicles.features !== [] && geVisVehicles.features !== undefined && status == 'Connection OK') {
               let mostUpToDateTrain;
               let latestPing = 0;
               for (let i = 0; i < geVisVehicles.features.length; i++) {
