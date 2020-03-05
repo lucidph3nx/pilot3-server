@@ -613,5 +613,27 @@ module.exports = {
           );
     });
   },
+  getAvailableLeave: function(dateFrom, dateTo, staffType, location) {
+    return new Promise((resolve, reject) => {
+      const requestDateFrom = moment.utc(dateFrom).format('YYYY-MM-DD');
+      const requestDateTo = moment.utc(dateTo).format('YYYY-MM-DD');
+      const availableLeave = [];
+      knex.raw('EXECUTE [dbo].[getAvailableLeave]  ?, ?, ?, ?', [requestDateFrom, requestDateTo, staffType, location])
+          .then(function(response) {
+            for (let s = 0; s < response.length; s++) {
+              const dataPoint = {
+                date: response[s].date,
+                staffType: response[s].staffType,
+                location: response[s].location,
+                limit: response[s].limit,
+                leaveCount: response[s].leaveCount,
+                availableLeave: response[s].availableLeave,
+              };
+              availableLeave.push(dataPoint);
+            }
+            resolve(availableLeave);
+          });
+    });
+  },
   // other exports here
 };

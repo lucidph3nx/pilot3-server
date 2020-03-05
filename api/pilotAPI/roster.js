@@ -133,4 +133,17 @@ module.exports = function(app, current, functionFlags) {
     response.write(JSON.stringify(apiResponse));
     response.end();
   });
+  // get a list of available leave dates
+  app.get('/api/roster/availableLeave', (request, response) => {
+    const dateFrom = request.query.dateFrom;
+    const dateTo = request.query.dateTo;
+    const staffType = request.query.staffType;
+    const location = request.query.location;
+    vdsRosterAPI.getAvailableLeave(dateFrom, dateTo, staffType, location).then((availableLeave) => {
+      const apiResponse = {'Time': moment(), availableLeave};
+      response.writeHead(200, {'Content-Type': 'application/json'}, {cache: false});
+      response.write(JSON.stringify(apiResponse));
+      response.end();
+    });
+  });
 };
