@@ -29,7 +29,7 @@ module.exports = {
       // disable cache to ensure fresh log in each time
       await page.setCacheEnabled(false);
       // navigate to GeVis page
-      await page.goto('https://gis.kiwirail.co.nz/maps/?viewer=gevis', {waitUntil: 'networkidle0'});
+      await page.goto('https://gis.kiwirail.co.nz/maps/?viewer=gevis', { waitUntil: 'networkidle0' });
       await page.click('[value="External Identity"]');
       await page.waitForSelector('#UserName');
       await page.type('#UserName', credentials.GeVis.username);
@@ -57,16 +57,18 @@ module.exports = {
         }
       });
       await page.waitForRequest('https://gis.kiwirail.co.nz/maps/Resources/Compiled/Alert.js');
-      // // code to close browser on timeout
-      // new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 60000)).catch((error) => {
-      //   browser.close();
-      //   console.log(error);
-      // });
+      // code to close browser on timeout
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 60000)).catch((error) => {
+        browser.close();
+        console.log(error);
+      });
       await browser.close();
       return thisgeVisToken;
     })().catch((error) => {
       browser.close();
       console.log(error);
+    }).finally(function () {
+      browser.close();
     });
   },
   /**
@@ -89,6 +91,11 @@ module.exports = {
       const browser = await puppeteer.launch(options);
       const page = await browser.newPage();
       await page.setCacheEnabled(false);
+      // code to close browser on timeout
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 20000)).catch((error) => {
+        browser.close();
+        console.log(error);
+      });
       await page.goto('http://192.168.103.11/maximo/webclient/login/login.jsp');
       await page.waitForSelector('#username');
       await page.type('#username', credentials.Maximo.username),
@@ -126,8 +133,8 @@ module.exports = {
       await browser.close();
       return tokens;
     })().catch((error) => {
-      browser.close();
       console.log(error);
+      browser.close();
     });
   },
 };
