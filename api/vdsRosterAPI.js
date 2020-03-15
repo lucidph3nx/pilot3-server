@@ -623,10 +623,11 @@ module.exports = {
             for (let s = 0; s < response.length; s++) {
               const dataPoint = {
                 date: response[s].date,
+                dateString: moment(response[s].date).format('DD/MM/YYYY'),
                 staffType: response[s].staffType,
                 location: response[s].location,
                 limit: response[s].limit,
-                leaveCount: response[s].leaveCount,
+                leaveCount: response[s].leaveCount > response[s].limit ? response[s].limit : response[s].leaveCount,
                 availableLeave: response[s].availableLeave,
               };
               availableLeave.push(dataPoint);

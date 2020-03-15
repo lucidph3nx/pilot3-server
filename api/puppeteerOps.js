@@ -29,7 +29,7 @@ module.exports = {
       // disable cache to ensure fresh log in each time
       await page.setCacheEnabled(false);
       // navigate to GeVis page
-      await page.goto('https://gis.kiwirail.co.nz/maps/?viewer=gevis', { waitUntil: 'networkidle0' });
+      await page.goto('https://gis.kiwirail.co.nz/maps/?viewer=gevis', {waitUntil: 'networkidle0'});
       await page.click('[value="External Identity"]');
       await page.waitForSelector('#UserName');
       await page.type('#UserName', credentials.GeVis.username);
@@ -67,7 +67,7 @@ module.exports = {
     })().catch((error) => {
       browser.close();
       console.log(error);
-    }).finally(function () {
+    }).finally(function() {
       browser.close();
     });
   },
