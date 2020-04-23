@@ -17,7 +17,7 @@ module.exports = {
     return new Promise(function(resolve, reject) {
       const options = {
         'method': 'POST',
-        'hostname': '192.168.103.11',
+        'hostname': '122.56.83.157',
         'path': '/maximo/report?__report=Z51_WONTRList.rptdesign&appname=PLUSTWO' +
           '&__requestid=' + tokens.__requestid +
           '&uisessionid=' + tokens.uisessionid +
@@ -40,7 +40,7 @@ module.exports = {
           resolve(new Promise(function(resolve, reject) {
             const options = {
               'method': 'POST',
-              'hostname': '192.168.103.11',
+              'hostname': '122.56.83.157',
               'path': '/maximo/report?__report=Z51_WONTRList.rptdesign&appname=PLUSTWO' +
                 '&__requestid=' + tokens.__requestid +
                 '&uisessionid=' + tokens.uisessionid +
