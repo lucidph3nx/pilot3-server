@@ -96,14 +96,14 @@ module.exports = {
         browser.close();
         console.log(error);
       });
-      await page.goto('http://192.168.103.11/maximo/webclient/login/login.jsp');
+      await page.goto('http://122.56.83.157/maximo/webclient/login/login.jsp');
       await page.waitForSelector('#username');
       await page.type('#username', credentials.Maximo.username),
       await page.type('#password', credentials.Maximo.password),
       await page.click('#loginbutton'),
       // eslint-disable-next-line max-len
-      await page.waitForRequest('http://192.168.103.11/maximo/webclient/skins/skins-20161213-2009/tivoli13/images/btn_nextpage.gif');
-      await page.goto('http://192.168.103.11/maximo/ui/?event=loadapp&value=plustwo');
+      await page.waitForRequest('http://122.56.83.157/maximo/webclient/skins/skins-20161213-2009/tivoli13/images/btn_nextpage.gif');
+      await page.goto('http://122.56.83.157/maximo/ui/?event=loadapp&value=plustwo');
       await page.evaluate(() => {
         console.log(sendEvent('click', 'toolbar2_tbs_1_tbcb_0_action-img', null));
       });
@@ -120,7 +120,7 @@ module.exports = {
         console.log(sendEvent('click', 'mefedc979-pb', ''));
       });
       // eslint-disable-next-line max-len
-      const newTab = await browser.waitForTarget((target) => target.url().startsWith('http://192.168.103.11/maximo/report'));
+      const newTab = await browser.waitForTarget((target) => target.url().startsWith('http://122.56.83.157/maximo/report'));
       const newPage = await newTab.page();
       const reportURL = await newPage.url();
       const stringarray = reportURL.split('?');
