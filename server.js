@@ -114,15 +114,15 @@ function refreshData() {
   } else {
     data.updateToken();
   }
-  // update Maximo based data
-  if (data.maximoTokenValid()) {
-    // update NIS List from Maximo
-    if (!data.listNISValid()) {
-      data.updateNISList();
-    }
-  } else {
-    data.updateMaximoTokens();
-  }
+  // // update Maximo based data - disabled by request of Hyundai-Rotem
+  // if (data.maximoTokenValid()) {
+  //   // update NIS List from Maximo
+  //   if (!data.listNISValid()) {
+  //     data.updateNISList();
+  //   }
+  // } else {
+  //   data.updateMaximoTokens();
+  // }
   // update Compass based data where appropriate
   // also update staff List from Pilot DB 9same time)
   if (!data.timetableValid()) {
