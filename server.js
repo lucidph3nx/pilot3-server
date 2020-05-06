@@ -106,11 +106,11 @@ function refreshData() {
     data.updateToken();
   }
   // update Maximo based data
-  if (!data.listNISValid()) {
-    data.updateMaximoTokens().then(() => {
-      data.updateNISList();
-    });
-  }
+  // if (!data.listNISValid()) {
+  //   data.updateMaximoTokens().then(() => {
+  //     data.updateNISList();
+  //   });
+  // }
   // update Compass based data where appropriate
   // also update staff List from Pilot DB 9same time)
   if (!data.timetableValid()) {
