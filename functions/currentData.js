@@ -154,24 +154,6 @@ module.exports = class CurrentData {
     }
   }
   /**
-   * checks to see if the current Maximo token is valid
-   * if full debug it just returns true
-   * @return {boolean} valid or not
-   */
-  maximoTokenValid() {
-    const fullDebugMode = this.functionFlags.fullDebugMode;
-    const lifespan = this.applicationSettings.maximoTokenLifespan;
-    if (fullDebugMode) {
-      return true;
-    }
-    if (this.maximoTokens.token == undefined ||
-      this.maximoTokens.updateTime < moment().subtract(lifespan, 'minutes')) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-  /**
    * checks if NIS List is valid
    * and up to date
    * @return {boolean} valid or not

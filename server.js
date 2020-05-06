@@ -8,7 +8,6 @@ const CurrentData = require('./functions/currentData');
 // =======express=======
 const express = require('express');
 const app = express();
-const dmck = require('./api/dmck')(app);
 
 // =======environment=======
 const os = require('os');
@@ -25,7 +24,6 @@ const functionFlags = {
   debugDataToUse: '20190723082606', // '20190722091137',
   workingOffsiteMode: false, // run with GeVis but no Compass or VDS -- DOES NOT WORK YET
   snapshotMode: false,
-  authorised: false,
 };
 if (productionFlag) {
   // production defaults, regardless of settings
@@ -37,7 +35,6 @@ if (productionFlag) {
 const applicationSettings = {
   // lifespans for data in minutes
   tokenLifespan: 60,
-  maximoTokenLifespan: 1,
   NISListLifespan: 1,
   rosterDutiesLifespan: 10,
   rosterDayStatusLifespan: 5,
@@ -55,9 +52,6 @@ const alternativeToken = {
 const data = new CurrentData(functionFlags, applicationSettings, alternativeToken);
 // =======API=======
 require('./api/pilotAPI')(app, data, functionFlags);
-dmck.then((response) => {
-  functionFlags.authorised = response;
-});
 
 // begin server
 refreshData();
@@ -65,9 +59,6 @@ refreshData();
  * Function to maintain current data for all dependancies
  */
 function refreshData() {
-  dmck.then((response) => {
-    functionFlags.authorised = response;
-  });
   // Take test data snapshot
   if (functionFlags.snapshotMode) {
     if (data.tokenValid()
@@ -114,15 +105,12 @@ function refreshData() {
   } else {
     data.updateToken();
   }
-  // // update Maximo based data - disabled by request of Hyundai-Rotem
-  // if (data.maximoTokenValid()) {
-  //   // update NIS List from Maximo
-  //   if (!data.listNISValid()) {
-  //     data.updateNISList();
-  //   }
-  // } else {
-  //   data.updateMaximoTokens();
-  // }
+  // update Maximo based data
+  if (!data.listNISValid()) {
+    data.updateMaximoTokens().then(() => {
+      data.updateNISList();
+    });
+  }
   // update Compass based data where appropriate
   // also update staff List from Pilot DB 9same time)
   if (!data.timetableValid()) {
