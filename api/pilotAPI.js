@@ -31,15 +31,6 @@ module.exports = function(app, current, functionFlags) {
     }
   });
 
-  app.use(function(req, res, next) {
-    if (functionFlags.authorised) {
-      next();
-    } else {
-      console.log('Unauthorised Error');
-      res.status(500).send('Unauthorised Error');
-    }
-  });
-
   // =======PilotAPIModules========
   require('./pilotAPI/fleet')(app, current, functionFlags);
   // require('./pilotAPI/location')(app, current, functionFlags);
