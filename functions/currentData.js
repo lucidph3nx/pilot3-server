@@ -190,28 +190,30 @@ module.exports = class CurrentData {
     }
   }
   /**
-   * updates the geVis token using puppeteer
+   * updates the maximo token using puppeteer
    * @return {Promise}
    */
   updateMaximoTokens() {
     const tokenPending = this.maximoTokens.pending;
-    if (!tokenPending) {
-      // get new token using puppeteer
-      return new Promise((resolve, reject) => {
+    // get new token using puppeteer
+    return new Promise((resolve, reject) => {
+      if (!tokenPending) {
         this.maximoTokens.pending = true;
         puppeteerOps.getMaximoTokens().then((result) => {
           this.maximoTokens.pending = false;
           this.maximoTokens.token = result;
           this.maximoTokens.updateTime = moment();
           this.pilotLog('Maximo Auth Updated');
-          resolve()
+          resolve();
         }).catch((error) => {
           this.maximoTokens.pending = false;
           this.pilotLog('Maximo token retreval ' + error);
-          resolve()
+          resolve();
         });
-      });
-    }
+      } else {
+        resolve();
+      }
+    });
   }
   /**
    * updates the vehicle list from GeVis if token is valid
