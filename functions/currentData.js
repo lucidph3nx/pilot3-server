@@ -191,20 +191,25 @@ module.exports = class CurrentData {
   }
   /**
    * updates the geVis token using puppeteer
+   * @return {Promise}
    */
   updateMaximoTokens() {
     const tokenPending = this.maximoTokens.pending;
     if (!tokenPending) {
       // get new token using puppeteer
-      this.maximoTokens.pending = true;
-      puppeteerOps.getMaximoTokens().then((result) => {
-        this.maximoTokens.pending = false;
-        this.maximoTokens.token = result;
-        this.maximoTokens.updateTime = moment();
-        this.pilotLog('Maximo Auth Updated');
-      }).catch((error) => {
-        this.maximoTokens.pending = false;
-        this.pilotLog('Maximo token retreval ' + error);
+      return new Promise((resolve, reject) => {
+        this.maximoTokens.pending = true;
+        puppeteerOps.getMaximoTokens().then((result) => {
+          this.maximoTokens.pending = false;
+          this.maximoTokens.token = result;
+          this.maximoTokens.updateTime = moment();
+          this.pilotLog('Maximo Auth Updated');
+          resolve()
+        }).catch((error) => {
+          this.maximoTokens.pending = false;
+          this.pilotLog('Maximo token retreval ' + error);
+          resolve()
+        });
       });
     }
   }
