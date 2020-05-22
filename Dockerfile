@@ -4,8 +4,9 @@ WORKDIR /home/node/app
 COPY package*.json ./
 USER node
 RUN npm install
-RUN rm -rf node_modules/sharp
-RUN npm install --arch=x64 --platform=linux sharp
+# RUN rm -rf node_modules/sharp
+# # RUN npm install --arch=x64 --platform=linux sharp
+# RUN npm install sharp
 COPY --chown=node:node . .
 EXPOSE 4000
 CMD [ "node", "server.js" ]
