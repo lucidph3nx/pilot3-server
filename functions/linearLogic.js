@@ -1,9 +1,9 @@
-const nzRailConventions = require('../Data/nzRailConventions');
+const nzRailConventions = require('../data/nzRailConventions');
 const serviceIdlineAssociations = nzRailConventions.serviceIdlineAssociations;
 const lineNamesMetlinkKiwirail = nzRailConventions.lineNamesMetlinkKiwirail;
 const stationGeoboundaries = require('../data/stationGeoboundaries');
 const stationMeterage = require('../data/stationMeterage');
-const lineshapes = require('../Data/lineshapes');
+const lineshapes = require('../data/lineshapes');
 
 module.exports = {
   /**

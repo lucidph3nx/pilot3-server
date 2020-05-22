@@ -42,7 +42,7 @@ module.exports = function(app, current, functionFlags) {
   // =======Staff Photos========
   app.use('/staff', express.static(path.resolve('./data/img/staff')));
 
-  const port = 4000;
+  const port = process.env.PORT || 4000;
   app.listen(port, '0.0.0.0');
   console.log('Pilot API listening on ' + port);
 };

@@ -1,4 +1,4 @@
-const lineshapes = require('../Data/lineshapes');
+const lineshapes = require('../data/lineshapes');
 
 /**
  * Takes GPS coodinates and which line the train/point belongs to
