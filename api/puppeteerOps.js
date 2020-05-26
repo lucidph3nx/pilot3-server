@@ -65,7 +65,8 @@ module.exports = {
       await browser.close();
       return thisgeVisToken;
     })().catch((error) => {
-      browser.close();
+      console.log('browser close in catch block');
+      // browser.close();
       console.log(error);
     }).finally(function() {
       browser.close();
