@@ -337,7 +337,8 @@ module.exports = {
       }
       let Turnaround = moment.duration(StartTime.diff(EndTime)) / 1000 / 60;
       if (Turnaround < 0) {
-        throw new Error('Negative Turnaround time: ' + Turnaround);
+        console.log('VDS Error - Negative Turnaround time: ' + Turnaround);
+        // throw new Error('Negative Turnaround time: ' + Turnaround);
       }
       if (isNaN(Turnaround)) {
         Turnaround = '';
