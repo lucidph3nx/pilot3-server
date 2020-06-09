@@ -10,11 +10,9 @@ const express = require('express');
 const app = express();
 
 // =======environment=======
-const os = require('os');
-const env = os.hostname();
 let productionFlag = false;
-// automatic production flag based on host
-if (env == 'APNZPTDWAPP01') {
+// automatic production flag based on environment variable
+if (process.env.SQL_LOG) {
   productionFlag = true;
 }
 // ======functions flags=======
